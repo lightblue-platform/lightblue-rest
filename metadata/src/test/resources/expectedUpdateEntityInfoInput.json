@@ -1,0 +1,15 @@
+{
+    "name": "country",
+    "indexes": [{
+        "name": null,
+        "unique": true,
+        "fields": [{"name": "$asc"}]
+    }],
+    "datastore": {
+        "mongo": {
+            "datasource" : "mongo",
+            "collection": "country"
+        }
+    }
+
+}
