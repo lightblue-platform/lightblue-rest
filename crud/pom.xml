@@ -33,12 +33,12 @@
         <dependency>
             <groupId>com.redhat.lightblue</groupId>
             <artifactId>core-api</artifactId>
-            <version>${project.version}</version>
+            <version>${lightblue-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.config</groupId>
             <artifactId>core-config</artifactId>
-            <version>${project.version}</version>
+            <version>${lightblue-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
@@ -48,32 +48,32 @@
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>mongo-crud</artifactId>
-            <version>${project.version}</version>
+            <version>${lightblue-mongo.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>mongo-metadata</artifactId>
-            <version>${project.version}</version>
+            <version>${lightblue-mongo.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>mongo-config</artifactId>
-            <version>${project.version}</version>
+            <version>${lightblue-mongo.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.rdbms</groupId>
             <artifactId>rdbms-crud</artifactId>
-            <version>${project.version}</version>
+            <version>${lightblue-rdbms.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.rdbms</groupId>
             <artifactId>rdbms-metadata</artifactId>
-            <version>${project.version}</version>
+            <version>${lightblue-rdbms.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.rdbms</groupId>
             <artifactId>rdbms-config</artifactId>
-            <version>${project.version}</version>
+            <version>${lightblue-rdbms.version}</version>
         </dependency>
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
