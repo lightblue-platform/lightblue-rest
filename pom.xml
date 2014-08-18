@@ -149,7 +149,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <rpm.install.basedir>/usr/share/jbossas/standalone/deployments</rpm.install.basedir>
         <lightblue-core.version>0.9.0</lightblue-core.version>
         <lightblue-mongo.version>0.9.0</lightblue-mongo.version>
-        <lightblue-rdbms.version>0.1-SNAPSHOT</lightblue-rdbms.version>
     </properties>
     <build>
         <plugins>
