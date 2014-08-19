@@ -30,6 +30,13 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
     </auth-constraint> 
   </security-constraint>
 
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Health check servlet (Unauth)</web-resource-name>
+      <url-pattern>/health</url-pattern>
+    </web-resource-collection>
+  </security-constraint>
+
   <login-config> 
     <auth-method>CLIENT-CERT</auth-method>
   </login-config>
@@ -49,4 +56,12 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
     <url-pattern>/request</url-pattern>
   </servlet-mapping>
   
+  <servlet>
+      <servlet-name>health</servlet-name>
+      <jsp-file>/health.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>health</servlet-name>
+      <url-pattern>/health</url-pattern>
+  </servlet-mapping>  
 </web-app>
