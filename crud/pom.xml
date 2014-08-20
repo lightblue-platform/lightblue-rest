@@ -63,19 +63,19 @@
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>1.44</version>
+            <version>1.46.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.178</version>
+            <version>1.4.181</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-catalina</artifactId>
-            <version>7.0.54</version>
+            <version>8.0.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
