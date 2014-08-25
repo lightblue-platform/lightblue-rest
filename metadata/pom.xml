@@ -38,17 +38,14 @@
         <dependency>
             <groupId>com.redhat.lightblue.config</groupId>
             <artifactId>core-config</artifactId>
-            <version>${lightblue-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>mongo-config</artifactId>
-            <version>${lightblue-mongo.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>mongo-metadata</artifactId>
-            <version>${lightblue-mongo.version}</version>
         </dependency>
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
