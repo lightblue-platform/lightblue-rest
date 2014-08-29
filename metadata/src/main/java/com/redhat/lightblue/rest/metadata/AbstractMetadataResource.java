@@ -29,8 +29,6 @@ import javax.ws.rs.core.MediaType;
 /**
  * @author nmalik
  * @author bserdar
- * @see
- * https://github.com/bserdar/lightblue/wiki/Rest-Spec-Metadata#rest-spec-metadata
  */
 @Produces(MediaType.APPLICATION_JSON)
 public abstract class AbstractMetadataResource {
