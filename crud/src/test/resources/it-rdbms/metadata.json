@@ -13,8 +13,8 @@
             }
         ],
         "datastore": {
-            "backend": "rdbms",
-            "datasource": "inmemory",
+            "backend": "mongo",
+            "datasource": "mongo",
             "collection": "country"
 
         }
