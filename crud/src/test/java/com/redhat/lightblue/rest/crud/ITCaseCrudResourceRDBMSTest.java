@@ -280,7 +280,7 @@ public class ITCaseCrudResourceRDBMSTest {
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
             String expectedCreated = readFile("expectedCreated.json");
-            String metadata = readFile("metadata.json");
+            String metadata = readFile("it-rdbms/metadata.json");
             EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
             RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
             EntityMetadata em2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("country", "1.0.0");
