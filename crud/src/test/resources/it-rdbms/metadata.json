@@ -86,28 +86,28 @@
                 },
                 "expressions": [
                     {
-                        "$statement": {
+                        "statement": {
                             "sql": "SELECT * FROM TABLE1",
                             "type": "select"
                         }
                     },
                     {
-                        "$for": {
+                        "for": {
                             "loopTimes": "1",
                             "loopCounterVariableName": "i",
                             "expressions": [
                                 {
-                                    "$statement": {
+                                    "statement": {
                                         "sql": "SELECT * FROM TABLE1",
                                         "type": "select"
                                     }
                                 },
                                 {
-                                    "$foreach": {
+                                    "foreach": {
                                         "iterateOverField": "j",
                                         "expressions": [
                                             {
-                                                "$statement": {
+                                                "statement": {
                                                     "sql": "SELECT * FROM TABLE1",
                                                     "type": "select"
                                                 }
@@ -119,16 +119,16 @@
                         }
                     },
                     {
-                        "$if": {
-                            "$fieldCheckValue": {
+                        "if": {
+                            "fieldCheckValue": {
                                 "field": "abc",
                                 "value": "123",
-                                "op": "$eq"
+                                "op": "eq"
                             }
                         },
-                        "$then": [
+                        "then": [
                             {
-                                "$statement": {
+                                "statement": {
                                     "sql": "DELETE FROM somewhere WHERE someColumn=someValue",
                                     "type": "delete"
                                 }

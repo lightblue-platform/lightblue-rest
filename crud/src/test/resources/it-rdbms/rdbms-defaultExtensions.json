@@ -4,5 +4,12 @@
             "name": "rdbms",
             "clazz": "com.redhat.lightblue.metadata.rdbms.impl.RDBMSDataStoreParser"
         }
+    ],
+    "propertyParser": [
+        {
+            "name": "rdbms",
+            "clazz": "com.redhat.lightblue.metadata.rdbms.impl.RDBMSPropertyParserImpl"
+        }
     ]
+
 }
