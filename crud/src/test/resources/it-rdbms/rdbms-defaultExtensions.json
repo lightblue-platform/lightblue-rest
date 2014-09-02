@@ -1,0 +1,8 @@
+{
+    "backendParsers": [
+        {
+            "name": "rdbms",
+            "clazz": "com.redhat.lightblue.metadata.rdbms.impl.RDBMSDataStoreParser"
+        }
+    ]
+}

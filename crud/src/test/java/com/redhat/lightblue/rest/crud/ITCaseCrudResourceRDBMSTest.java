@@ -242,8 +242,8 @@ public class ITCaseCrudResourceRDBMSTest {
                 .addAsResource(new File(PATH + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
                 .addAsResource(new File(PATH + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
                 .addAsResource(new File(PATH + DATASOURCESJSON), DATASOURCESJSON)
+                .addAsResource(new File(PATH + EXTENSIONS), EXTENSIONS)
                 .addAsResource(new File(PATH + CONFIGPROPERTIES), CONFIGPROPERTIES);
-
         for (File file : libs) {
             archive.addAsLibrary(file);
         }
@@ -254,6 +254,7 @@ public class ITCaseCrudResourceRDBMSTest {
     private static final String PATH = "src/test/resources/it-rdbms/rdbms-";
     private static final String CONFIGPROPERTIES = "config.properties";
     private static final String DATASOURCESJSON = "datasources.json";
+    private static final String EXTENSIONS = "defaultExtensions.json";
 
     @Inject
     private CrudResource cutCrudResource; //class under test
@@ -279,7 +280,7 @@ public class ITCaseCrudResourceRDBMSTest {
             RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
-            String expectedCreated = readFile("expectedCreated.json");
+            String expectedCreated = readFile("it-rdbms/expectedCreated.json");
             String metadata = readFile("it-rdbms/metadata.json");
             EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
             RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
@@ -289,6 +290,7 @@ public class ITCaseCrudResourceRDBMSTest {
 
             String expectedInserted = readFile("expectedInserted.json");
             String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json"));
+            System.err.println("!!!!!!!!!!!!!!!!!"+resultInserted);
             JSONAssert.assertEquals(expectedInserted, resultInserted, false);
         } catch (NamingException ex) {
             throw new IllegalStateException(ex);
@@ -296,4 +298,5 @@ public class ITCaseCrudResourceRDBMSTest {
             throw new IllegalStateException(ex);
         }
     }
+    String expectedJSON = "{\"rdbms\":{\"dialect\":\"oracle\",\"SQLMapping\": {\"columnToFieldMap\":[{\"table\":\"t\",\"column\":\"c\",\"field\":\"f\"}], \"joins\" :[{\"tables\":[{\"name\":\"n\",\"alias\":\"a\"}],\"joinTablesStatement\" : \"x\", \"projectionMappings\": [{\"column\":\"c\",\"field\":\"f\",\"sort\":\"s\"}]}]},\"delete\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]},\"fetch\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]},\"insert\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]},\"save\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]},\"update\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]}}}";
 }

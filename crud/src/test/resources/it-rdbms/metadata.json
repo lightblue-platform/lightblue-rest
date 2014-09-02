@@ -13,8 +13,8 @@
             }
         ],
         "datastore": {
-            "backend": "mongo",
-            "datasource": "mongo",
+            "backend": "rdbms",
+            "datasource": "rdbms",
             "collection": "country"
 
         }
@@ -43,6 +43,99 @@
             },
             "iso3code": {
                 "type": "string"
+            }
+        },
+
+        "rdbms": {
+            "dialect": "oracle",
+            "SQLMapping": {
+                "columnToFieldMap": [
+                    {
+                        "table": "t",
+                        "column": "c",
+                        "field": "f"
+                    }
+                ],
+                "joins": [
+                    {
+                        "tables": [
+                            {
+                                "name": "n",
+                                "alias": "a"
+                            }
+                        ],
+                        "joinTablesStatement": "x",
+                        "projectionMappings": [
+                            {
+                                "column": "c",
+                                "field": "f",
+                                "sort": "s"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "insert": {
+                "bindings": {
+                    "in": [
+                        {
+                            "column": "col",
+                            "field": "pat"
+                        }
+                    ]
+                },
+                "expressions": [
+                    {
+                        "$statement": {
+                            "sql": "SELECT * FROM TABLE1",
+                            "type": "select"
+                        }
+                    },
+                    {
+                        "$for": {
+                            "loopTimes": "1",
+                            "loopCounterVariableName": "i",
+                            "expressions": [
+                                {
+                                    "$statement": {
+                                        "sql": "SELECT * FROM TABLE1",
+                                        "type": "select"
+                                    }
+                                },
+                                {
+                                    "$foreach": {
+                                        "iterateOverField": "j",
+                                        "expressions": [
+                                            {
+                                                "$statement": {
+                                                    "sql": "SELECT * FROM TABLE1",
+                                                    "type": "select"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "$if": {
+                            "$fieldCheckValue": {
+                                "field": "abc",
+                                "value": "123",
+                                "op": "$eq"
+                            }
+                        },
+                        "$then": [
+                            {
+                                "$statement": {
+                                    "sql": "DELETE FROM somewhere WHERE someColumn=someValue",
+                                    "type": "delete"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
         }
     }
