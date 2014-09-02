@@ -14,9 +14,7 @@
         ],
         "datastore": {
             "backend": "rdbms",
-            "datasource": "rdbms",
-            "collection": "country"
-
+            "datasource": "simplefile"
         }
     },
     "schema": {

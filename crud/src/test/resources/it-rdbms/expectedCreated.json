@@ -8,7 +8,7 @@
         }],
         "datastore": {
             "backend":"rdbms",
-            "datasource" : "rdbms"
+            "datasource" : "simplefile"
         }
     },
     "schema": {
