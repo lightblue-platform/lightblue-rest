@@ -49,31 +49,49 @@
             "SQLMapping": {
                 "columnToFieldMap": [
                     {
-                        "table": "t",
-                        "column": "c",
-                        "field": "f"
+                        "table": "Country",
+                        "column": "name",
+                        "field": "name"
+                    },
+                    {
+                        "table": "Country",
+                        "column": "iso2code",
+                        "field": "iso2code"
+                    },
+                    {
+                        "table": "Country",
+                        "column": "iso3code",
+                        "field": "iso3code"
                     }
                 ],
                 "joins": [
                     {
                         "tables": [
                             {
-                                "name": "n",
-                                "alias": "a"
+                                "name": "Country"
                             }
                         ],
-                        "joinTablesStatement": "x",
                         "projectionMappings": [
                             {
-                                "column": "c",
-                                "field": "f",
-                                "sort": "s"
+                                "column": "name",
+                                "field": "name",
+                                "sort": "name"
+                            },
+                            {
+                                "column": "iso2code",
+                                "field": "iso2code",
+                                "sort": "iso2code"
+                            },
+                            {
+                                "column": "iso3code",
+                                "field": "iso3code",
+                                "sort": "iso3code"
                             }
                         ]
                     }
                 ]
             },
-            "insert": {
+            "update": {
                 "bindings": {
                     "in": [
                         {

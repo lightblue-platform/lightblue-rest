@@ -143,9 +143,9 @@ public class ITCaseCrudResourceRDBMSTest {
             MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
             mongodExe = runtime.prepare(
                     new MongodConfigBuilder()
-                    .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
-                    .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                    .build()
+                            .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
+                            .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
+                            .build()
             );
             try {
                 mongod = mongodExe.start();
@@ -266,14 +266,7 @@ public class ITCaseCrudResourceRDBMSTest {
             DataSource ds = (DataSource) initCtx.lookup("java:/mydatasource");
             Connection conn = ds.getConnection();
             Statement stmt = conn.createStatement();
-            stmt.execute("CREATE TABLE People ( PersonID int, Name varchar(255) );");
-
-            // Good resource for examples of procedure with h2 https://code.google.com/p/h2database/source/browse/trunk/h2/src/test/org/h2/samples/Function.java
-            stmt.execute("CREATE ALIAS getVersion FOR \"org.h2.engine.Constants.getVersion\"");
-            ResultSet rs = stmt.executeQuery("CALL getVersion()");
-            if (rs.next()) {
-                System.out.println("Version: " + rs.getString(1));
-            }
+            stmt.execute("CREATE TABLE Country ( name varchar(255), iso2code varchar(255), iso3code varchar(255) );");
             stmt.close();
 
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
@@ -290,7 +283,7 @@ public class ITCaseCrudResourceRDBMSTest {
 
             String expectedInserted = readFile("expectedInserted.json");
             String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json"));
-            System.err.println("!!!!!!!!!!!!!!!!!"+resultInserted);
+            System.err.println("!!!!!!!!!!!!!!!!!" + resultInserted);
             JSONAssert.assertEquals(expectedInserted, resultInserted, false);
         } catch (NamingException ex) {
             throw new IllegalStateException(ex);
@@ -298,5 +291,6 @@ public class ITCaseCrudResourceRDBMSTest {
             throw new IllegalStateException(ex);
         }
     }
-    String expectedJSON = "{\"rdbms\":{\"dialect\":\"oracle\",\"SQLMapping\": {\"columnToFieldMap\":[{\"table\":\"t\",\"column\":\"c\",\"field\":\"f\"}], \"joins\" :[{\"tables\":[{\"name\":\"n\",\"alias\":\"a\"}],\"joinTablesStatement\" : \"x\", \"projectionMappings\": [{\"column\":\"c\",\"field\":\"f\",\"sort\":\"s\"}]}]},\"delete\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]},\"fetch\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]},\"insert\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]},\"save\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]},\"update\":{\"bindings\":{\"in\":[{\"column\":\"col\",\"field\":\"pat\"}]},\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$for\":{\"loopTimes\":\"1\",\"loopCounterVariableName\":\"i\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}},{\"$foreach\":{\"iterateOverField\":\"j\",\"expressions\":[{\"$statement\":{\"sql\":\"SELECT * FROM TABLE1\",\"type\":\"select\"}}]}}]}},{\"$if\":{\"$fieldCheckValue\":{\"field\":\"abc\",\"value\":\"123\",\"op\":\"$eq\"}},\"$then\":[{\"$statement\":{\"sql\":\"DELETE FROM somewhere WHERE someColumn=someValue\",\"type\":\"delete\"}}]}]}}}";
+
+
 }
