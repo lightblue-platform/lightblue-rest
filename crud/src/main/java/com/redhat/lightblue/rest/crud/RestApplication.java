@@ -31,17 +31,4 @@ public class RestApplication extends Application {
         set.add(CrudResource.class);
         return set;
     }
-    public static void main(String[] args) {
-        //Testing the array of bytes
-        byte[] x = new byte[]{(byte) 0, (byte) 1};
-        System.out.println(x);
-        System.out.println(x.getClass());
-        System.out.println(x.hashCode());
-        Class<?> c = x.getClass();
-        if (c.isArray()) {
-            System.out.format("            Type: %s%n"
-                            + "  Component Type: %s%n",
-                    c, c.getSimpleName());
-        }
-    }
 }
