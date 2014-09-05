@@ -1,9 +1,6 @@
 {
     "status": "COMPLETE",
     "modifiedCount": 0,
-    "matchCount": 1,
-    "processed": {
-        "iso3code": "CAN",
-        "name": "Canada"
-    }
+    "matchCount": 0,
+    "processed": [["a"],["c"]]
 }
