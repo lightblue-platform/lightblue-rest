@@ -282,7 +282,7 @@ public class ITCaseCrudResourceRDBMSTest {
             String expectedInserted = readFile("expectedInserted.json");
             // TODO insert operation need input, it was not conververed in the query expression translation.
             String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json"));
-            System.err.println("!!!!!!!!!!!!!!!!!" + resultInserted);
+            //System.err.println("!!!!!!!!!!!!!!!!!" + resultInserted);
             JSONAssert.assertEquals(expectedInserted, resultInserted, false);
         } catch (NamingException ex) {
             throw new IllegalStateException(ex);
@@ -318,7 +318,8 @@ public class ITCaseCrudResourceRDBMSTest {
 
             String expectedFound = readFile("it-rdbms/expectedFound.json");
             String resultFound = cutCrudResource.find("country", "1.0.0", readFile("it-rdbms/resultFound.json"));
-            System.err.println("!!!!!!!!!!!!!!!!!" + resultFound);
+            // TODO / NOTE we can change the result format if needed, now it return an array of arrays
+            //System.err.println("!!!!!!!!!!!!!!!!!" + resultFound);
             JSONAssert.assertEquals(expectedFound, resultFound, false);
         } catch (NamingException ex) {
             throw new IllegalStateException(ex);
