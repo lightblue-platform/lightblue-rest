@@ -50,17 +50,17 @@
                 "columnToFieldMap": [
                     {
                         "table": "Country",
-                        "column": "name",
+                        "column": "NAME",
                         "field": "name"
                     },
                     {
                         "table": "Country",
-                        "column": "iso2code",
+                        "column": "ISO2CODE",
                         "field": "iso2code"
                     },
                     {
                         "table": "Country",
-                        "column": "iso3code",
+                        "column": "ISO3CODE",
                         "field": "iso3code"
                     }
                 ],
@@ -73,19 +73,19 @@
                         ],
                         "projectionMappings": [
                             {
-                                "column": "name",
+                                "column": "NAME",
                                 "field": "name",
-                                "sort": "name"
+                                "sort": "NAME"
                             },
                             {
-                                "column": "iso2code",
+                                "column": "ISO2CODE",
                                 "field": "iso2code",
-                                "sort": "iso2code"
+                                "sort": "ISO2CODE"
                             },
                             {
-                                "column": "iso3code",
+                                "column": "ISO3CODE",
                                 "field": "iso3code",
-                                "sort": "iso3code"
+                                "sort": "ISO3CODE"
                             }
                         ]
                     }

@@ -5,11 +5,11 @@
     <parent>
         <groupId>com.redhat.lightblue.rest</groupId>
         <artifactId>rest-pom</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0.9.1-SNAPSHOT</version>
     </parent>
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>rest-crud-cert-auth</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
@@ -38,9 +38,9 @@
                           <groupId>com.redhat.lightblue.rest</groupId>
                           <artifactId>rest-crud</artifactId>
                           <excludes>
-                              <exclude>WEB-INF/jboss-web.xml</exclude> 
+                              <exclude>WEB-INF/jboss-web.xml</exclude>
                           </excludes>
-                      </overlay>           
+                      </overlay>
                   </overlays>
               </configuration>
           </plugin>
@@ -86,8 +86,8 @@
                               </mapping>
                           </mappings>
                       </configuration>
-                  </plugin>      
-              </plugins>  
+                  </plugin>
+              </plugins>
           </build>
       </profile>
   </profiles>
