@@ -77,7 +77,7 @@ public class CertLdapLoginModule extends CertRolesLoginModule {
             LOGGER.info("Prinicipal username:" + getUsername());
 
             LdapName name = new LdapName(getUsername());
-            String searchName = new String();
+            String searchName = "";
             for (Rdn rdn : name.getRdns()) {
                 if (rdn.getType().equalsIgnoreCase("cn")) {
                     searchName = (String) rdn.getValue();
