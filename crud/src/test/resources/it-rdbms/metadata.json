@@ -93,63 +93,71 @@
             },
             "update": {
                 "bindings": {
-                    "in": [
+                    "out": [
                         {
-                            "column": "col",
-                            "field": "pat"
+                            "column": "NAME",
+                            "field": "name"
+                        },
+                        {
+                            "column": "ISO2CODE",
+                            "field": "iso2code"
                         }
                     ]
                 },
                 "expressions": [
                     {
                         "statement": {
-                            "sql": "SELECT * FROM TABLE1",
-                            "type": "select"
+                            "sql": "ZZY",
+                            "type": "update"
                         }
-                    },
-                    {
-                        "for": {
-                            "loopTimes": "1",
-                            "loopCounterVariableName": "i",
-                            "expressions": [
-                                {
-                                    "statement": {
-                                        "sql": "SELECT * FROM TABLE1",
-                                        "type": "select"
-                                    }
-                                },
-                                {
-                                    "foreach": {
-                                        "iterateOverField": "j",
-                                        "expressions": [
-                                            {
-                                                "statement": {
-                                                    "sql": "SELECT * FROM TABLE1",
-                                                    "type": "select"
-                                                }
-                                            }
-                                        ]
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "if": {
-                            "fieldCheckValue": {
-                                "field": "abc",
-                                "value": "123",
-                                "op": "eq"
-                            }
+                    }
+                ]
+            },
+            "insert": {
+                "bindings": {
+                    "in": [
+                        {
+                            "column": "NAME",
+                            "field": "name"
                         },
-                        "then": [
-                            {
-                                "statement": {
-                                    "sql": "DELETE FROM somewhere WHERE someColumn=someValue",
-                                    "type": "delete"
-                                }
-                            }
-                        ]
+                        {
+                            "column": "ISO2CODE",
+                            "field": "iso2code"
+                        },
+                        {
+                            "column": "ISO3CODE",
+                            "field": "so3code"
+                        }
+                    ]
+                },
+                "expressions": [
+                    {
+                        "statement": {
+                            "sql": "XXY",
+                            "type": "insert"
+                        }
+                    }
+                ]
+            },
+            "delete": {
+                "bindings": {
+                    "in": [
+                        {
+                            "column": "NAME",
+                            "field": "name"
+                        },
+                        {
+                            "column": "ISO2CODE",
+                            "field": "iso2code"
+                        }
+                    ]
+                },
+                "expressions": [
+                    {
+                        "statement": {
+                            "sql": "YYZ",
+                            "type": "delete"
+                        }
                     }
                 ]
             }
