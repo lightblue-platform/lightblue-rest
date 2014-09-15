@@ -268,7 +268,6 @@ public class ITCaseCrudResourceRDBMSTest {
                 .addAsResource(new File(PATH + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
                 .addAsResource(new File(PATH + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
                 .addAsResource(new File(PATH + DATASOURCESJSON), DATASOURCESJSON)
-                .addAsResource(new File(PATH + EXTENSIONS), EXTENSIONS)
                 .addAsResource(new File(PATH + CONFIGPROPERTIES), CONFIGPROPERTIES);
         for (File file : libs) {
             archive.addAsLibrary(file);
@@ -280,7 +279,6 @@ public class ITCaseCrudResourceRDBMSTest {
     private static final String PATH = "src/test/resources/it-rdbms/rdbms-";
     private static final String CONFIGPROPERTIES = "config.properties";
     private static final String DATASOURCESJSON = "datasources.json";
-    private static final String EXTENSIONS = "defaultExtensions.json";
 
     @Inject
     private CrudResource cutCrudResource; //class under test

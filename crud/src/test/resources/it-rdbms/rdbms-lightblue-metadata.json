@@ -1,5 +1,17 @@
 {
     "type" : "com.redhat.lightblue.mongo.config.MongoMetadataConfiguration",
     "dataSource" : "mongo",
-    "collection": "metadata"
+    "collection": "metadata",
+    "backendParsers": [
+        {
+            "name": "rdbms",
+            "clazz": "com.redhat.lightblue.metadata.rdbms.impl.RDBMSDataStoreParser"
+        }
+    ],
+    "propertyParsers": [
+        {
+            "name": "rdbms",
+            "clazz": "com.redhat.lightblue.metadata.rdbms.impl.RDBMSPropertyParserImpl"
+        }
+    ]
 }
