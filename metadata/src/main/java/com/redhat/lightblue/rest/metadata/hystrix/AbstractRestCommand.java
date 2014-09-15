@@ -96,6 +96,11 @@ public abstract class AbstractRestCommand extends HystrixCommand<String> {
             public boolean isUserInRole(String role) {
                 return httpServletRequest == null ? false : httpServletRequest.isUserInRole(role);
             }
+
+            @Override
+            public String getPrincipal() {
+                return httpServletRequest.getUserPrincipal() != null ? httpServletRequest.getUserPrincipal().getName() : null;
+            }
         });
     }
 }
