@@ -15,7 +15,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program.  If not, see <http://www.gnu.org/licenses />.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -38,22 +38,19 @@
         <dependency>
             <groupId>com.redhat.lightblue.config</groupId>
             <artifactId>core-config</artifactId>
-            <version>${lightblue-core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>mongo-config</artifactId>
-            <version>${lightblue-mongo.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>mongo-metadata</artifactId>
-            <version>${lightblue-mongo.version}</version>
         </dependency>
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>1.44</version>
+            <version>1.46.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
