@@ -133,6 +133,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <artifactId>jboss-javaee-6.0</artifactId>
             <version>3.0.2.Final</version>
             <type>pom</type>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>xalan</artifactId>
@@ -140,13 +141,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 </exclusion>
             </exclusions>
         </dependency>
-       <dependency>
-           <groupId>org.jboss.resteasy</groupId>
-           <artifactId>resteasy-jaxrs</artifactId>
-           <version>2.3.6.Final</version>
-           <scope>provided</scope>
-       </dependency>
-       <dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+            <version>2.3.6.Final</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.netflix.hystrix</groupId>
             <artifactId>hystrix-metrics-event-stream</artifactId>
         </dependency>
