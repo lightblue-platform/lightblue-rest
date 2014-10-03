@@ -18,18 +18,29 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
-import static com.redhat.lightblue.util.test.FileUtil.readFile;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import javax.inject.Inject;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.Mongo;
+import com.redhat.lightblue.config.DataSourcesConfiguration;
+import com.redhat.lightblue.config.LightblueFactory;
+import com.redhat.lightblue.config.MetadataConfiguration;
+import com.redhat.lightblue.metadata.mongo.MongoMetadata;
+import com.redhat.lightblue.mongo.config.MongoConfiguration;
+import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.util.JsonUtils;
+import de.flapdoodle.embed.mongo.Command;
+import de.flapdoodle.embed.mongo.MongodExecutable;
+import de.flapdoodle.embed.mongo.MongodProcess;
+import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
+import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
+import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import de.flapdoodle.embed.process.config.io.ProcessOutput;
+import de.flapdoodle.embed.process.io.IStreamProcessor;
+import de.flapdoodle.embed.process.io.Processors;
+import de.flapdoodle.embed.process.runtime.Network;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -44,30 +55,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.redhat.lightblue.config.DataSourcesConfiguration;
-import com.redhat.lightblue.config.MetadataConfiguration;
-import com.redhat.lightblue.config.LightblueFactory;
-import com.redhat.lightblue.metadata.mongo.MongoMetadata;
-import com.redhat.lightblue.mongo.config.MongoConfiguration;
-import com.redhat.lightblue.util.JsonUtils;
-import com.redhat.lightblue.rest.RestConfiguration;
+import javax.inject.Inject;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
-import de.flapdoodle.embed.mongo.Command;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
-import de.flapdoodle.embed.process.io.IStreamProcessor;
-import de.flapdoodle.embed.process.io.Processors;
-import de.flapdoodle.embed.process.runtime.Network;
+import static com.redhat.lightblue.util.test.FileUtil.readFile;
 
 /**
- *
  * @author lcestari
  */
 @RunWith(Arquillian.class)
@@ -126,9 +123,9 @@ public class ITCaseMetadataResourceTest {
             MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
             mongodExe = runtime.prepare(
                     new MongodConfigBuilder()
-                    .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
-                    .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                    .build()
+                            .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
+                            .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
+                            .build()
             );
             try {
                 mongod = mongodExe.start();
@@ -213,6 +210,9 @@ public class ITCaseMetadataResourceTest {
     @Test
     public void testFirstIntegrationTest() throws IOException, URISyntaxException, JSONException {
         Assert.assertNotNull("MetadataResource was not injected by the container", cutMetadataResource);
+
+        System.setProperty("mongodb.host", MONGO_HOST);
+        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
 
         RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
         RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));

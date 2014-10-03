@@ -40,6 +40,10 @@
             <artifactId>core-config</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.lightblue</groupId>
+            <artifactId>util</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>mongo-config</artifactId>
         </dependency>

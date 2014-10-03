@@ -55,7 +55,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
                 <artifactId>arquillian-bom</artifactId>
-                <version>1.1.3.Final</version>
+                <version>1.1.5.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -98,6 +98,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>core-api</artifactId>
+                <version>${lightblue-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue</groupId>
+                <artifactId>util</artifactId>
                 <version>${lightblue-core.version}</version>
             </dependency>
             <dependency>
@@ -192,7 +197,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <sonar.host.url>http://127.0.0.1:8080</sonar.host.url>
         <sonar.projectName>lightblue-rest</sonar.projectName>
         <rpm.install.basedir>/usr/share/jbossas/standalone/deployments</rpm.install.basedir>
-        <lightblue-core.version>1.0.1</lightblue-core.version>
+        <lightblue-core.version>1.1.0-SNAPSHOT</lightblue-core.version>
         <lightblue-mongo.version>1.0.1</lightblue-mongo.version>
     </properties>
     <build>
