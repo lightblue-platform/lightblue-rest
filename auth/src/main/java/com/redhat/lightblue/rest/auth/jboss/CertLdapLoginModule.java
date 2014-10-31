@@ -23,10 +23,14 @@ package com.redhat.lightblue.rest.auth.jboss;
 
 import java.security.Principal;
 import java.security.acl.Group;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 
 import org.jboss.logging.Logger;
@@ -35,8 +39,6 @@ import org.jboss.security.auth.spi.CertRolesLoginModule;
 
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
 import com.redhat.lightblue.rest.auth.ldap.LightblueLdapRoleProvider;
-import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * @author dhaynes
@@ -54,8 +56,16 @@ public class CertLdapLoginModule extends CertRolesLoginModule {
     public static final String BIND_DN = "bindDn";
     public static final String BIND_PWD = "bindPassword";
 
+    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, LDAP_SERVER, SEARCH_BASE, BIND_DN, BIND_PWD};
+    
     private Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
 
+    @Override
+	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String,?> sharedState, Map<String,?> options) {
+		addValidOptions(ALL_VALID_OPTIONS);
+		super.initialize(subject, callbackHandler, sharedState, options);
+	}
+    
     /* (non-Javadoc)
      * @see org.jboss.security.auth.spi.AbstractServerLoginModule#getRoleSets()
      */
@@ -77,7 +87,7 @@ public class CertLdapLoginModule extends CertRolesLoginModule {
             LOGGER.info("Prinicipal username:" + getUsername());
 
             LdapName name = new LdapName(getUsername());
-            String searchName = new String();
+            String searchName = "";
             for (Rdn rdn : name.getRdns()) {
                 if (rdn.getType().equalsIgnoreCase("cn")) {
                     searchName = (String) rdn.getValue();
