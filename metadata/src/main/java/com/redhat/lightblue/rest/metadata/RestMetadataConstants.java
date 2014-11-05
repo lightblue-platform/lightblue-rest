@@ -28,6 +28,7 @@ public final class RestMetadataConstants {
 
     public static final String ERR_CANT_GET_METADATA = "rest-metadata:CantGetMetadata";
     public static final String ERR_CANT_GET_PARSER = "rest-metadata:CantGetParser";
+    public static final String ERR_CANT_GET_TRANSLATOR = "rest-metadata:CantGetJsonTranslator";
 
     private RestMetadataConstants() {
 

@@ -29,6 +29,7 @@ import com.netflix.hystrix.HystrixCommandKey;
 import com.redhat.lightblue.ClientIdentification;
 import com.redhat.lightblue.EntityVersion;
 import com.redhat.lightblue.Request;
+import com.redhat.lightblue.config.JsonTranslator;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
@@ -104,6 +105,17 @@ public abstract class AbstractRestCommand extends HystrixCommand<String> {
         if (!req.getEntityVersion().getVersion().equals(version)) {
             throw Error.get(RestCrudConstants.ERR_NO_VERSION_MATCH, version);
         }
+    }
+
+    protected JsonTranslator getJsonTranslator() {
+        JsonTranslator tx = null;
+        try {
+            tx = RestConfiguration.getFactory().getJsonTranslator();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw Error.get(RestCrudConstants.ERR_CANT_GET_TRANSLATOR, e.getMessage());
+        }
+        return tx;
     }
 
     protected void addCallerId(Request req) {

@@ -53,8 +53,7 @@ public class UpdateEntityInfoCommand extends AbstractRestCommand {
         Error.push(getClass().getSimpleName());
         Error.push(entity);
         try {
-            JSONMetadataParser parser = getJSONParser();
-            EntityInfo ei = parser.parseEntityInfo(JsonUtils.json(info));
+            EntityInfo ei = getJsonTranslator().parse(EntityInfo.class,JsonUtils.json(info));
             if (!ei.getName().equals(entity)) {
                 throw Error.get(RestMetadataConstants.ERR_NO_NAME_MATCH, entity);
             }
@@ -62,7 +61,7 @@ public class UpdateEntityInfoCommand extends AbstractRestCommand {
             Metadata md = getMetadata();
             md.updateEntityInfo(ei);
             ei = md.getEntityInfo(entity);
-            return parser.convert(ei).toString();
+            return getJSONParser().convert(ei).toString();
         } catch (Error e) {
             return e.toString();
         } catch (Exception e) {
