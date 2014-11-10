@@ -56,8 +56,7 @@ public class CreateEntityMetadataCommand extends AbstractRestCommand {
         Error.push(entity);
         Error.push(version);
         try {
-            JSONMetadataParser parser = getJSONParser();
-            EntityMetadata emd = parser.parseEntityMetadata(JsonUtils.json(data));
+            EntityMetadata emd = getJsonTranslator().parse(EntityMetadata.class,JsonUtils.json(data));
             if (!emd.getName().equals(entity)) {
                 throw Error.get(RestMetadataConstants.ERR_NO_NAME_MATCH, entity);
             }
@@ -69,7 +68,7 @@ public class CreateEntityMetadataCommand extends AbstractRestCommand {
             LOGGER.debug("Metadata instance:{}", md);
             md.createNewMetadata(emd);
             emd = md.getEntityMetadata(entity, version);
-            return parser.convert(emd).toString();
+            return getJSONParser().convert(emd).toString();
         } catch (Error e) {
             return e.toString();
         } catch (Exception e) {
