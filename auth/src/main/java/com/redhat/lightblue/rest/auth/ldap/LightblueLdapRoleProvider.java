@@ -66,7 +66,8 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
             userRoles.addAll(getUserRolesFromCache(userName));
 
             if (userRoles.isEmpty()) {
-                userRoles.addAll(getUserRolesFromLdap(findUserByUid(userName)));
+                SearchResult searchResult = new LdapFindUserByUidCommand(ldapContext, ldapSearchBase, userName).execute();
+                userRoles.addAll(getUserRolesFromLdap(searchResult));
             }
         } catch (NamingException ne) {
             LOGGER.error("Problem getting roles for user: " + userName, ne);
@@ -93,28 +94,6 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private List<String> getUserRolesFromCache(String userName) {
         //TODO add persistent caching backed by lightblue here at some point
         return Collections.emptyList();
-    }
-
-    private SearchResult findUserByUid(String uid) throws NamingException {
-        String searchFilter = "(uid=" + uid + ")";
-
-        SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-
-        NamingEnumeration<SearchResult> results = ldapContext.search(ldapSearchBase, searchFilter, searchControls);
-
-        SearchResult searchResult = null;
-        if (results.hasMoreElements()) {
-            searchResult = results.nextElement();
-
-            //make sure there is not another item available, there should be only 1 match
-            if (results.hasMoreElements()) {
-                LOGGER.error("Matched multiple users for the accountName: " + uid);
-                return null;
-            }
-        }
-
-        return searchResult;
     }
 
     private List<String> getUserRolesFromLdap(SearchResult ldapUser) throws NamingException {
