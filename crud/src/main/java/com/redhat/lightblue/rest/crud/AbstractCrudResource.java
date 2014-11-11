@@ -83,12 +83,14 @@ public abstract class AbstractCrudResource {
                                 String request) {
         return insert(entity, version, request);
     }
+
     @PUT
     @Path("/insert/{entity}")
     public String insert(@PathParam(PARAM_ENTITY) String entity,
                          String request) {
         return insert(entity, null, request);
     }
+
     @PUT
     @Path("/insert/{entity}/{version}")
     public String insert(@PathParam(PARAM_ENTITY) String entity,
