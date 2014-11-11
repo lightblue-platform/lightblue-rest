@@ -126,6 +126,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <version>${lightblue-mongo.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.redhat.lightblue.hook</groupId>
+                <artifactId>audit</artifactId>
+                <version>${lightblue-audit-hook.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.guava</groupId>
                  <artifactId>guava</artifactId>
                  <version>14.0.1</version>
@@ -208,6 +213,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <rpm.install.basedir>/usr/share/jbossas/standalone/deployments</rpm.install.basedir>
         <lightblue-core.version>1.1.0-SNAPSHOT</lightblue-core.version>
         <lightblue-mongo.version>1.1.0-SNAPSHOT</lightblue-mongo.version>
+        <lightblue-audit-hook.version>1.1.0-SNAPSHOT</lightblue-audit-hook.version>
     </properties>
     <build>
         <plugins>
