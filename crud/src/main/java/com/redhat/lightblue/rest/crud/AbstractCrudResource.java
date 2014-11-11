@@ -68,7 +68,7 @@ public abstract class AbstractCrudResource {
     @Path("/{entity}")
     @Deprecated
     public String insertAlt(@PathParam(PARAM_ENTITY) String entity,
-                                String request) {
+                            String request) {
         return insert(entity, null, request);
     }
 
@@ -79,8 +79,8 @@ public abstract class AbstractCrudResource {
     @Path("/{entity}/{version}")
     @Deprecated
     public String insertAlt(@PathParam(PARAM_ENTITY) String entity,
-                                @PathParam(PARAM_VERSION) String version,
-                                String request) {
+                            @PathParam(PARAM_VERSION) String version,
+                            String request) {
         return insert(entity, version, request);
     }
 
