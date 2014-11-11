@@ -25,6 +25,9 @@ import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.MetadataStatus;
 import com.redhat.lightblue.metadata.VersionInfo;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  *
  * @author nmalik
@@ -92,6 +95,11 @@ public abstract class AbstractRestCommandTest {
         @Override
         public void removeEntity(String entityName) {
             args = new Object[]{entityName};
+        }
+
+        @Override
+        public Map<String, List<String>> getMappedRoles() {
+            return null;
         }
     }
 
