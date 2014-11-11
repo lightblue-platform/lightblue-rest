@@ -125,6 +125,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <artifactId>mongo-config</artifactId>
                 <version>${lightblue-mongo.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                 <artifactId>guava</artifactId>
+                 <version>14.0.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -132,6 +137,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jboss.spec</groupId>
@@ -198,7 +207,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <sonar.projectName>lightblue-rest</sonar.projectName>
         <rpm.install.basedir>/usr/share/jbossas/standalone/deployments</rpm.install.basedir>
         <lightblue-core.version>1.1.0-SNAPSHOT</lightblue-core.version>
-        <lightblue-mongo.version>1.0.1</lightblue-mongo.version>
+        <lightblue-mongo.version>1.1.0-SNAPSHOT</lightblue-mongo.version>
     </properties>
     <build>
         <plugins>

@@ -58,7 +58,7 @@ public class SaveCommand extends AbstractRestCommand {
         Error.push(getClass().getSimpleName());
         Error.push(entity);
         try {
-            SaveRequest ireq = SaveRequest.fromJson((ObjectNode) JsonUtils.json(request));
+            SaveRequest ireq = getJsonTranslator().parse(SaveRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
             Response r = getMediator().save(ireq);
