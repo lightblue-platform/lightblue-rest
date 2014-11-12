@@ -255,7 +255,7 @@ public class ITCaseMetadataResourceTest {
         String resultEntityVersions = cutMetadataResource.getEntityVersions(new MySecurityContext(),"country");
         JSONAssert.assertEquals(expectedEntityVersions, resultEntityVersions, false);
 
-        String expectedGetMetadata = esc("{'entityInfo':{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'active'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
+        String expectedGetMetadata = esc("{'entityInfo':{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]},{\"name\": null,\"unique\": true,\"fields\": [{\"field\": \"_id\",\"dir\": \"$asc\"}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'active'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
         String resultGetMetadata = cutMetadataResource.getMetadata(new MySecurityContext(),"country", "1.0.0");
         JSONAssert.assertEquals(expectedGetMetadata, resultGetMetadata, false);
 
@@ -265,6 +265,8 @@ public class ITCaseMetadataResourceTest {
 
         String expectedUpdateEntityInfo = readFile("expectedUpdateEntityInfo.json");
         String resultUpdateEntityInfo = cutMetadataResource.updateEntityInfo(new MySecurityContext(),"country", readFile("expectedUpdateEntityInfoInput.json"));
+        System.out.println("EXPECTED: "+expectedUpdateEntityInfo);
+        System.out.println("RESULT: " + resultUpdateEntityInfo);
         JSONAssert.assertEquals(expectedUpdateEntityInfo, resultUpdateEntityInfo, false);
 
         String x = cutMetadataResource.setDefaultVersion(new MySecurityContext(),"country", "1.0.0");
