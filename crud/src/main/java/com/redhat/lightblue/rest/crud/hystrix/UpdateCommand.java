@@ -58,7 +58,7 @@ public class UpdateCommand extends AbstractRestCommand {
         Error.push(getClass().getSimpleName());
         Error.push(entity);
         try {
-            UpdateRequest ireq = UpdateRequest.fromJson((ObjectNode) JsonUtils.json(request));
+            UpdateRequest ireq = getJsonTranslator().parse(UpdateRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
             Response r = getMediator().update(ireq);

@@ -1,13 +1,20 @@
 {
     "name": "country",
-    "indexes": [{
-        "name": null,
-        "unique": true,
-        "fields": [{"field":"name","dir": "$asc"}]
-    }],
+    "indexes": [
+        {
+            "name": null,
+            "unique": true,
+            "fields": [
+                {
+                    "field": "name",
+                    "dir": "$asc"
+                }
+            ]
+        }
+    ],
     "datastore": {
-        "backend":"mongo",
-        "datasource" : "mongo",
+        "backend": "mongo",
+        "datasource": "mongo",
         "collection": "country"
     }
 

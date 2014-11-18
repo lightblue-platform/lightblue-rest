@@ -58,8 +58,7 @@ public class CreateEntitySchemaCommand extends AbstractRestCommand {
         Error.push(entity);
         Error.push(version);
         try {
-            JSONMetadataParser parser = getJSONParser();
-            EntitySchema sch = parser.parseEntitySchema(JsonUtils.json(schema));
+            EntitySchema sch = getJsonTranslator().parse(EntitySchema.class,JsonUtils.json(schema));
             if (!sch.getName().equals(entity)) {
                 throw Error.get(RestMetadataConstants.ERR_NO_NAME_MATCH, entity);
             }
@@ -76,7 +75,7 @@ public class CreateEntitySchemaCommand extends AbstractRestCommand {
             EntityMetadata emd = new EntityMetadata(ei, sch);
             md.createNewSchema(emd);
             emd = md.getEntityMetadata(entity, version);
-            return parser.convert(emd).toString();
+            return getJSONParser().convert(emd).toString();
         } catch (Error e) {
             return e.toString();
         } catch (Exception e) {

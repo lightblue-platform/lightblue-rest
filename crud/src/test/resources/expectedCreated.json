@@ -1,14 +1,31 @@
 {
     "entityInfo": {
         "name": "country",
-        "indexes": [{
-            "name": null,
-            "unique": true,
-            "fields": [{"field":"name","dir": "$asc"}]
-        }],
+        "indexes": [
+            {
+                "name": null,
+                "unique": true,
+                "fields": [
+                    {
+                        "field": "name",
+                        "dir": "$asc"
+                    }
+                ]
+            },
+            {
+                "name": null,
+                "unique": true,
+                "fields": [
+                    {
+                        "field": "_id",
+                        "dir": "$asc"
+                    }
+                ]
+            }
+        ],
         "datastore": {
-            "backend":"mongo",
-            "datasource" : "mongo",
+            "backend": "mongo",
+            "datasource": "mongo",
             "collection": "country"
         }
     },
@@ -22,10 +39,18 @@
             "value": "active"
         },
         "access": {
-            "insert": ["anyone"],
-            "update": ["anyone"],
-            "find": ["anyone"],
-            "delete": ["anyone"]
+            "insert": [
+                "anyone"
+            ],
+            "update": [
+                "anyone"
+            ],
+            "find": [
+                "anyone"
+            ],
+            "delete": [
+                "anyone"
+            ]
         },
         "fields": {
             "iso3code": {
@@ -40,12 +65,22 @@
             "objectType": {
                 "type": "string",
                 "access": {
-                    "find": ["anyone"],
-                    "update": ["noone"]
+                    "find": [
+                        "anyone"
+                    ],
+                    "update": [
+                        "noone"
+                    ]
                 },
                 "constraints": {
                     "required": true,
                     "minLength": 1
+                }
+            },
+            "_id": {
+                "type": "string",
+                "constraints": {
+                    "identity": true
                 }
             }
         }
