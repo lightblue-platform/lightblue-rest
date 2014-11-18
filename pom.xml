@@ -55,7 +55,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
                 <artifactId>arquillian-bom</artifactId>
-                <version>1.1.3.Final</version>
+                <version>1.1.5.Final</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -120,6 +120,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <artifactId>mongo-config</artifactId>
                 <version>${lightblue-mongo.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.hook</groupId>
+                <artifactId>audit</artifactId>
+                <version>${lightblue-audit-hook.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                 <artifactId>guava</artifactId>
+                 <version>14.0.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -129,10 +139,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.spec</groupId>
             <artifactId>jboss-javaee-6.0</artifactId>
             <version>3.0.2.Final</version>
             <type>pom</type>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>xalan</artifactId>
@@ -191,9 +206,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <sonar.host.url>http://127.0.0.1:8080</sonar.host.url>
         <sonar.projectName>lightblue-rest</sonar.projectName>
         <rpm.install.basedir>/usr/share/jbossas/standalone/deployments</rpm.install.basedir>
-        <lightblue-core.version>0.9.1-SNAPSHOT</lightblue-core.version>
-        <lightblue-mongo.version>0.9.1-SNAPSHOT</lightblue-mongo.version>
-        <lightblue-rdbms.version>0.9.1-SNAPSHOT</lightblue-rdbms.version>
+        <lightblue-core.version>1.2.0-SNAPSHOT</lightblue-core.version>
+        <lightblue-mongo.version>1.2.0-SNAPSHOT</lightblue-mongo.version>
+        <lightblue-audit-hook.version>1.1.1</lightblue-audit-hook.version>
     </properties>
     <build>
         <plugins>
@@ -251,7 +266,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
                         <configuration>
-                            <useAgent>true</useAgent>
+                            <useAgent>false</useAgent>
                         </configuration>
                     </plugin>
                     <plugin>
