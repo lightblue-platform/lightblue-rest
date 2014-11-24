@@ -33,3 +33,5 @@ nb-configuration.xml
 metadata/nb-configuration.xml
 docs/cicd/*.png
 overlays
+metadata-basic-auth/overlays
+crud-basic-auth/overlays
