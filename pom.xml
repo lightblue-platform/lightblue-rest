@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>rest-pom</artifactId>
     <packaging>pom</packaging>
-    <version>0.9.1-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <description>REST front-ends for Lightblue</description>
     <licenses>
@@ -130,6 +130,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                  <artifactId>guava</artifactId>
                  <version>14.0.1</version>
             </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue</groupId>
+                <artifactId>util</artifactId>
+                <version>1.2.0-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -209,6 +214,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <lightblue-core.version>1.2.0-SNAPSHOT</lightblue-core.version>
         <lightblue-mongo.version>1.2.0-SNAPSHOT</lightblue-mongo.version>
         <lightblue-audit-hook.version>1.1.1</lightblue-audit-hook.version>
+        <lightblue-rdbms.version>0.9.1-SNAPSHOT</lightblue-rdbms.version>
     </properties>
     <build>
         <plugins>
