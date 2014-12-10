@@ -12,5 +12,8 @@
     }, {
         "field": "iso3code",
         "include": true
+    }, {
+        "field": "objectType",
+        "include": true
     }]
 }

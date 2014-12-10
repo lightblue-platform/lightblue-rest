@@ -4,7 +4,8 @@
     "data": [{
         "name": "Canad",
         "iso2code": "CA",
-        "iso3code": "CAN"
+        "iso3code": "CAN",
+        "objectType": "country"
     }],
     "projection": [{
         "field": "*",
