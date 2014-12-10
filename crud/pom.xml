@@ -35,6 +35,10 @@
             <artifactId>core-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.lightblue.hook</groupId>
+            <artifactId>audit</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.config</groupId>
             <artifactId>core-config</artifactId>
         </dependency>
