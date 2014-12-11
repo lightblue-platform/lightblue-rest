@@ -101,7 +101,7 @@ public class ITCaseCrudResourceTest {
     }
 
     private static final String MONGO_HOST = "localhost";
-    private static final int MONGO_PORT = 27777;
+    private static final int MONGO_PORT = 27757;
     private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
 
     private static final String DB_NAME = "testmetadata";
@@ -235,7 +235,7 @@ public class ITCaseCrudResourceTest {
 
         String expectedFound = readFile("expectedFound.json");
         String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json"));
-        JSONAssert.assertEquals(expectedFound, resultFound, false);
+        JSONAssert.assertEquals(expectedFound, resultFound, false); // #TODO #FIX Not finding the right version
 
         String resultSimpleFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
                 "country",
