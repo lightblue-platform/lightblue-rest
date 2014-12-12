@@ -326,4 +326,33 @@ public class ITMongoIndexManipulationTest {
         // verify has _id and field1 index by simply check on index count
         Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
     }
+
+    @Test
+    public void deleteArrayIndex() throws Exception {
+        String metadata = readFile(getClass().getSimpleName() + "-deleteArrayIndex-metadata.json");
+        String entityInfo = readFile(getClass().getSimpleName() + "-deleteArrayIndex-entityInfo.json");
+        String entityName = "test";
+        String entityVersion = "1.0.0";
+        SecurityContext sc = new TestSecurityContext();
+
+        Assert.assertNotNull(metadata);
+        Assert.assertTrue(metadata.length() > 0);
+
+        // create metadata without any non-default indexes
+        metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
+
+        DBCollection metadataCollection = db.getCollection("metadata");
+        Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
+
+        DBCollection entityCollection = db.getCollection(entityName);
+
+        // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
+        Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
+
+        // update entityInfo to delete an index
+        metadataResource.updateEntityInfo(sc, entityName, entityInfo);
+
+        // verify has _id and field1 index by simply check on index count
+        Assert.assertEquals("index not deleted", 1, entityCollection.getIndexInfo().size());
+    }
 }
