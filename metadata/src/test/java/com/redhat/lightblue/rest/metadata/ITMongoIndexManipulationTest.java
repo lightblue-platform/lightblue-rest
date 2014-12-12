@@ -203,10 +203,27 @@ public class ITMongoIndexManipulationTest {
 
         DBCollection entityCollection = db.getCollection(entityName);
 
-        // create a dummy doc to force index creation
-        entityCollection.insert(new BasicDBObject("field1", 1));
-
         // verify has _id and field1 index by simply check on index count
+        Assert.assertEquals(2, entityCollection.getIndexInfo().size());
+    }
+
+    @Test
+    public void addSimpleIndex_forced() throws Exception {
+        String metadata = readFile(getClass().getSimpleName() + "-addSimpleIndex-metadata.json");
+        String entityName = "addSimpleIndex";
+        String entityVersion = "1.0.0";
+        SecurityContext sc = new TestSecurityContext();
+
+        // create metadata without any non-default indexes
+        metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
+
+        DBCollection entityCollection = db.getCollection(entityName);
+        
+        Assert.assertEquals(0, entityCollection.getIndexInfo().size());
+
+        entityCollection.createIndex(new BasicDBObject("x", 1));
+        
+        // since index was forced the collection is initialized and we don't need to create a dummy doc
         Assert.assertEquals(2, entityCollection.getIndexInfo().size());
     }
 
@@ -222,17 +239,14 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection entityCollection = db.getCollection(entityName);
-
-        // create a dummy doc to force index creation
-        entityCollection.insert(new BasicDBObject("field1", 1));
-
-        // verify only have _id index
-        Assert.assertEquals(1, entityCollection.getIndexInfo().size());
+        
+        // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
+        Assert.assertEquals(0, entityCollection.getIndexInfo().size());
 
         // update entityInfo to add an index
         metadataResource.updateEntityInfo(sc, entityName, entityInfo1);
 
-        // verify have one index
+        // verify has _id and field1 index by simply check on index count
         Assert.assertEquals(2, entityCollection.getIndexInfo().size());
     }
 }
