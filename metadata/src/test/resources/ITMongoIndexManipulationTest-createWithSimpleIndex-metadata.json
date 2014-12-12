@@ -1,9 +1,10 @@
 {
     "entityInfo": {
-        "name": "createWithSimpleIndex",
+        "name": "test",
         "datastore": {
             "backend": "mongo",
-            "collection": "createWithSimpleIndex"
+            "collection": "test",
+            "datasource": "mongo"
         },
         "indexes": [
             {
@@ -18,7 +19,7 @@
         ]
     },
     "schema": {
-        "name": "createWithSimpleIndex",
+        "name": "test",
         "version": {
             "value": "1.0.0",
             "changelog": "blahblah"

@@ -1,8 +1,9 @@
 {
-    "name": "addSimpleIndex",
+    "name": "test",
     "datastore": {
         "backend": "mongo",
-        "collection": "addSimpleIndex"
+        "collection": "test",
+            "datasource": "mongo"
     },
     "indexes": [
         {
