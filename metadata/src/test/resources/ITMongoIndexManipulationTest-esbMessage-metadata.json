@@ -1,0 +1,122 @@
+{
+    "entityInfo": {
+        "name": "test",
+        "enums": [
+            {
+                "name": "esbMessageTypeCode",
+                "values": [
+                    "esb",
+                    "jms"
+                ]
+            }
+        ],
+        "datastore": {
+            "backend": "mongo",
+            "collection": "test",
+            "datasource": "mongo"
+        }
+    },
+    "schema": {
+        "name": "test",
+        "version": {
+            "value": "0.4.0-SNAPSHOT",
+            "changelog": "Initial version"
+        },
+        "status": {
+            "value": "active"
+        },
+        "access": {
+            "insert": [
+                "anyone"
+            ],
+            "update": [
+                "anyone"
+            ],
+            "find": [
+                "anyone"
+            ],
+            "delete": [
+                "anyone"
+            ]
+        },
+        "fields": {
+            "timestamp": {
+                "type": "date",
+                "constraints": {
+                    "required": true
+                }
+            },
+            "esbMessageSearchable#": {
+                "type": "integer",
+                "access": {
+                    "find": [
+                        "anyone"
+                    ]
+                }
+            },
+            "queueLocation": {
+                "type": "string"
+            },
+            "_id": {
+                "type": "uid",
+                "constraints": {
+                    "identity": true
+                }
+            },
+            "rawpayload": {
+                "type": "binary",
+                "constraints": {
+                    "required": true
+                }
+            },
+            "sourceQueue": {
+                "type": "string"
+            },
+            "errorQueue": {
+                "type": "string"
+            },
+            "objectType": {
+                "type": "string",
+                "access": {
+                    "find": [
+                        "anyone"
+                    ],
+                    "update": [
+                        "noone"
+                    ]
+                },
+                "constraints": {
+                    "minLength": 1,
+                    "required": true
+                }
+            },
+            "esbMessageSearchable": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "fields": {
+                        "uid": {
+                            "type": "uid",
+                            "constraints": {
+                                "required": true
+                            }
+                        },
+                        "path": {
+                            "type": "string"
+                        },
+                        "value": {
+                            "type": "string"
+                        },
+                        "typeCode": {
+                            "type": "string",
+                            "constraints": {
+                                "enum": "esbMessageTypeCode",
+                                "required": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
