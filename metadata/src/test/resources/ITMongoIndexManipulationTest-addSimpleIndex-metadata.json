@@ -1,13 +1,14 @@
 {
     "entityInfo": {
-        "name": "addSimpleIndex",
+        "name": "test",
         "datastore": {
             "backend":"mongo",
-            "collection": "addSimpleIndex"
+            "collection": "test",
+            "datasource": "mongo"
         }
     },
     "schema": {
-        "name": "addSimpleIndex",
+        "name": "test",
         "version": {
             "value": "1.0.0",
             "changelog": "blahblah"

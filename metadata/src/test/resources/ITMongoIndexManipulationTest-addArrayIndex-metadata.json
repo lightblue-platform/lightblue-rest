@@ -4,19 +4,8 @@
         "datastore": {
             "backend": "mongo",
             "collection": "test",
-            "datasource":"mongo"
-        },
-        "indexes": [
-            {
-                "fields": [
-                    {
-                        "field": "field1",
-                        "dir": "$asc"
-                    }
-                ],
-                "unique": false
-            }
-        ]
+            "datasource": "mongo"
+        }
     },
     "schema": {
         "name": "test",

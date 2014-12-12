@@ -3,7 +3,7 @@
      "type" : "com.redhat.lightblue.mongo.config.MongoConfiguration",
      "metadataBackendParser" : "com.redhat.lightblue.metadata.mongo.MongoBackendParser",
      "ssl" : false,
-     "database" : "testmetadata",
+     "database" : "mongo",
      "servers" : [
         {
            "host" : "${mongodb.host}",

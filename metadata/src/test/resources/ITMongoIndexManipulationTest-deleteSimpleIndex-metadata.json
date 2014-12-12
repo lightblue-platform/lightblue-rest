@@ -4,7 +4,7 @@
         "datastore": {
             "backend": "mongo",
             "collection": "test",
-            "datasource":"mongo"
+            "datasource": "mongo"
         },
         "indexes": [
             {

@@ -40,10 +40,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
@@ -64,7 +61,7 @@ import javax.ws.rs.core.SecurityContext;
 public class ITMongoIndexManipulationTest {
 
     public static class FileStreamProcessor implements IStreamProcessor {
-        private final FileOutputStream outputStream;
+        private FileOutputStream outputStream;
 
         public FileStreamProcessor(File file) throws FileNotFoundException {
             outputStream = new FileOutputStream(file);
@@ -94,7 +91,7 @@ public class ITMongoIndexManipulationTest {
     private static final int MONGO_PORT = 27777;
     private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
 
-    private static final String DB_NAME = "testmetadata";
+    private static final String DB_NAME = "mongo";
 
     private static MongodExecutable mongodExe;
     private static MongodProcess mongod;
@@ -131,8 +128,8 @@ public class ITMongoIndexManipulationTest {
             mongo = new Mongo(IN_MEM_CONNECTION_URL);
 
             MongoConfiguration config = new MongoConfiguration();
-            // disable ssl for test (enabled by default)
             config.setDatabase(DB_NAME);
+            // disable ssl for test (enabled by default)
             config.setSsl(Boolean.FALSE);
             config.addServerAddress(MONGO_HOST, MONGO_PORT);
 
@@ -146,23 +143,29 @@ public class ITMongoIndexManipulationTest {
                 }
 
             });
+
+            System.setProperty("mongodb.host", MONGO_HOST);
+            System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
         } catch (IOException e) {
             throw new Error(e);
         }
     }
 
-    @Before
-    public void setup() throws Exception {
-        db.createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
-        BasicDBObject index = new BasicDBObject("name", 1);
-        index.put("version.value", 1);
-        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).ensureIndex(index, "name", true);
-    }
-
     @After
     public void teardown() {
+        if (db != null) {
+            DBCollection coll = db.getCollection("test");
+            coll.drop();
+            coll = db.getCollection("metadata");
+            coll.drop();
+        }
+    }
+
+    @AfterClass
+    public static void teardownSuite() {
         if (mongo != null) {
             mongo.dropDatabase(DB_NAME);
+            db = null;
         }
     }
 
@@ -176,6 +179,7 @@ public class ITMongoIndexManipulationTest {
         mongod = null;
         mongodExe = null;
     }
+
 
     @Deployment
     public static WebArchive createDeployment() {
@@ -204,49 +208,187 @@ public class ITMongoIndexManipulationTest {
         System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
 
         String metadata = readFile(getClass().getSimpleName() + "-createWithSimpleIndex-metadata.json");
-        String entityName = "createWithSimpleIndex";
+        String entityName = "test";
         String entityVersion = "1.0.0";
         SecurityContext sc = new TestSecurityContext();
+
+        Assert.assertNotNull(metadata);
+        Assert.assertTrue(metadata.length() > 0);
 
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
+        DBCollection metadataCollection = db.getCollection("metadata");
+        Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
+
         DBCollection entityCollection = db.getCollection(entityName);
-        // create a dummy doc to force index creation
-        entityCollection.insert(new BasicDBObject("field1", 1));
-
-
-        // create a dummy doc to force index creation
-        entityCollection.insert(new BasicDBObject("field1", 1));
 
         // verify has _id and field1 index by simply check on index count
-        System.out.println("Index info:"+entityCollection.getIndexInfo());
-        Assert.assertEquals(2, entityCollection.getIndexInfo().size());
+        Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
+    }
+
+    @Test
+    public void addSimpleIndex_forced() throws Exception {
+        String metadata = readFile(getClass().getSimpleName() + "-addSimpleIndex-metadata.json");
+        String entityName = "test";
+        String entityVersion = "1.0.0";
+        SecurityContext sc = new TestSecurityContext();
+
+        Assert.assertNotNull(metadata);
+        Assert.assertTrue(metadata.length() > 0);
+
+        // create metadata without any non-default indexes
+        metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
+
+        DBCollection metadataCollection = db.getCollection("metadata");
+        Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
+
+        DBCollection entityCollection = db.getCollection(entityName);
+
+        Assert.assertEquals("expected no indexes", 0, entityCollection.getIndexInfo().size());
+
+        entityCollection.createIndex(new BasicDBObject("x", 1));
+
+        // since index was forced the collection is initialized and we don't need to create a dummy doc
+        Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
     }
 
     @Test
     public void addSimpleIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-addSimpleIndex-metadata.json");
-        String entityInfo1 = readFile(getClass().getSimpleName() + "-addSimpleIndex-entityInfo.json");
-        String entityName = "addSimpleIndex";
+        String entityInfo = readFile(getClass().getSimpleName() + "-addSimpleIndex-entityInfo.json");
+        String entityName = "test";
         String entityVersion = "1.0.0";
         SecurityContext sc = new TestSecurityContext();
+
+        Assert.assertNotNull(metadata);
+        Assert.assertTrue(metadata.length() > 0);
 
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
+        DBCollection metadataCollection = db.getCollection("metadata");
+        Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
+
         DBCollection entityCollection = db.getCollection(entityName);
 
-        // create a dummy doc to force index creation
-        entityCollection.insert(new BasicDBObject("field1", 1));
-
-        // verify only have _id index
-        Assert.assertEquals(1, entityCollection.getIndexInfo().size());
+        // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
+        Assert.assertEquals("expected no indexes", 0, entityCollection.getIndexInfo().size());
 
         // update entityInfo to add an index
-        metadataResource.updateEntityInfo(sc, entityName, entityInfo1);
+        metadataResource.updateEntityInfo(sc, entityName, entityInfo);
 
-        // verify have one index
-        Assert.assertEquals(2, entityCollection.getIndexInfo().size());
+        // verify has _id and field1 index by simply check on index count
+        Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
+    }
+
+    @Test @Ignore
+    public void deleteSimpleIndex() throws Exception {
+        String metadata = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-metadata.json");
+        String entityInfo = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-entityInfo.json");
+        String entityName = "test";
+        String entityVersion = "1.0.0";
+        SecurityContext sc = new TestSecurityContext();
+
+        Assert.assertNotNull(metadata);
+        Assert.assertTrue(metadata.length() > 0);
+
+        // create metadata without any non-default indexes
+        metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
+
+        DBCollection metadataCollection = db.getCollection("metadata");
+        Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
+
+        DBCollection entityCollection = db.getCollection(entityName);
+
+        // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
+        Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
+
+        // update entityInfo to delete an index
+        metadataResource.updateEntityInfo(sc, entityName, entityInfo);
+
+        // verify has _id and field1 index by simply check on index count
+        Assert.assertEquals("index not deleted", 1, entityCollection.getIndexInfo().size());
+    }
+
+    @Test
+    public void createWithArrayIndex() throws Exception {
+        String metadata = readFile(getClass().getSimpleName() + "-createWithArrayIndex-metadata.json");
+        String entityName = "test";
+        String entityVersion = "1.0.0";
+        SecurityContext sc = new TestSecurityContext();
+
+        Assert.assertNotNull(metadata);
+        Assert.assertTrue(metadata.length() > 0);
+
+        // create metadata without any non-default indexes
+        metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
+
+        DBCollection metadataCollection = db.getCollection("metadata");
+        Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
+
+        DBCollection entityCollection = db.getCollection(entityName);
+
+        // verify has _id and field1 index by simply check on index count
+        Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
+    }
+
+    @Test
+    public void addArrayIndex() throws Exception {
+        String metadata = readFile(getClass().getSimpleName() + "-addArrayIndex-metadata.json");
+        String entityInfo = readFile(getClass().getSimpleName() + "-addArrayIndex-entityInfo.json");
+        String entityName = "test";
+        String entityVersion = "1.0.0";
+        SecurityContext sc = new TestSecurityContext();
+
+        Assert.assertNotNull(metadata);
+        Assert.assertTrue(metadata.length() > 0);
+
+        // create metadata without any non-default indexes
+        metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
+
+        DBCollection metadataCollection = db.getCollection("metadata");
+        Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
+
+        DBCollection entityCollection = db.getCollection(entityName);
+
+        // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
+        Assert.assertEquals("expected no indexes", 0, entityCollection.getIndexInfo().size());
+
+        // update entityInfo to add an index
+        metadataResource.updateEntityInfo(sc, entityName, entityInfo);
+
+        // verify has _id and field1 index by simply check on index count
+        Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
+    }
+
+    @Test
+        @Ignore
+    public void deleteArrayIndex() throws Exception {
+        String metadata = readFile(getClass().getSimpleName() + "-deleteArrayIndex-metadata.json");
+        String entityInfo = readFile(getClass().getSimpleName() + "-deleteArrayIndex-entityInfo.json");
+        String entityName = "test";
+        String entityVersion = "1.0.0";
+        SecurityContext sc = new TestSecurityContext();
+
+        Assert.assertNotNull(metadata);
+        Assert.assertTrue(metadata.length() > 0);
+
+        // create metadata without any non-default indexes
+        metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
+
+        DBCollection metadataCollection = db.getCollection("metadata");
+        Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
+
+        DBCollection entityCollection = db.getCollection(entityName);
+
+        // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
+        Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
+
+        // update entityInfo to delete an index
+        metadataResource.updateEntityInfo(sc, entityName, entityInfo);
+
+        // verify has _id and field1 index by simply check on index count
+        Assert.assertEquals("index not deleted", 1, entityCollection.getIndexInfo().size());
     }
 }

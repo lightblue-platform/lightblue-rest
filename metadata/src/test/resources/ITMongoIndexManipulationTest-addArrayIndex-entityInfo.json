@@ -3,13 +3,13 @@
     "datastore": {
         "backend": "mongo",
         "collection": "test",
-            "datasource": "mongo"
+        "datasource": "mongo"
     },
     "indexes": [
         {
             "fields": [
                 {
-                    "field": "field1",
+                    "field": "field7.elemf1",
                     "dir": "$asc"
                 }
             ],
