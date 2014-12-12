@@ -96,12 +96,14 @@ public class ITMongoIndexManipulationTest {
 
     private static final String DB_NAME = "testmetadata";
 
-    private static final MongodExecutable mongodExe;
+    private static MongodExecutable mongodExe;
     private static MongodProcess mongod;
     private static Mongo mongo;
     private static DB db;
 
     static {
+        System.setProperty("mongodb.host", MONGO_HOST);
+        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
         try {
             IStreamProcessor mongodOutput = Processors.named("[mongod>]",
                     new FileStreamProcessor(File.createTempFile("mongod", "log")));
@@ -122,7 +124,7 @@ public class ITMongoIndexManipulationTest {
             );
             try {
                 mongod = mongodExe.start();
-            } catch (IOException t) {
+            } catch (Throwable t) {
                 // try again, could be killed breakpoint in IDE
                 mongod = mongodExe.start();
             }
@@ -139,14 +141,8 @@ public class ITMongoIndexManipulationTest {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {
-                    super.start();
-                    if (mongod != null) {
-                        mongod.stop();
-                        mongodExe.stop();
-                    }
-                    db = null;
-                    mongo = null;
-                    mongod = null;
+                    super.run();
+                    clearDatabase();
                 }
 
             });
@@ -168,6 +164,17 @@ public class ITMongoIndexManipulationTest {
         if (mongo != null) {
             mongo.dropDatabase(DB_NAME);
         }
+    }
+
+    public static void clearDatabase() {
+        if (mongod != null) {
+            mongod.stop();
+            mongodExe.stop();
+        }
+        db = null;
+        mongo = null;
+        mongod = null;
+        mongodExe = null;
     }
 
     @Deployment
@@ -193,6 +200,9 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void createWithSimpleIndex() throws Exception {
+        System.setProperty("mongodb.host", MONGO_HOST);
+        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
+
         String metadata = readFile(getClass().getSimpleName() + "-createWithSimpleIndex-metadata.json");
         String entityName = "createWithSimpleIndex";
         String entityVersion = "1.0.0";
@@ -202,11 +212,15 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection entityCollection = db.getCollection(entityName);
+        // create a dummy doc to force index creation
+        entityCollection.insert(new BasicDBObject("field1", 1));
+
 
         // create a dummy doc to force index creation
         entityCollection.insert(new BasicDBObject("field1", 1));
 
         // verify has _id and field1 index by simply check on index count
+        System.out.println("Index info:"+entityCollection.getIndexInfo());
         Assert.assertEquals(2, entityCollection.getIndexInfo().size());
     }
 

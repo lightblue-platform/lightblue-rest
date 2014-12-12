@@ -3,7 +3,8 @@
         "name": "createWithSimpleIndex",
         "datastore": {
             "backend": "mongo",
-            "collection": "createWithSimpleIndex"
+            "collection": "createWithSimpleIndex",
+            "datasource":"mongo"
         },
         "indexes": [
             {
