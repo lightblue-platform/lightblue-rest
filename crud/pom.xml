@@ -39,6 +39,10 @@
             <artifactId>core-config</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.lightblue.hook</groupId>
+            <artifactId>audit</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>rest-common</artifactId>
             <version>${project.version}</version>

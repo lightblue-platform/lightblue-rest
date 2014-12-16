@@ -35,10 +35,7 @@ import com.redhat.lightblue.util.Error;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -193,9 +190,10 @@ public abstract class AbstractCrudResource {
             List<String> queryList = Arrays.asList(q.split(";"));
             if (queryList.size() > 1) {
                 StringBuilder sbq = new StringBuilder("{ \"$and\" : [");
-                for (int i = 0; i < queryList.size(); i++) {
-                    sbq.append(buildQueryFieldTemplate(queryList.get(i)));
-                    if ((i + 1) < queryList.size()) {
+                Iterator<String> itr = queryList.iterator();
+                while (itr.hasNext()) {
+                    sbq.append(buildQueryFieldTemplate(itr.next()));
+                    if (itr.hasNext()) {
                         sbq.append(',');
                     }
                 }
@@ -213,9 +211,10 @@ public abstract class AbstractCrudResource {
             List<String> projectionList = Arrays.asList(p.split(","));
             if (projectionList.size() > 1) {
                 StringBuilder sbp = new StringBuilder("[");
-                for (int i = 0; i < projectionList.size(); i++) {
-                    sbp.append(buildProjectionTemplate(projectionList.get(i)));
-                    if ((i + 1) < projectionList.size()) {
+                Iterator<String> itr = projectionList.iterator();
+                while (itr.hasNext()) {
+                    sbp.append(buildProjectionTemplate(itr.next()));
+                    if (itr.hasNext()) {
                         sbp.append(',');
                     }
                 }
@@ -233,9 +232,10 @@ public abstract class AbstractCrudResource {
             List<String> sortList = Arrays.asList(s.split(","));
             if (sortList.size() > 1) {
                 StringBuilder sbs = new StringBuilder("[");
-                for (int i = 0; i < sortList.size(); i++) {
-                    sbs.append(buildSortTemplate(sortList.get(i)));
-                    if ((i + 1) < sortList.size()) {
+                Iterator<String> itr = sortList.iterator();
+                while (itr.hasNext()) {
+                    sbs.append(buildSortTemplate(itr.next()));
+                    if (itr.hasNext()) {
                         sbs.append(',');
                     }
                 }
