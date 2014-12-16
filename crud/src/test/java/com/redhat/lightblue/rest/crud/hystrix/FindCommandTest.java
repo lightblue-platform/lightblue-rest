@@ -69,14 +69,6 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
     @Test
     public void execute() {
-        try {
-            Object a = JsonUtils
-                    .json(Thread.currentThread().getContextClassLoader().getResourceAsStream("datasources.json"));
-            System.out.println(a);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
 
         FindCommand command = new FindCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 

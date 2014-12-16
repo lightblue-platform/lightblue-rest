@@ -1,0 +1,166 @@
+{
+    "entityInfo": {
+        "name": "country",
+        "indexes": [
+            {
+                "unique": true,
+                "fields": [
+                    {
+                        "field": "name",
+                        "dir": "$asc"
+                    }
+                ]
+            }
+        ],
+        "datastore": {
+            "backend": "rdbms",
+            "datasource": "simplefile"
+        }
+    },
+    "schema": {
+        "name": "country",
+        "version": {
+            "value": "1.0.0",
+            "changelog": "blahblah"
+        },
+        "status": {
+            "value": "active"
+        },
+        "access": {
+            "insert": ["anyone"],
+            "update": ["anyone"],
+            "delete": [ "anyone" ],
+            "find": [ "anyone" ]
+        },
+        "fields": {
+            "name": {
+                "type": "string"
+            },
+            "iso2code": {
+                "type": "string"
+            },
+            "iso3code": {
+                "type": "string"
+            }
+        },
+
+        "rdbms": {
+            "dialect": "oracle",
+            "SQLMapping": {
+                "columnToFieldMap": [
+                    {
+                        "table": "Country",
+                        "column": "NAME",
+                        "field": "name"
+                    },
+                    {
+                        "table": "Country",
+                        "column": "ISO2CODE",
+                        "field": "iso2code"
+                    },
+                    {
+                        "table": "Country",
+                        "column": "ISO3CODE",
+                        "field": "iso3code"
+                    }
+                ],
+                "joins": [
+                    {
+                        "tables": [
+                            {
+                                "name": "Country"
+                            }
+                        ],
+                        "projectionMappings": [
+                            {
+                                "column": "NAME",
+                                "field": "name",
+                                "sort": "NAME"
+                            },
+                            {
+                                "column": "ISO2CODE",
+                                "field": "iso2code",
+                                "sort": "ISO2CODE"
+                            },
+                            {
+                                "column": "ISO3CODE",
+                                "field": "iso3code",
+                                "sort": "ISO3CODE"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "update": {
+                "bindings": {
+                    "out": [
+                        {
+                            "column": "NAME",
+                            "field": "name"
+                        },
+                        {
+                            "column": "ISO2CODE",
+                            "field": "iso2code"
+                        }
+                    ]
+                },
+                "expressions": [
+                    {
+                        "statement": {
+                            "sql": "ZZY",
+                            "type": "update"
+                        }
+                    }
+                ]
+            },
+            "insert": {
+                "bindings": {
+                    "in": [
+                        {
+                            "column": "NAME",
+                            "field": "name"
+                        },
+                        {
+                            "column": "ISO2CODE",
+                            "field": "iso2code"
+                        },
+                        {
+                            "column": "ISO3CODE",
+                            "field": "so3code"
+                        }
+                    ]
+                },
+                "expressions": [
+                    {
+                        "statement": {
+                            "sql": "XXY",
+                            "type": "insert"
+                        }
+                    }
+                ]
+            },
+            "delete": {
+                "bindings": {
+                    "in": [
+                        {
+                            "column": "NAME",
+                            "field": "name"
+                        },
+                        {
+                            "column": "ISO2CODE",
+                            "field": "iso2code"
+                        }
+                    ]
+                },
+                "expressions": [
+                    {
+                        "statement": {
+                            "sql": "YYZ",
+                            "type": "delete"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

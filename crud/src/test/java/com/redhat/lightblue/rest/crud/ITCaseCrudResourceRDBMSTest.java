@@ -30,7 +30,7 @@ import com.redhat.lightblue.metadata.mongo.MongoMetadata;
 import com.redhat.lightblue.mongo.config.MongoConfiguration;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.util.JsonUtils;
-import static com.redhat.lightblue.util.test.FileUtil.readFile;
+import com.redhat.lightblue.util.test.FileUtil;
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -43,24 +43,6 @@ import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.io.IStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.runtime.Network;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import javax.inject.Inject;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -69,14 +51,27 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.json.JSONException;
-import org.junit.*;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import javax.inject.Inject;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 /**
- *
  * @author lcestari
  */
 @RunWith(Arquillian.class)
@@ -194,7 +189,7 @@ public class ITCaseCrudResourceRDBMSTest {
         mongo.getDB("admin").dropDatabase();
         mongo.getDB("mongo").dropDatabase();
 
-        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).remove( new BasicDBObject());
+        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).remove(new BasicDBObject());
         mongo.getDB("mongo").getCollection("metadata").remove(new BasicDBObject());
 
         db.createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
@@ -202,7 +197,7 @@ public class ITCaseCrudResourceRDBMSTest {
         index.put("version.value", 1);
         db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).ensureIndex(index, "name", true);
 
-        if(notRegistered) {
+        if (notRegistered) {
             notRegistered = false;
             try {
                 // Create initial context
@@ -256,10 +251,10 @@ public class ITCaseCrudResourceRDBMSTest {
 
         WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(new File(PATH + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
-                .addAsResource(new File(PATH + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
-                .addAsResource(new File(PATH + DATASOURCESJSON), DATASOURCESJSON)
-                .addAsResource(new File(PATH + CONFIGPROPERTIES), CONFIGPROPERTIES);
+                .addAsResource(new File(PATH_BASE + FILE_CONFIG_METADATA), MetadataConfiguration.FILENAME)
+                .addAsResource(new File(PATH_BASE + FILE_CONFIG_CRUD), CrudConfiguration.FILENAME)
+                .addAsResource(new File(PATH_BASE + FILE_CONFIG_DATASOURCES), FILE_CONFIG_DATASOURCES)
+                .addAsResource(new File(PATH_BASE + FILE_CONFIG), FILE_CONFIG);
         for (File file : libs) {
             archive.addAsLibrary(file);
         }
@@ -267,9 +262,16 @@ public class ITCaseCrudResourceRDBMSTest {
         return archive;
     }
 
-    private static final String PATH = "src/test/resources/it-rdbms/rdbms-";
-    private static final String CONFIGPROPERTIES = "config.properties";
-    private static final String DATASOURCESJSON = "datasources.json";
+    private static final String PATH_BASE = "src/test/resources/" + ITCaseCrudResourceRDBMSTest.class.getSimpleName() + "/";
+    private static final String PATH_CONFIG = "config/";
+    private static final String FILE_CONFIG_METADATA = PATH_CONFIG + MetadataConfiguration.FILENAME;
+    private static final String FILE_CONFIG_CRUD = PATH_CONFIG + CrudConfiguration.FILENAME;
+    private static final String FILE_CONFIG = PATH_CONFIG + "config.properties";
+    private static final String FILE_CONFIG_DATASOURCES = PATH_CONFIG + "datasources.json";
+
+    private String readFile(String filename) throws IOException, URISyntaxException {
+        return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
+    }
 
     @Inject
     private CrudResource cutCrudResource; //class under test
@@ -286,7 +288,7 @@ public class ITCaseCrudResourceRDBMSTest {
             conn.close();
 
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
+            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(FILE_CONFIG_DATASOURCES))));
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
             String expectedCreated = readFile("it-rdbms/expectedCreated.json");
@@ -307,9 +309,9 @@ public class ITCaseCrudResourceRDBMSTest {
             stmt.execute("SELECT * FROM Country;");
             ResultSet resultSet = stmt.getResultSet();
             resultSet.next();
-            Assert.assertEquals( "Canad", resultSet.getString("name"));
-            Assert.assertEquals( "CA", resultSet.getString("iso2code"));
-            Assert.assertEquals( "CAN", resultSet.getString("iso3code"));
+            Assert.assertEquals("Canad", resultSet.getString("name"));
+            Assert.assertEquals("CA", resultSet.getString("iso2code"));
+            Assert.assertEquals("CAN", resultSet.getString("iso3code"));
 
             JSONAssert.assertEquals(expectedInserted, resultInserted, false);
         } catch (NamingException ex) {
@@ -333,25 +335,23 @@ public class ITCaseCrudResourceRDBMSTest {
             conn.close();
 
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
+            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(FILE_CONFIG_DATASOURCES))));
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
-            String expectedCreated = readFile("it-rdbms/expectedCreated.json");
-            String metadata = readFile("it-rdbms/metadata.json");
+            String expectedCreated = readFile("expectedCreated.json");
+            String metadata = readFile("metadata.json");
             EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
             RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
             EntityMetadata em2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("country", "1.0.0");
             String resultCreated = RestConfiguration.getFactory().getJSONParser().convert(em2).toString();
             JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
-            String expectedFound = readFile("it-rdbms/expectedFound.json");
-            String resultFound = cutCrudResource.find("country", "1.0.0", readFile("it-rdbms/resultFound.json"));
+            String expectedFound = readFile("expectedFound.json");
+            String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json"));
             // TODO / NOTE we can change the result format if needed, now it return an array of arrays
             //System.err.println("!!!!!!!!!!!!!!!!!" + resultFound);
             JSONAssert.assertEquals(expectedFound, resultFound, false);
-        } catch (NamingException ex) {
-            throw new IllegalStateException(ex);
-        } catch (SQLException ex) {
+        } catch (NamingException | SQLException ex) {
             throw new IllegalStateException(ex);
         }
         mongo.dropDatabase(DB_NAME);
@@ -371,19 +371,19 @@ public class ITCaseCrudResourceRDBMSTest {
             conn.close();
 
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
+            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(FILE_CONFIG_DATASOURCES))));
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
-            String expectedCreated = readFile("it-rdbms/expectedCreated.json");
-            String metadata = readFile("it-rdbms/metadata.json").replaceAll("ZZY", " UPDATE Country SET NAME=:name  WHERE ISO2CODE=:ISO2CODE;");
+            String expectedCreated = readFile("expectedCreated.json");
+            String metadata = readFile("metadata.json").replaceAll("ZZY", " UPDATE Country SET NAME=:name  WHERE ISO2CODE=:ISO2CODE;");
             EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
             RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
             EntityMetadata em2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("country", "1.0.0");
             String resultCreated = RestConfiguration.getFactory().getJSONParser().convert(em2).toString();
             JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
-            String expectedUpdated = readFile("it-rdbms/expectedUpdated.json");
-            String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("it-rdbms/resultUpdated.json"));
+            String expectedUpdated = readFile("expectedUpdated.json");
+            String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json"));
             System.err.println("!!!!!!!!!!!!!!!!!" + resultUpdated);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
@@ -392,14 +392,12 @@ public class ITCaseCrudResourceRDBMSTest {
             stmt.execute("SELECT * FROM Country;");
             ResultSet resultSet = stmt.getResultSet();
             resultSet.next();
-            Assert.assertEquals( "Canada", resultSet.getString("name"));
-            Assert.assertEquals( "CA", resultSet.getString("iso2code"));
-            Assert.assertEquals( "c", resultSet.getString("iso3code"));
+            Assert.assertEquals("Canada", resultSet.getString("name"));
+            Assert.assertEquals("CA", resultSet.getString("iso2code"));
+            Assert.assertEquals("c", resultSet.getString("iso3code"));
 
             JSONAssert.assertEquals(expectedUpdated, resultUpdated, false);
-        } catch (NamingException ex) {
-            throw new IllegalStateException(ex);
-        } catch (SQLException ex) {
+        } catch (NamingException | SQLException ex) {
             throw new IllegalStateException(ex);
         }
         mongo.dropDatabase(DB_NAME);
@@ -419,19 +417,19 @@ public class ITCaseCrudResourceRDBMSTest {
             conn.close();
 
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
+            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(FILE_CONFIG_DATASOURCES))));
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
-            String expectedCreated = readFile("it-rdbms/expectedCreated.json");
-            String metadata = readFile("it-rdbms/metadata.json").replaceAll("YYZ", " DELETE FROM Country WHERE ISO2CODE=:ISO2CODE;");
+            String expectedCreated = readFile("expectedCreated.json");
+            String metadata = readFile("metadata.json").replaceAll("YYZ", " DELETE FROM Country WHERE ISO2CODE=:ISO2CODE;");
             EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
             RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
             EntityMetadata em2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("country", "1.0.0");
             String resultCreated = RestConfiguration.getFactory().getJSONParser().convert(em2).toString();
             JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
-            String expectedDeleted = readFile("it-rdbms/expectedDeleted.json");
-            String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("it-rdbms/resultDeleted.json"));
+            String expectedDeleted = readFile("expectedDeleted.json");
+            String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json"));
             System.err.println("!!!!!!!!!!!!!!!!!" + resultDeleted);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
@@ -440,12 +438,10 @@ public class ITCaseCrudResourceRDBMSTest {
             stmt.execute("SELECT * FROM Country;");
             ResultSet resultSet = stmt.getResultSet();
 
-            Assert.assertEquals( false, resultSet.next());
+            Assert.assertEquals(false, resultSet.next());
 
             JSONAssert.assertEquals(expectedDeleted, resultDeleted, false);
-        } catch (NamingException ex) {
-            throw new IllegalStateException(ex);
-        } catch (SQLException ex) {
+        } catch (NamingException | SQLException ex) {
             throw new IllegalStateException(ex);
         }
         mongo.dropDatabase(DB_NAME);
