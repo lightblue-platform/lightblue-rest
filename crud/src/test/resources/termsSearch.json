@@ -1,0 +1,13 @@
+{
+   "entity":"terms",
+   "entityVersion":"2.0.0",
+   "query":{"field":"_id","op":"=","rvalue":1},
+   "projection":[
+       {"field":"termsVerbiage","include":true,
+          "match":{"field":"statusCode","op":"=","rfield":"statusCode"},
+          "project":[{"field":"termsVerbiageTranslation","include":true, 
+              "match":{"field":"uid","op":"=","rvalue":"b1c1843f-499f-47cb-af4f-73432bb20f44"},
+              "project":[{"field":"termsPdfId","include":true,"recursive":false},
+                         {"field":"url","include":true,"recursive":false}]
+           }]
+      }]}

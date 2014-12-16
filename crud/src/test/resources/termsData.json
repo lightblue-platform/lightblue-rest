@@ -1,0 +1,33 @@
+{
+   "entity":"terms",
+   "entityVersion":"2.0.0",
+   "data": [ {
+     "objectType":"terms",
+     "_id":1,
+     "createdBy":"me",
+     "termsTypeCode":"site",
+     "lastUpdateDate":"20141215T17:00:06.284+0000",
+     "creationDate":"20141215T17:00:06.284+0000",
+     "lastUpdatedBy":"me",
+     "statusCode":"active",
+     "termsVerbiage":[
+       { "statusCode":"active",
+         "name":"name",
+         "termsVerbiageTranslation":[
+           {
+              "uid":"b1c1843f-499f-47cb-af4f-73432bb20f44",
+              "termsPdfSizeBytes":86654,
+              "termsPdfId":"35a0099f-2207-49db-b479-59b3c839dc01",
+              "localeCodeText":"fr_FR",
+              "statusCode":"active",
+              "creationDate":"20141215T17:00:06.284+0000",
+              "versionSeq":1,
+              "dateLabel":"2014Dec"
+            }
+         ]
+        }
+     ]
+    } 
+   ],
+   "projection": { "field":"*","include":1}
+}
