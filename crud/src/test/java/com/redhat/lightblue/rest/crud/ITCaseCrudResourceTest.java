@@ -211,7 +211,7 @@ public class ITCaseCrudResourceTest {
     @Inject
     private CrudResource cutCrudResource; //class under test
 
-    @Test
+       @Test
     public void testFirstIntegrationTest() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
         RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
@@ -255,4 +255,23 @@ public class ITCaseCrudResourceTest {
         String resultFound2 = cutCrudResource.find("country", "1.0.0", readFile("resultFound2.json"));
         JSONAssert.assertEquals(expectedFound2, resultFound2, false);
     }
+
+    @Test
+    public void testTermsProjection() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
+        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
+        RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
+
+        String metadata = readFile("termsMetadata.json");
+        EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
+        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+
+        // Create terms record
+        String resultInserted = cutCrudResource.insert("terms","2.0.0",readFile("termsData.json"));
+        System.out.println("Inserted:"+resultInserted);
+        String resultFound = cutCrudResource.find("terms", "2.0.0", readFile("termsSearch.json"));
+        System.out.println("Result:"+resultFound);
+       
+    }
+
 }
