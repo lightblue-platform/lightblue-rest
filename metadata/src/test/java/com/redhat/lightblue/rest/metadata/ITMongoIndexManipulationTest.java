@@ -60,6 +60,7 @@ import javax.ws.rs.core.SecurityContext;
  *
  * @author nmalik
  */
+@Ignore
 @RunWith(Arquillian.class)
 public class ITMongoIndexManipulationTest {
 
