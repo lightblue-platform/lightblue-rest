@@ -18,22 +18,10 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.redhat.lightblue.config.MetadataConfiguration;
-import com.redhat.lightblue.metadata.mongo.MongoMetadata;
-import com.redhat.lightblue.mongo.config.MongoConfiguration;
-import de.flapdoodle.embed.mongo.Command;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
-import de.flapdoodle.embed.process.io.IStreamProcessor;
-import de.flapdoodle.embed.process.io.Processors;
-import de.flapdoodle.embed.process.runtime.Network;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -44,146 +32,40 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.SecurityContext;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
 import static com.redhat.lightblue.util.test.FileUtil.readFile;
-
-import javax.ws.rs.core.SecurityContext;
 
 /**
  * Test to verify index creation in mongo backend through front-end API's.
  *
  * @author nmalik
  */
-@Ignore
 @RunWith(Arquillian.class)
 public class ITMongoIndexManipulationTest {
 
-    public static class FileStreamProcessor implements IStreamProcessor {
-        private FileOutputStream outputStream;
+    private static EmbeddedMongo mongo = EmbeddedMongo.getInstance();
 
-        public FileStreamProcessor(File file) throws FileNotFoundException {
-            outputStream = new FileOutputStream(file);
-        }
+    @Before
+    public void setup() {
+        mongo.dropCollection("metadata");
+        mongo.dropCollection("test");
 
-        @Override
-        public void process(String block) {
-            try {
-                outputStream.write(block.getBytes());
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        @Override
-        public void onProcessed() {
-            try {
-                outputStream.close();
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-    }
-
-    private static final String MONGO_HOST = "localhost";
-    private static final int MONGO_PORT = 27777;
-    private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
-
-    private static final String DB_NAME = "mongo";
-
-    private static MongodExecutable mongodExe;
-    private static MongodProcess mongod;
-    private static Mongo mongo;
-    private static DB db;
-
-    static {
-        System.setProperty("mongodb.host", MONGO_HOST);
-        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
-        try {
-            IStreamProcessor mongodOutput = Processors.named("[mongod>]",
-                    new FileStreamProcessor(File.createTempFile("mongod", "log")));
-            IStreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
-            IStreamProcessor commandsOutput = Processors.namedConsole("[console>]");
-
-            IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                    .defaults(Command.MongoD)
-                    .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-                    .build();
-
-            MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
-            mongodExe = runtime.prepare(
-                    new MongodConfigBuilder()
-                            .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
-                            .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                            .build()
-            );
-            try {
-                mongod = mongodExe.start();
-            } catch (Throwable t) {
-                // try again, could be killed breakpoint in IDE
-                mongod = mongodExe.start();
-            }
-            mongo = new Mongo(IN_MEM_CONNECTION_URL);
-
-            MongoConfiguration config = new MongoConfiguration();
-            config.setDatabase(DB_NAME);
-            // disable ssl for test (enabled by default)
-            config.setSsl(Boolean.FALSE);
-            config.addServerAddress(MONGO_HOST, MONGO_PORT);
-
-            db = config.getDB();
-
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    clearDatabase();
-                }
-
-            });
-
-            System.setProperty("mongodb.host", MONGO_HOST);
-            System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
-        } catch (IOException e) {
-            throw new Error(e);
-        }
+        Assert.assertEquals("setup: metadata collection is not empty", 0, mongo.getDB().getCollection("metadata").find().count());
     }
 
     @After
     public void teardown() {
-        if (db != null) {
-            DBCollection coll = db.getCollection("test");
-            coll.drop();
-            coll = db.getCollection("metadata");
-            coll.drop();
-        }
+        mongo.reset();
     }
 
     @AfterClass
-    public static void teardownSuite() {
-        if (mongo != null) {
-            mongo.dropDatabase(DB_NAME);
-            db = null;
-        }
-    }
-
-    public static void clearDatabase() {
-        if (mongod != null) {
-            mongod.stop();
-            mongodExe.stop();
-        }
-        db = null;
+    public static void teardownClass() {
         mongo = null;
-        mongod = null;
-        mongodExe = null;
     }
-
 
     @Deployment
     public static WebArchive createDeployment() {
@@ -200,7 +82,6 @@ public class ITMongoIndexManipulationTest {
         }
         archive.addPackages(true, "com.redhat.lightblue");
         return archive;
-
     }
 
     @Inject
@@ -208,9 +89,6 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void createWithSimpleIndex() throws Exception {
-        System.setProperty("mongodb.host", MONGO_HOST);
-        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
-
         String metadata = readFile(getClass().getSimpleName() + "-createWithSimpleIndex-metadata.json");
         String entityName = "test";
         String entityVersion = "1.0.0";
@@ -222,10 +100,10 @@ public class ITMongoIndexManipulationTest {
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
-        DBCollection metadataCollection = db.getCollection("metadata");
+        DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
         Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
 
-        DBCollection entityCollection = db.getCollection(entityName);
+        DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
         // verify has _id and field1 index by simply check on index count
         Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
@@ -244,10 +122,10 @@ public class ITMongoIndexManipulationTest {
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
-        DBCollection metadataCollection = db.getCollection("metadata");
+        DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
         Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
 
-        DBCollection entityCollection = db.getCollection(entityName);
+        DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
         Assert.assertEquals("expected no indexes", 0, entityCollection.getIndexInfo().size());
 
@@ -271,10 +149,10 @@ public class ITMongoIndexManipulationTest {
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
-        DBCollection metadataCollection = db.getCollection("metadata");
+        DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
         Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
 
-        DBCollection entityCollection = db.getCollection(entityName);
+        DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
         // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
         Assert.assertEquals("expected no indexes", 0, entityCollection.getIndexInfo().size());
@@ -301,10 +179,10 @@ public class ITMongoIndexManipulationTest {
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
-        DBCollection metadataCollection = db.getCollection("metadata");
+        DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
         Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
 
-        DBCollection entityCollection = db.getCollection(entityName);
+        DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
         // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
         Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
@@ -329,10 +207,10 @@ public class ITMongoIndexManipulationTest {
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
-        DBCollection metadataCollection = db.getCollection("metadata");
+        DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
         Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
 
-        DBCollection entityCollection = db.getCollection(entityName);
+        DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
         // verify has _id and field1 index by simply check on index count
         Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
@@ -352,10 +230,10 @@ public class ITMongoIndexManipulationTest {
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
-        DBCollection metadataCollection = db.getCollection("metadata");
+        DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
         Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
 
-        DBCollection entityCollection = db.getCollection(entityName);
+        DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
         // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
         Assert.assertEquals("expected no indexes", 0, entityCollection.getIndexInfo().size());
@@ -381,10 +259,10 @@ public class ITMongoIndexManipulationTest {
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
-        DBCollection metadataCollection = db.getCollection("metadata");
+        DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
         Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
 
-        DBCollection entityCollection = db.getCollection(entityName);
+        DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
         // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
         Assert.assertEquals("expected no indexes", 0, entityCollection.getIndexInfo().size());
@@ -410,7 +288,6 @@ public class ITMongoIndexManipulationTest {
         Assert.assertTrue(verified);
     }
 
-
     @Test
     @Ignore
     public void deleteArrayIndex() throws Exception {
@@ -426,10 +303,10 @@ public class ITMongoIndexManipulationTest {
         // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
-        DBCollection metadataCollection = db.getCollection("metadata");
+        DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
         Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
 
-        DBCollection entityCollection = db.getCollection(entityName);
+        DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
         // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
         Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
