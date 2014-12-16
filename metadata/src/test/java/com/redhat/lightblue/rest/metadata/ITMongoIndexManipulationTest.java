@@ -207,8 +207,6 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void createWithSimpleIndex() throws Exception {
-        System.setProperty("mongodb.host", MONGO_HOST);
-        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
 
         String metadata = readFile(getClass().getSimpleName() + "-createWithSimpleIndex-metadata.json");
         String entityName = "test";
