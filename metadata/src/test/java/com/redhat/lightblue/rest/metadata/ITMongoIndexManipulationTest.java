@@ -48,8 +48,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 
 import static com.redhat.lightblue.util.test.FileUtil.readFile;
+
 import javax.ws.rs.core.SecurityContext;
 
 /**
@@ -115,9 +118,9 @@ public class ITMongoIndexManipulationTest {
             MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
             mongodExe = runtime.prepare(
                     new MongodConfigBuilder()
-                    .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
-                    .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                    .build()
+                            .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
+                            .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
+                            .build()
             );
             try {
                 mongod = mongodExe.start();
@@ -282,7 +285,8 @@ public class ITMongoIndexManipulationTest {
         Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
     }
 
-    @Test @Ignore
+    @Test
+    @Ignore
     public void deleteSimpleIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-metadata.json");
         String entityInfo = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-entityInfo.json");
@@ -363,7 +367,51 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-        @Ignore
+    public void esbMessage() throws Exception {
+        String metadata = readFile(getClass().getSimpleName() + "-esbMessage-metadata.json");
+        String entityInfo = readFile(getClass().getSimpleName() + "-esbMessage-entityInfo.json");
+        String entityName = "test";
+        String entityVersion = "0.4.0-SNAPSHOT";
+        SecurityContext sc = new TestSecurityContext();
+
+        Assert.assertNotNull(metadata);
+        Assert.assertTrue(metadata.length() > 0);
+
+        // create metadata without any non-default indexes
+        metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
+
+        DBCollection metadataCollection = db.getCollection("metadata");
+        Assert.assertEquals("Metadata was not created!", 2, metadataCollection.find().count());
+
+        DBCollection entityCollection = db.getCollection(entityName);
+
+        // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
+        Assert.assertEquals("expected no indexes", 0, entityCollection.getIndexInfo().size());
+
+        // update entityInfo to add an index
+        metadataResource.updateEntityInfo(sc, entityName, entityInfo);
+
+        // verify has _id and field1 index by simply check on index count
+        Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
+
+        // verify specific index
+        boolean verified = false;
+        for (DBObject dbi : entityCollection.getIndexInfo()) {
+            if (((BasicDBObject) dbi.get("key")).entrySet().iterator().next().getKey().equals("_id")) {
+                continue;
+            }
+            // non _id index is the one we want to verify with
+            Iterator<Map.Entry<String, Object>> i = ((BasicDBObject) dbi.get("key")).entrySet().iterator();
+            Assert.assertEquals("esbMessageSearchable.value", i.next().getKey());
+            Assert.assertEquals("esbMessageSearchable.path", i.next().getKey());
+            verified = true;
+        }
+        Assert.assertTrue(verified);
+    }
+
+
+    @Test
+    @Ignore
     public void deleteArrayIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-deleteArrayIndex-metadata.json");
         String entityInfo = readFile(getClass().getSimpleName() + "-deleteArrayIndex-entityInfo.json");
