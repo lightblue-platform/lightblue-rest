@@ -48,3 +48,7 @@ git push origin master --tags
 
 # perform release
 mvn release:perform -P release || exit
+
+mvn versions:set -DnewVersion=$DEVEL_VERSION
+
+mvn clean deploy
