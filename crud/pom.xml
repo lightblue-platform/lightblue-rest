@@ -62,17 +62,17 @@
         <dependency>
             <groupId>com.redhat.lightblue.rdbms</groupId>
             <artifactId>rdbms-crud</artifactId>
-            <version>${lightblue-rdbms.version}</version>
+            <version>0.9.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.rdbms</groupId>
             <artifactId>rdbms-metadata</artifactId>
-            <version>${lightblue-rdbms.version}</version>
+            <version>0.9.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.rdbms</groupId>
             <artifactId>rdbms-config</artifactId>
-            <version>${lightblue-rdbms.version}</version>
+            <version>0.9.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.hook</groupId>
