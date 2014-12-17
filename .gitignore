@@ -37,3 +37,4 @@ metadata-basic-auth/overlays
 crud-basic-auth/overlays
 metadata-cert-auth/overlays
 crud-cert-auth/overlays
+*.versionsBackup

@@ -248,13 +248,14 @@ public class ITCaseCrudResourceRDBMSTest {
     @Deployment
     public static WebArchive createDeployment() {
         File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeDependencies().resolve().withTransitivity().asFile();
+        final String PATH_BASE = "src/test/resources/" + ITCaseCrudResourceRDBMSTest.class.getSimpleName() + "/config/";
 
         WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(new File(PATH_BASE + FILE_CONFIG_METADATA), MetadataConfiguration.FILENAME)
-                .addAsResource(new File(PATH_BASE + FILE_CONFIG_CRUD), CrudConfiguration.FILENAME)
-                .addAsResource(new File(PATH_BASE + FILE_CONFIG_DATASOURCES), FILE_CONFIG_DATASOURCES)
-                .addAsResource(new File(PATH_BASE + FILE_CONFIG), FILE_CONFIG);
+                .addAsResource(new File(PATH_BASE + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
+                .addAsResource(new File(PATH_BASE + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
+                .addAsResource(new File(PATH_BASE + RestConfiguration.DATASOURCE_FILENAME), RestConfiguration.DATASOURCE_FILENAME)
+                .addAsResource(new File(PATH_BASE + "config.properties"), "config.properties");
         for (File file : libs) {
             archive.addAsLibrary(file);
         }
@@ -262,15 +263,12 @@ public class ITCaseCrudResourceRDBMSTest {
         return archive;
     }
 
-    private static final String PATH_BASE = "src/test/resources/" + ITCaseCrudResourceRDBMSTest.class.getSimpleName() + "/";
-    private static final String PATH_CONFIG = "config/";
-    private static final String FILE_CONFIG_METADATA = PATH_CONFIG + MetadataConfiguration.FILENAME;
-    private static final String FILE_CONFIG_CRUD = PATH_CONFIG + CrudConfiguration.FILENAME;
-    private static final String FILE_CONFIG = PATH_CONFIG + "config.properties";
-    private static final String FILE_CONFIG_DATASOURCES = PATH_CONFIG + "datasources.json";
-
     private String readFile(String filename) throws IOException, URISyntaxException {
         return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
+    }
+
+    private String readConfigFile(String filename) throws IOException, URISyntaxException {
+        return readFile("config/" + filename);
     }
 
     @Inject
@@ -288,11 +286,11 @@ public class ITCaseCrudResourceRDBMSTest {
             conn.close();
 
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(FILE_CONFIG_DATASOURCES))));
+            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readConfigFile(RestConfiguration.DATASOURCE_FILENAME))));
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
-            String expectedCreated = readFile("it-rdbms/expectedCreated.json");
-            String metadata = readFile("it-rdbms/metadata.json").replaceAll("XXY", "INSERT INTO Country (NAME,ISO2CODE,ISO3CODE) VALUES (:name,:iso2code,:iso3code);");
+            String expectedCreated = readFile("expectedCreated.json");
+            String metadata = readFile("metadata.json").replaceAll("XXY", "INSERT INTO Country (NAME,ISO2CODE,ISO3CODE) VALUES (:name,:iso2code,:iso3code);");
             EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
             RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
             EntityMetadata em2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("country", "1.0.0");
@@ -335,7 +333,7 @@ public class ITCaseCrudResourceRDBMSTest {
             conn.close();
 
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(FILE_CONFIG_DATASOURCES))));
+            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readConfigFile(RestConfiguration.DATASOURCE_FILENAME))));
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
             String expectedCreated = readFile("expectedCreated.json");
@@ -371,7 +369,7 @@ public class ITCaseCrudResourceRDBMSTest {
             conn.close();
 
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(FILE_CONFIG_DATASOURCES))));
+            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readConfigFile(RestConfiguration.DATASOURCE_FILENAME))));
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
             String expectedCreated = readFile("expectedCreated.json");
@@ -417,7 +415,7 @@ public class ITCaseCrudResourceRDBMSTest {
             conn.close();
 
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(FILE_CONFIG_DATASOURCES))));
+            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readConfigFile(RestConfiguration.DATASOURCE_FILENAME))));
             RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
 
             String expectedCreated = readFile("expectedCreated.json");

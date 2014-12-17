@@ -1,0 +1,14 @@
+{
+    "entity": "country",
+    "entityVersion": "1.0.0",
+    "data": [{
+        "name": "Canad",
+        "iso2code": "CA",
+        "iso3code": "CAN",
+        "objectType": "country"
+    }],
+    "projection": [{
+        "field": "*",
+        "include": true
+    }]
+}
