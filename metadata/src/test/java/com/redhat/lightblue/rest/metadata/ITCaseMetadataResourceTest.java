@@ -23,6 +23,7 @@ import com.redhat.lightblue.config.DataSourcesConfiguration;
 import com.redhat.lightblue.config.LightblueFactory;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.metadata.mongo.MongoMetadata;
+import com.redhat.lightblue.mongo.test.EmbeddedMongo;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.util.JsonUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -63,11 +64,6 @@ public class ITCaseMetadataResourceTest {
     @After
     public void teardown() {
         mongo.reset();
-    }
-
-    @AfterClass
-    public static void teardownClass() {
-        mongo = null;
     }
 
     @Deployment

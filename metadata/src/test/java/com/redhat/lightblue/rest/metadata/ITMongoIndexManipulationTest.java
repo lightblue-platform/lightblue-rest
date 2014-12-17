@@ -22,6 +22,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.redhat.lightblue.config.MetadataConfiguration;
+import com.redhat.lightblue.mongo.test.EmbeddedMongo;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -60,11 +61,6 @@ public class ITMongoIndexManipulationTest {
     @After
     public void teardown() {
         mongo.reset();
-    }
-
-    @AfterClass
-    public static void teardownClass() {
-        mongo = null;
     }
 
     @Deployment
