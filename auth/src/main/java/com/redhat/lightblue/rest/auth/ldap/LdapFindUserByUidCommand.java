@@ -19,7 +19,7 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
 
     public static final String GROUPKEY = "ldap";
 
-    {
+    static {
         ServoGraphiteSetup.initialize();
     }
 
