@@ -284,4 +284,25 @@ public class ITCaseMetadataResourceTest {
         JSONAssert.assertEquals(expectedUpdateSchemaStatus, resultUpdateSchemaStatus, false);
 
     }
+
+    @Test
+    public void createMetadataAlsoUpdates() throws Exception {
+        Assert.assertNotNull("MetadataResource was not injected by the container", cutMetadataResource);
+
+        SecurityContext sc = new TestSecurityContext();
+
+        System.setProperty("mongodb.host", MONGO_HOST);
+        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
+
+        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
+        RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
+        System.out.println("factory:" + RestConfiguration.getFactory());
+        String expectedCreated = readFile("expectedCreated.json");
+        String resultCreated = cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFile("resultCreated.json"));
+        JSONAssert.assertEquals(expectedCreated, resultCreated, false);
+
+        String expectedUpdateEntityInfo = readFile("expectedCreateSchema.json");
+        String resultUpdateEntityInfo = cutMetadataResource.createMetadata(sc, "country", "1.1.0",expectedUpdateEntityInfo);
+        JSONAssert.assertEquals(expectedUpdateEntityInfo, resultUpdateEntityInfo, false);
+    }
 }
