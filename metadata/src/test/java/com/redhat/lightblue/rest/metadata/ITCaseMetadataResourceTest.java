@@ -169,9 +169,6 @@ public class ITCaseMetadataResourceTest {
 
         SecurityContext sc = new TestSecurityContext();
 
-        System.setProperty("mongodb.host", MONGO_HOST);
-        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
-
         RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
         RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
         System.out.println("factory:" + RestConfiguration.getFactory());
