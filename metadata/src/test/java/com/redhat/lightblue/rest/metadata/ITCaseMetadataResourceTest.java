@@ -19,27 +19,13 @@
 package com.redhat.lightblue.rest.metadata;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.Mongo;
 import com.redhat.lightblue.config.DataSourcesConfiguration;
 import com.redhat.lightblue.config.LightblueFactory;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.metadata.mongo.MongoMetadata;
-import com.redhat.lightblue.mongo.config.MongoConfiguration;
+import com.redhat.lightblue.mongo.test.EmbeddedMongo;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.util.JsonUtils;
-import de.flapdoodle.embed.mongo.Command;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
-import de.flapdoodle.embed.process.io.IStreamProcessor;
-import de.flapdoodle.embed.process.io.Processors;
-import de.flapdoodle.embed.process.runtime.Network;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -47,18 +33,13 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.json.JSONException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -70,119 +51,19 @@ import static com.redhat.lightblue.util.test.FileUtil.readFile;
 @RunWith(Arquillian.class)
 public class ITCaseMetadataResourceTest {
 
-    public static class FileStreamProcessor implements IStreamProcessor {
-        private FileOutputStream outputStream;
-
-        public FileStreamProcessor(File file) throws FileNotFoundException {
-            outputStream = new FileOutputStream(file);
-        }
-
-        @Override
-        public void process(String block) {
-            try {
-                outputStream.write(block.getBytes());
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        @Override
-        public void onProcessed() {
-            try {
-                outputStream.close();
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-    }
-
-    private static final String MONGO_HOST = "localhost";
-    private static final int MONGO_PORT = 27777;
-    private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
-
-    private static final String DB_NAME = "mongo";
-
-    private static MongodExecutable mongodExe;
-    private static MongodProcess mongod;
-    private static Mongo mongo;
-    private static DB db;
-
-    static {
-        try {
-            IStreamProcessor mongodOutput = Processors.named("[mongod>]",
-                    new FileStreamProcessor(File.createTempFile("mongod", "log")));
-            IStreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
-            IStreamProcessor commandsOutput = Processors.namedConsole("[console>]");
-
-            IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                    .defaults(Command.MongoD)
-                    .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-                    .build();
-
-            MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
-            mongodExe = runtime.prepare(
-                    new MongodConfigBuilder()
-                    .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
-                    .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                    .build()
-            );
-            try {
-                mongod = mongodExe.start();
-            } catch (Throwable t) {
-                // try again, could be killed breakpoint in IDE
-                mongod = mongodExe.start();
-            }
-            mongo = new Mongo(IN_MEM_CONNECTION_URL);
-
-            MongoConfiguration config = new MongoConfiguration();
-            config.setDatabase(DB_NAME);
-            // disable ssl for test (enabled by default)
-            config.setSsl(Boolean.FALSE);
-            config.addServerAddress(MONGO_HOST, MONGO_PORT);
-
-            db = config.getDB();
-
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    clearDatabase();
-                }
-
-            });
-
-            System.setProperty("mongodb.host", MONGO_HOST);
-            System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
-        } catch (IOException e) {
-            throw new Error(e);
-        }
-    }
+    private static EmbeddedMongo mongo = EmbeddedMongo.getInstance();
 
     @Before
     public void setup() {
-        db.createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
+        mongo.getDB().createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
         BasicDBObject index = new BasicDBObject("name", 1);
         index.put("version.value", 1);
-        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).ensureIndex(index, "name", true);
+        mongo.getDB().getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).ensureIndex(index, "name", true);
     }
 
     @After
     public void teardown() {
-        if (mongo != null) {
-            mongo.dropDatabase(DB_NAME);
-        }
-    }
-
-    public static void clearDatabase() {
-        if (mongod != null) {
-            mongod.stop();
-            mongodExe.stop();
-        }
-        db = null;
-        mongo = null;
-        mongod = null;
-        mongodExe = null;
+        mongo.reset();
     }
 
     @Deployment
@@ -215,9 +96,6 @@ public class ITCaseMetadataResourceTest {
         Assert.assertNotNull("MetadataResource was not injected by the container", cutMetadataResource);
 
         SecurityContext sc = new TestSecurityContext();
-
-        System.setProperty("mongodb.host", MONGO_HOST);
-        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
 
         RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
         RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
