@@ -94,7 +94,7 @@ public abstract class AbstractCrudResource {
                          @PathParam(PARAM_VERSION) String version,
                          String request) {
         Error.reset();
-        return new InsertCommand(null, entity, version, request).execute();
+        return new InsertCommand(null, entity, version, request).execute().toString();
     }
 
     @POST
@@ -110,7 +110,7 @@ public abstract class AbstractCrudResource {
                        @PathParam(PARAM_VERSION) String version,
                        String request) {
         Error.reset();
-        return new SaveCommand(null, entity, version, request).execute();
+        return new SaveCommand(null, entity, version, request).execute().toString();
     }
 
     @POST
@@ -126,7 +126,7 @@ public abstract class AbstractCrudResource {
                          @PathParam(PARAM_VERSION) String version,
                          String request) {
         Error.reset();
-        return new UpdateCommand(null, entity, version, request).execute();
+        return new UpdateCommand(null, entity, version, request).execute().toString();
     }
 
     @POST
@@ -142,7 +142,7 @@ public abstract class AbstractCrudResource {
                          @PathParam(PARAM_VERSION) String version,
                          String req) {
         Error.reset();
-        return new DeleteCommand(null, entity, version, req).execute();
+        return new DeleteCommand(null, entity, version, req).execute().toString();
     }
 
     @POST
@@ -158,7 +158,7 @@ public abstract class AbstractCrudResource {
                        @PathParam(PARAM_VERSION) String version,
                        String request) {
         Error.reset();
-        return new FindCommand(null, entity, version, request).execute();
+        return new FindCommand(null, entity, version, request).execute().toString();
     }
 
     @GET
@@ -257,7 +257,7 @@ public abstract class AbstractCrudResource {
         findRequest.setTo(to);
         String request = findRequest.toString();
 
-        return new FindCommand(null, entity, version, request).execute();
+        return new FindCommand(null, entity, version, request).execute().toString();
     }
 
     private String buildQueryFieldTemplate(String s1) {

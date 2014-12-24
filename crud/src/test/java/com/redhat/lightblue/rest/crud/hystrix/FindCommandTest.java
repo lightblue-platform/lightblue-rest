@@ -80,7 +80,7 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         FindCommand command = new FindCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute();
+        String output = command.execute().toString();
 
         Assert.assertNotNull(output);
 
