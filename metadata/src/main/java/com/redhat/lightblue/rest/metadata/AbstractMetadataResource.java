@@ -79,7 +79,7 @@ public abstract class AbstractMetadataResource {
             return new GetDependenciesCommand(null, entity, version).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_DEPENDENCIES);
+        List<String> roles = mappedRoles.get(MetadataRoles.FIND_DEPENDENCIES.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new GetDependenciesCommand(null, entity, version).execute();
@@ -111,7 +111,7 @@ public abstract class AbstractMetadataResource {
             return new GetEntityRolesCommand(null, entity, version).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ROLES);
+        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ROLES.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new GetEntityRolesCommand(null, entity, version).execute();
@@ -131,7 +131,7 @@ public abstract class AbstractMetadataResource {
             return new GetEntityNamesCommand(null, new String[0]).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_NAMES);
+        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_NAMES.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new GetEntityNamesCommand(null, new String[0]).execute();
@@ -157,7 +157,7 @@ public abstract class AbstractMetadataResource {
             return new GetEntityNamesCommand(null, s).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_NAMES);
+        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_NAMES.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new GetEntityNamesCommand(null, s).execute();
@@ -177,7 +177,7 @@ public abstract class AbstractMetadataResource {
             return new GetEntityVersionsCommand(null, entity).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_VERSIONS);
+        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_VERSIONS.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new GetEntityVersionsCommand(null, entity).execute();
@@ -197,7 +197,7 @@ public abstract class AbstractMetadataResource {
             return new GetEntityMetadataCommand(null, entity, version).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_METADATA);
+        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_METADATA.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new GetEntityMetadataCommand(null, entity, version).execute();
@@ -218,7 +218,7 @@ public abstract class AbstractMetadataResource {
             return new CreateEntityMetadataCommand(null, entity, version, data).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.INSERT);
+        List<String> roles = mappedRoles.get(MetadataRoles.INSERT.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new CreateEntityMetadataCommand(null, entity, version, data).execute();
@@ -239,7 +239,7 @@ public abstract class AbstractMetadataResource {
             return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.INSERT_SCHEMA);
+        List<String> roles = mappedRoles.get(MetadataRoles.INSERT_SCHEMA.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
@@ -260,7 +260,7 @@ public abstract class AbstractMetadataResource {
             return new UpdateEntityInfoCommand(null, entity, info).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_ENTITYINFO);
+        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_ENTITYINFO.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new UpdateEntityInfoCommand(null, entity, info).execute();
@@ -284,7 +284,7 @@ public abstract class AbstractMetadataResource {
             return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_ENTITY_SCHEMASTATUS);
+        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_ENTITY_SCHEMASTATUS.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
@@ -306,7 +306,7 @@ public abstract class AbstractMetadataResource {
             return new SetDefaultVersionCommand(null, entity, version).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_DEFAULTVERSION);
+        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_DEFAULTVERSION.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new SetDefaultVersionCommand(null, entity, version).execute();
@@ -326,7 +326,7 @@ public abstract class AbstractMetadataResource {
             return new RemoveEntityCommand(null, entity).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.DELETE_ENTITY);
+        List<String> roles = mappedRoles.get(MetadataRoles.DELETE_ENTITY.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new RemoveEntityCommand(null, entity).execute();
@@ -346,7 +346,7 @@ public abstract class AbstractMetadataResource {
             return new SetDefaultVersionCommand(null, entity, null).execute();
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_DEFAULTVERSION);
+        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_DEFAULTVERSION.toString());
         for (String role : roles) {
             if (sc.isUserInRole(role)){
                 return new SetDefaultVersionCommand(null, entity, null).execute();

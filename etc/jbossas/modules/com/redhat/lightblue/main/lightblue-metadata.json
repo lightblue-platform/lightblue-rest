@@ -5,6 +5,6 @@
     ],
     "validateRequests" : false,
     "type" : "com.redhat.lightblue.mongo.config.MongoMetadataConfiguration",
-    "dataSource" : "mongo",
+    "dataSource" : "metadata",
     "collection": "metadata"
 }

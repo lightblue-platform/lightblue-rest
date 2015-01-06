@@ -6,8 +6,8 @@
      "database" : "mongo",
      "servers" : [
         {
-           "host" : "${mongodb.host}",
-           "port" : "${mongodb.port}"
+           "host" : "localhost",
+           "port" : "27777"
         }
      ]
    }
