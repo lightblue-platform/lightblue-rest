@@ -22,10 +22,14 @@ import java.util.List;
 import java.util.Collection;
 import java.util.ArrayList;
 
+import static javax.ws.rs.core.Response.Status;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+
+import com.redhat.lightblue.Response;;
 
 import com.redhat.lightblue.util.JsonObject;
 import com.redhat.lightblue.util.Error;
@@ -127,6 +131,22 @@ public class CallStatus<T extends JsonObject> {
             return returnValue==null?factory.objectNode():returnValue.toJson();
         }
         
+    }
+
+    /**
+     * Returns an http status based on the error information in the return value
+     */
+    public Status getHttpStatus() {
+        if(hasErrors()) {
+            return HttpErrorMapper.getStatus(errors.get(0));
+        } else {
+            if(returnValue instanceof Response) {
+                List<Error> l=((Response)returnValue).getErrors();
+                if(l!=null&&!l.isEmpty())
+                    return HttpErrorMapper.getStatus(errors.get(0));
+            }
+        }
+        return Status.OK;
     }
 
     @Override
