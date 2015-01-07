@@ -22,18 +22,38 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import com.redhat.lightblue.metadata.Metadata;
-import com.redhat.lightblue.metadata.MetadataRoles;
-import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.rest.metadata.hystrix.*;
-import com.redhat.lightblue.util.Error;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.redhat.lightblue.metadata.Metadata;
+import com.redhat.lightblue.metadata.MetadataConstants;
+import com.redhat.lightblue.metadata.MetadataRoles;
+import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.metadata.hystrix.CreateEntityMetadataCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.CreateEntitySchemaCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetDependenciesCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetEntityMetadataCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetEntityNamesCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetEntityRolesCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetEntityVersionsCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.RemoveEntityCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.SetDefaultVersionCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntityInfoCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntitySchemaStatusCommand;
+import com.redhat.lightblue.util.Error;
 
 /**
  * @author nmalik
@@ -73,19 +93,8 @@ public abstract class AbstractMetadataResource {
     public String getDepGraph(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new GetDependenciesCommand(null, entity, version).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_DEPENDENCIES.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new GetDependenciesCommand(null, entity, version).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'GET /dependencies'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.FIND_DEPENDENCIES);
+        return new GetDependenciesCommand(null, entity, version).execute();
     }
 
     @GET
@@ -105,19 +114,8 @@ public abstract class AbstractMetadataResource {
     public String getEntityRoles(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new GetEntityRolesCommand(null, entity, version).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ROLES.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new GetEntityRolesCommand(null, entity, version).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'GET /roles'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.FIND_ROLES);
+        return new GetEntityRolesCommand(null, entity, version).execute();
     }
 
     @GET
@@ -125,19 +123,8 @@ public abstract class AbstractMetadataResource {
     public String getEntityNames(@Context SecurityContext sc) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new GetEntityNamesCommand(null, new String[0]).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_NAMES.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new GetEntityNamesCommand(null, new String[0]).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'GET /'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
+        return new GetEntityNamesCommand(null, new String[0]).execute();
     }
 
     @GET
@@ -151,19 +138,8 @@ public abstract class AbstractMetadataResource {
         }
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new GetEntityNamesCommand(null, s).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_NAMES.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new GetEntityNamesCommand(null, s).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'GET /s=?status'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
+        return new GetEntityNamesCommand(null, s).execute();
     }
 
     @GET
@@ -171,19 +147,8 @@ public abstract class AbstractMetadataResource {
     public String getEntityVersions(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new GetEntityVersionsCommand(null, entity).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_VERSIONS.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new GetEntityVersionsCommand(null, entity).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'GET /?entity'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_VERSIONS);
+        return new GetEntityVersionsCommand(null, entity).execute();
     }
 
     @GET
@@ -191,19 +156,8 @@ public abstract class AbstractMetadataResource {
     public String getMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new GetEntityMetadataCommand(null, entity, version).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.FIND_ENTITY_METADATA.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new GetEntityMetadataCommand(null, entity, version).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'GET /?entity/?version'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_METADATA);
+        return new GetEntityMetadataCommand(null, entity, version).execute();
     }
 
     @PUT
@@ -212,19 +166,8 @@ public abstract class AbstractMetadataResource {
     public String createMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String data) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new CreateEntityMetadataCommand(null, entity, version, data).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.INSERT.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new CreateEntityMetadataCommand(null, entity, version, data).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'PUT /?entity/?version'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.INSERT);
+        return new CreateEntityMetadataCommand(null, entity, version, data).execute();
     }
 
     @PUT
@@ -233,19 +176,8 @@ public abstract class AbstractMetadataResource {
     public String createSchema(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String schema) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.INSERT_SCHEMA.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'PUT /?entity/schema=?version'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.INSERT_SCHEMA);
+        return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
     }
 
     @PUT
@@ -254,65 +186,32 @@ public abstract class AbstractMetadataResource {
     public String updateEntityInfo(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, String info) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new UpdateEntityInfoCommand(null, entity, info).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_ENTITYINFO.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new UpdateEntityInfoCommand(null, entity, info).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'PUT /?entity/?version'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.UPDATE_ENTITYINFO);
+        return new UpdateEntityInfoCommand(null, entity, info).execute();
     }
 
     @PUT
     @Path("/{entity}/{version}/{status}")
     public String updateSchemaStatus(@Context SecurityContext sc,
-                                     @PathParam(PARAM_ENTITY) String entity,
-                                     @PathParam(PARAM_VERSION) String version,
-                                     @PathParam("status") String status,
-                                     @QueryParam("comment") String comment) {
+            @PathParam(PARAM_ENTITY) String entity,
+            @PathParam(PARAM_VERSION) String version,
+            @PathParam("status") String status,
+            @QueryParam("comment") String comment) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_ENTITY_SCHEMASTATUS.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'PUT /?entity/?version/?status'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.UPDATE_ENTITY_SCHEMASTATUS);
+        return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
     }
 
     @POST
     @Path("/{entity}/{version}/default")
     public String setDefaultVersion(@Context SecurityContext sc,
-                                    @PathParam(PARAM_ENTITY) String entity,
-                                    @PathParam(PARAM_VERSION) String version) {
+            @PathParam(PARAM_ENTITY) String entity,
+            @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new SetDefaultVersionCommand(null, entity, version).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_DEFAULTVERSION.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new SetDefaultVersionCommand(null, entity, version).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'POST /?entity/?version/default'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
+        return new SetDefaultVersionCommand(null, entity, version).execute();
     }
 
     @DELETE
@@ -320,19 +219,8 @@ public abstract class AbstractMetadataResource {
     public String removeEntity(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
-            // No authorization was configured
-            return new RemoveEntityCommand(null, entity).execute();
-        }
-
-        List<String> roles = mappedRoles.get(MetadataRoles.DELETE_ENTITY.toString());
-        for (String role : roles) {
-            if (sc.isUserInRole(role)){
-                return new RemoveEntityCommand(null, entity).execute();
-            }
-        }
-        throw new SecurityException("Unauthorized request for 'DELETE /?entity'. One of the following roles is needed: "+roles);
+        checkPermission(sc, MetadataRoles.DELETE_ENTITY);
+        return new RemoveEntityCommand(null, entity).execute();
     }
 
     @DELETE
@@ -340,18 +228,33 @@ public abstract class AbstractMetadataResource {
     public String clearDefaultVersion(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
+        checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
+        return new SetDefaultVersionCommand(null, entity, null).execute();
+    }
+
+    private void checkPermission(SecurityContext sc, MetadataRoles roleAllowed){
         final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
-            return new SetDefaultVersionCommand(null, entity, null).execute();
+            return;
         }
 
-        List<String> roles = mappedRoles.get(MetadataRoles.UPDATE_DEFAULTVERSION.toString());
-        for (String role : roles) {
+        List<String> roles = mappedRoles.get(roleAllowed);
+
+        if(roles.contains(MetadataConstants.ROLE_NOONE)){
+            throw new SecurityException("Unauthorized Request");
+        }
+        else if(roles.contains(MetadataConstants.ROLE_ANYONE)){
+            return;
+        }
+
+        for(String role : roles){
             if (sc.isUserInRole(role)){
-                return new SetDefaultVersionCommand(null, entity, null).execute();
+                return;
             }
         }
-        throw new SecurityException("Unauthorized request for 'DELETE /?entity/default'. One of the following roles is needed: "+roles);
+
+        throw new SecurityException("Unauthorized Request. One of the following roles is required: " + roles);
     }
+
 }
