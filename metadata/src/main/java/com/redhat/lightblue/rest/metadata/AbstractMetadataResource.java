@@ -73,7 +73,7 @@ public abstract class AbstractMetadataResource {
     public String getDepGraph(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new GetDependenciesCommand(null, entity, version).execute();
@@ -105,7 +105,7 @@ public abstract class AbstractMetadataResource {
     public String getEntityRoles(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new GetEntityRolesCommand(null, entity, version).execute();
@@ -125,7 +125,7 @@ public abstract class AbstractMetadataResource {
     public String getEntityNames(@Context SecurityContext sc) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new GetEntityNamesCommand(null, new String[0]).execute();
@@ -151,7 +151,7 @@ public abstract class AbstractMetadataResource {
         }
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new GetEntityNamesCommand(null, s).execute();
@@ -171,7 +171,7 @@ public abstract class AbstractMetadataResource {
     public String getEntityVersions(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new GetEntityVersionsCommand(null, entity).execute();
@@ -191,7 +191,7 @@ public abstract class AbstractMetadataResource {
     public String getMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new GetEntityMetadataCommand(null, entity, version).execute();
@@ -212,7 +212,7 @@ public abstract class AbstractMetadataResource {
     public String createMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String data) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new CreateEntityMetadataCommand(null, entity, version, data).execute();
@@ -233,7 +233,7 @@ public abstract class AbstractMetadataResource {
     public String createSchema(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String schema) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
@@ -254,7 +254,7 @@ public abstract class AbstractMetadataResource {
     public String updateEntityInfo(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, String info) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new UpdateEntityInfoCommand(null, entity, info).execute();
@@ -278,7 +278,7 @@ public abstract class AbstractMetadataResource {
                                      @QueryParam("comment") String comment) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
@@ -300,7 +300,7 @@ public abstract class AbstractMetadataResource {
                                     @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new SetDefaultVersionCommand(null, entity, version).execute();
@@ -320,7 +320,7 @@ public abstract class AbstractMetadataResource {
     public String removeEntity(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new RemoveEntityCommand(null, entity).execute();
@@ -340,7 +340,7 @@ public abstract class AbstractMetadataResource {
     public String clearDefaultVersion(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        final Map<String, List<String>> mappedRoles = metadata.getMappedRoles();
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return new SetDefaultVersionCommand(null, entity, null).execute();

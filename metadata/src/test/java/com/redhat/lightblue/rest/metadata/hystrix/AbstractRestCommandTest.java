@@ -19,11 +19,7 @@
 package com.redhat.lightblue.rest.metadata.hystrix;
 
 import com.redhat.lightblue.Response;
-import com.redhat.lightblue.metadata.EntityInfo;
-import com.redhat.lightblue.metadata.EntityMetadata;
-import com.redhat.lightblue.metadata.Metadata;
-import com.redhat.lightblue.metadata.MetadataStatus;
-import com.redhat.lightblue.metadata.VersionInfo;
+import com.redhat.lightblue.metadata.*;
 
 import java.util.List;
 import java.util.Map;
@@ -98,7 +94,7 @@ public abstract class AbstractRestCommandTest {
         }
 
         @Override
-        public Map<String, List<String>> getMappedRoles() {
+        public Map<MetadataRoles, List<String>> getMappedRoles() {
             return null;
         }
     }
