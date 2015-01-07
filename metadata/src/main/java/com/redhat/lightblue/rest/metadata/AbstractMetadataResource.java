@@ -93,13 +93,8 @@ public abstract class AbstractMetadataResource {
     public String getDepGraph(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.FIND_DEPENDENCIES);
-            return new GetDependenciesCommand(null, entity, version).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'GET /dependencies'.", e);
-        }
+        checkPermission(sc, MetadataRoles.FIND_DEPENDENCIES);
+        return new GetDependenciesCommand(null, entity, version).execute();
     }
 
     @GET
@@ -119,13 +114,8 @@ public abstract class AbstractMetadataResource {
     public String getEntityRoles(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.FIND_ROLES);
-            return new GetEntityRolesCommand(null, entity, version).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'GET /roles'.", e);
-        }
+        checkPermission(sc, MetadataRoles.FIND_ROLES);
+        return new GetEntityRolesCommand(null, entity, version).execute();
     }
 
     @GET
@@ -133,13 +123,8 @@ public abstract class AbstractMetadataResource {
     public String getEntityNames(@Context SecurityContext sc) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
-            return new GetEntityNamesCommand(null, new String[0]).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'GET /'.", e);
-        }
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
+        return new GetEntityNamesCommand(null, new String[0]).execute();
     }
 
     @GET
@@ -153,13 +138,8 @@ public abstract class AbstractMetadataResource {
         }
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
-            return new GetEntityNamesCommand(null, s).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'GET /s=?status'.", e);
-        }
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
+        return new GetEntityNamesCommand(null, s).execute();
     }
 
     @GET
@@ -167,13 +147,8 @@ public abstract class AbstractMetadataResource {
     public String getEntityVersions(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.FIND_ENTITY_VERSIONS);
-            return new GetEntityVersionsCommand(null, entity).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'GET /?entity'.", e);
-        }
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_VERSIONS);
+        return new GetEntityVersionsCommand(null, entity).execute();
     }
 
     @GET
@@ -181,13 +156,8 @@ public abstract class AbstractMetadataResource {
     public String getMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.FIND_ENTITY_METADATA);
-            return new GetEntityMetadataCommand(null, entity, version).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'GET /?entity/?version'.", e);
-        }
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_METADATA);
+        return new GetEntityMetadataCommand(null, entity, version).execute();
     }
 
     @PUT
@@ -196,13 +166,8 @@ public abstract class AbstractMetadataResource {
     public String createMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String data) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.INSERT);
-            return new CreateEntityMetadataCommand(null, entity, version, data).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'PUT /?entity/?version'.", e);
-        }
+        checkPermission(sc, MetadataRoles.INSERT);
+        return new CreateEntityMetadataCommand(null, entity, version, data).execute();
     }
 
     @PUT
@@ -211,13 +176,8 @@ public abstract class AbstractMetadataResource {
     public String createSchema(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String schema) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.INSERT_SCHEMA);
-            return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'PUT /?entity/schema=?version'.", e);
-        }
+        checkPermission(sc, MetadataRoles.INSERT_SCHEMA);
+        return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
     }
 
     @PUT
@@ -226,13 +186,8 @@ public abstract class AbstractMetadataResource {
     public String updateEntityInfo(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, String info) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.UPDATE_ENTITYINFO);
-            return new UpdateEntityInfoCommand(null, entity, info).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'PUT /?entity/?version'.", e);
-        }
+        checkPermission(sc, MetadataRoles.UPDATE_ENTITYINFO);
+        return new UpdateEntityInfoCommand(null, entity, info).execute();
     }
 
     @PUT
@@ -244,13 +199,8 @@ public abstract class AbstractMetadataResource {
             @QueryParam("comment") String comment) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.UPDATE_ENTITY_SCHEMASTATUS);
-            return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'PUT /?entity/?version/?status'.", e);
-        }
+        checkPermission(sc, MetadataRoles.UPDATE_ENTITY_SCHEMASTATUS);
+        return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
     }
 
     @POST
@@ -260,13 +210,8 @@ public abstract class AbstractMetadataResource {
             @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
-            return new SetDefaultVersionCommand(null, entity, version).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'POST /?entity/?version/default'.", e);
-        }
+        checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
+        return new SetDefaultVersionCommand(null, entity, version).execute();
     }
 
     @DELETE
@@ -274,13 +219,8 @@ public abstract class AbstractMetadataResource {
     public String removeEntity(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.DELETE_ENTITY);
-            return new RemoveEntityCommand(null, entity).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'DELETE /?entity'.", e);
-        }
+        checkPermission(sc, MetadataRoles.DELETE_ENTITY);
+        return new RemoveEntityCommand(null, entity).execute();
     }
 
     @DELETE
@@ -288,16 +228,11 @@ public abstract class AbstractMetadataResource {
     public String clearDefaultVersion(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        try{
-            checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
-            return new SetDefaultVersionCommand(null, entity, null).execute();
-        }
-        catch(RoleException e){
-            throw new SecurityException("Unauthorized request for 'DELETE /?entity/default'.", e);
-        }
+        checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
+        return new SetDefaultVersionCommand(null, entity, null).execute();
     }
 
-    private void checkPermission(SecurityContext sc, MetadataRoles roleAllowed) throws RoleException{
+    private void checkPermission(SecurityContext sc, MetadataRoles roleAllowed){
         final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
@@ -307,7 +242,7 @@ public abstract class AbstractMetadataResource {
         List<String> roles = mappedRoles.get(roleAllowed);
 
         if(roles.contains(MetadataConstants.ROLE_NOONE)){
-            throw new RoleException(roles);
+            throw new SecurityException("Unauthorized Request");
         }
         else if(roles.contains(MetadataConstants.ROLE_ANYONE)){
             return;
@@ -319,7 +254,7 @@ public abstract class AbstractMetadataResource {
             }
         }
 
-        throw new RoleException(roles);
+        throw new SecurityException("Unauthorized Request. One of the following roles is required: " + roles);
     }
 
 }
