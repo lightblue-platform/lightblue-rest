@@ -79,10 +79,8 @@
             <artifactId>audit</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>1.46.0</version>
-            <scope>test</scope>
+            <groupId>com.redhat.lightblue.mongo</groupId>
+            <artifactId>mongo-test</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
