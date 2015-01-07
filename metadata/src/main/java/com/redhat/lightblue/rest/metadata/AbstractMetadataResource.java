@@ -322,20 +322,4 @@ public abstract class AbstractMetadataResource {
         throw new RoleException(roles);
     }
 
-    private static class RoleException extends Exception{
-
-        private static final long serialVersionUID = 8185195626339000384L;
-
-        private final List<String> roles;
-
-        public List<String> getRoles(){
-            return roles;
-        }
-
-        public RoleException(List<String> roles){
-            super("One of the following roles is required: " + roles);
-            this.roles = roles;
-        }
-
-    }
 }
