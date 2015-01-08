@@ -32,6 +32,7 @@ import com.redhat.lightblue.Request;
 import com.redhat.lightblue.config.JsonTranslator;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.Error;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author nmalik
  */
-public abstract class AbstractRestCommand extends HystrixCommand<String> {
+public abstract class AbstractRestCommand extends HystrixCommand<CallStatus> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRestCommand.class);
 
     protected static final JsonNodeFactory NODE_FACTORY = JsonNodeFactory.withExactBigDecimals(true);

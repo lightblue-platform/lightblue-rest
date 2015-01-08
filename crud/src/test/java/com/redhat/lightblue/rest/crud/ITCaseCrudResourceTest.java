@@ -216,7 +216,7 @@ public class ITCaseCrudResourceTest {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
         RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
         RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
-
+        
         String expectedCreated = readFile("expectedCreated.json");
         String metadata = readFile("metadata.json");
         EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
@@ -226,15 +226,15 @@ public class ITCaseCrudResourceTest {
         JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
         String expectedInserted = readFile("expectedInserted.json");
-        String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json"));
+        String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedInserted, resultInserted, false);
 
         String expectedUpdated = readFile("expectedUpdated.json");
-        String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json"));
+        String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedUpdated, resultUpdated, false);
 
         String expectedFound = readFile("expectedFound.json");
-        String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json"));
+        String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedFound, resultFound, false); // #TODO #FIX Not finding the right version
 
         String resultSimpleFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
@@ -244,15 +244,15 @@ public class ITCaseCrudResourceTest {
                 "name:1r,iso3code:1,iso2code:0r",
                 "name:a,iso3code:d,iso2code:d",
                 0,
-                -1);
+                -1).getEntity().toString();
         JSONAssert.assertEquals(expectedFound, resultSimpleFound, false);
 
         String expectedDeleted = readFile("expectedDeleted.json");
-        String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json"));
+        String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedDeleted, resultDeleted, false);
 
         String expectedFound2 = readFile("expectedFound2.json");
-        String resultFound2 = cutCrudResource.find("country", "1.0.0", readFile("resultFound2.json"));
+        String resultFound2 = cutCrudResource.find("country", "1.0.0", readFile("resultFound2.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedFound2, resultFound2, false);
     }
 }

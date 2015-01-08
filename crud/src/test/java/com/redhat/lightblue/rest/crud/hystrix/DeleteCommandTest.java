@@ -66,7 +66,7 @@ public class DeleteCommandTest extends AbstractRestCommandTest {
     public void execute() {
         DeleteCommand command = new DeleteCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute();
+        String output = command.execute().toString();
 
         Assert.assertNotNull(output);
 
