@@ -143,7 +143,7 @@ public class CallStatus<T extends JsonObject> {
             if(returnValue instanceof Response) {
                 List<Error> l=((Response)returnValue).getErrors();
                 if(l!=null&&!l.isEmpty())
-                    return HttpErrorMapper.getStatus(errors.get(0));
+                    return HttpErrorMapper.getStatus(l.get(0));
             }
         }
         return Status.OK;
