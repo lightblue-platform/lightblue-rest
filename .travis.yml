@@ -6,6 +6,7 @@ before_install:
     - cp ./settings.xml ~/.m2/
     - cp ./settings-arquillian.xml ~/
     - cp ./onFailure.sh  ~/
+    - cp ./onSuccess.sh  ~/
     - cp ./logging.properties  ~/
     - chmod 777 ~/onFailure.sh
     - chmod 777 ~/onSuccess.sh
