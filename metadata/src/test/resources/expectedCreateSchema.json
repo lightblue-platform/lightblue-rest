@@ -5,7 +5,17 @@
             "name": null,
             "unique": true,
             "fields": [{"field":"name","dir": "$asc"}]
-        }],
+        },
+            {
+                "name": null,
+                "unique": true,
+                "fields": [
+                    {
+                        "field": "_id",
+                        "dir": "$asc"
+                    }
+                ]
+            }],
         "datastore": {
             "backend":"mongo",
             "datasource" : "mongo",
@@ -50,6 +60,12 @@
             },
             "elementx": {
                 "type": "string"
+            },
+            "_id": {
+                "type": "string",
+                "constraints": {
+                    "identity": true
+                }
             }
         }
     }

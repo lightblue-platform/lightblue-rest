@@ -6,7 +6,7 @@
      "servers" : [
         {
            "host" : "localhost",
-           "port" : "27777"
+           "port" : "27757"
         }
      ],
      "type" : "com.redhat.lightblue.mongo.config.MongoConfiguration"

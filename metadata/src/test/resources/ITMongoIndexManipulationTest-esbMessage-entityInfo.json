@@ -1,0 +1,32 @@
+{
+    "name": "test",
+    "enums": [
+        {
+            "name": "esbMessageTypeCode",
+            "values": [
+                "esb",
+                "jms"
+            ]
+        }
+    ],
+    "datastore": {
+        "backend": "mongo",
+        "collection": "test",
+        "datasource": "mongo"
+    },
+    "indexes": [
+        {
+            "unique": true,
+            "fields": [
+                {
+                    "field": "esbMessageSearchable.value",
+                    "dir": "$asc"
+                },
+                {
+                    "field": "esbMessageSearchable.path",
+                    "dir": "$asc"
+                }
+            ]
+        }
+    ]
+}

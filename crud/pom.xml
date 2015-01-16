@@ -22,12 +22,12 @@
     <parent>
         <groupId>com.redhat.lightblue.rest</groupId>
         <artifactId>rest-pom</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>rest-crud</artifactId>
     <packaging>war</packaging>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
@@ -37,6 +37,10 @@
         <dependency>
             <groupId>com.redhat.lightblue.config</groupId>
             <artifactId>core-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.hook</groupId>
+            <artifactId>audit</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
@@ -56,10 +60,24 @@
             <artifactId>mongo-config</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>1.46.0</version>
-            <scope>test</scope>
+            <groupId>com.redhat.lightblue.rdbms</groupId>
+            <artifactId>rdbms-crud</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.rdbms</groupId>
+            <artifactId>rdbms-metadata</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.rdbms</groupId>
+            <artifactId>rdbms-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.hook</groupId>
+            <artifactId>audit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.mongo</groupId>
+            <artifactId>mongo-test</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
