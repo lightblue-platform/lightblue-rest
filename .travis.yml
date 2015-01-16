@@ -3,6 +3,8 @@ jdk:
 - openjdk7
 - oraclejdk8
 before_install:
+- cat ~/.m2/settings.xml
+- ls -lsa  ~/.m2/
 - cp ./settings.xml ~/.m2/
 - cp ./onFailure.sh  ~/
 - chmod 777 ~/onFailure.sh
