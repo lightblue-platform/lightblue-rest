@@ -7,13 +7,11 @@ before_install:
 install:
 - mvn dependency:resolve dependency:resolve-plugins -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
-- mvn -B clean verify cobertura:cobertura coveralls:cobertura  -Djava.util.logging.config.file=./logging.properties -X
+- mvn -B clean verify cobertura:cobertura coveralls:cobertura  -Djava.util.logging.config.file=./logging.properties -X || (echo "DEBUG TRAVIS BUILD FAILURE"
+  && for i in `find . -type d -name surefire-reports` ; do for f in $i/*.txt; do echo $f : `cat $f`; done  done  && false )
 after_success:
 - '[[ $TRAVIS_BRANCH == "master" ]] && [[ $TRAVIS_JDK_VERSION == "openjdk7" ]] &&
   { mvn -B clean deploy -DskipTests; };'
-after_failure:
-- echo "DEBUG TRAVIS BUILD FAILURE"
-- for i in `find . -type d -name surefire-reports` ; do for f in $i/*.txt; do echo $f : `cat $f`; done  done
 notifications:
   email: false
   irc:
