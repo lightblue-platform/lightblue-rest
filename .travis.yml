@@ -6,13 +6,14 @@ before_install:
 - cat ~/.m2/settings.xml
 - ls -lsa  ~/.m2/
 - cp ./settings.xml ~/.m2/
-- cp ./settings-security.xml ~/.m2/
+- cp ./settings-arquillian.xml ~/
 - cp ./onFailure.sh  ~/
+- cp ./logging.properties  ~/
 - chmod 777 ~/onFailure.sh
 install:
 - mvn dependency:resolve dependency:resolve-plugins -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
-- mvn -B clean verify cobertura:cobertura coveralls:cobertura  -Djava.util.logging.config.file=./logging.properties -X
+    - mvn -B -X clean verify cobertura:cobertura coveralls:cobertura  -Djava.util.logging.config.file=~/logging.properties -Dorg.apache.maven.user-settings=~/settings-arquillian.xml  -Dorg.apache.maven.global-settings=~/settings-arquillian.xml
 after_failure: ~/onFailure.sh
 notifications:
   email: false
