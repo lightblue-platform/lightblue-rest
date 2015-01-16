@@ -4,11 +4,13 @@ jdk:
 - oraclejdk8
 before_install:
 - cp ./settings.xml ~/.m2/
+- cp ./onFailure.sh  ~/
+- chmod 777 ~/onFailure.sh
 install:
 - mvn dependency:resolve dependency:resolve-plugins -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
 - mvn -B clean verify cobertura:cobertura coveralls:cobertura  -Djava.util.logging.config.file=./logging.properties -X
-after_failure: ./onFailure.sh
+after_failure: ~/onFailure.sh
 notifications:
   email: false
   irc:
