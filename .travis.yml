@@ -5,13 +5,12 @@ jdk:
 before_install:
 - cp ./settings.xml ~/.m2/
 install:
-- mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+- mvn dependency:resolve dependency:resolve-plugins -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
-- mvn verify  -DskipTests=true -B -V
+- mvn -B clean verify cobertura:cobertura coveralls:cobertura  -Djava.util.logging.config.file=./logging.properties -X
 after_success:
 - '[[ $TRAVIS_BRANCH == "master" ]] && [[ $TRAVIS_JDK_VERSION == "openjdk7" ]] &&
   { mvn -B clean deploy -DskipTests; };'
-- mvn -B clean cobertura:cobertura coveralls:cobertura  -Djava.util.logging.config.file=./logging.properties -X
 notifications:
   email: false
   irc:
