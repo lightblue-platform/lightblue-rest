@@ -4,6 +4,8 @@ jdk:
 - oraclejdk8
 before_install:
 - cp ./settings.xml ~/.m2/
+install:
+- mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 after_success:
 - '[[ $TRAVIS_BRANCH == "master" ]] && [[ $TRAVIS_JDK_VERSION == "openjdk7" ]] &&
   { mvn -B clean deploy -DskipTests; };'
