@@ -6,8 +6,8 @@ before_install:
 - cp ./settings.xml ~/.m2/
 after_success:
 - '[[ $TRAVIS_BRANCH == "master" ]] && [[ $TRAVIS_JDK_VERSION == "openjdk7" ]] &&
-  { mvn clean deploy -DskipTests; };'
-- mvn clean cobertura:cobertura coveralls:cobertura
+  { mvn -B clean deploy -DskipTests; };'
+- mvn -B clean cobertura:cobertura coveralls:cobertura  -Djava.util.logging.config.file=./logging.properties -X
 notifications:
   email: false
   irc:
