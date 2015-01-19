@@ -298,7 +298,7 @@ public class ITCaseCrudResourceRDBMSTest {
             JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
             String expectedInserted = readFile("expectedInserted.json");
-            String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json"));
+            String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity().toString();
             //System.err.println("!!!!!!!!!!!!!!!!!" + resultInserted);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
@@ -345,7 +345,7 @@ public class ITCaseCrudResourceRDBMSTest {
             JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
             String expectedFound = readFile("expectedFound.json");
-            String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json"));
+            String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json")).getEntity().toString();
             // TODO / NOTE we can change the result format if needed, now it return an array of arrays
             //System.err.println("!!!!!!!!!!!!!!!!!" + resultFound);
             JSONAssert.assertEquals(expectedFound, resultFound, false);
@@ -381,7 +381,7 @@ public class ITCaseCrudResourceRDBMSTest {
             JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
             String expectedUpdated = readFile("expectedUpdated.json");
-            String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json"));
+            String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
             System.err.println("!!!!!!!!!!!!!!!!!" + resultUpdated);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
@@ -427,7 +427,7 @@ public class ITCaseCrudResourceRDBMSTest {
             JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
             String expectedDeleted = readFile("expectedDeleted.json");
-            String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json"));
+            String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json")).getEntity().toString();
             System.err.println("!!!!!!!!!!!!!!!!!" + resultDeleted);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");

@@ -30,7 +30,7 @@ public class SaveCommandTest extends AbstractRestCommandTest {
     public void execute() {
         SaveCommand command = new SaveCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute();
+        String output = command.execute().toString();
 
         Assert.assertNotNull(output);
 

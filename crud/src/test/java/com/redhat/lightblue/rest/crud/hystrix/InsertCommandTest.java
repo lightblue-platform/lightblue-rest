@@ -34,7 +34,7 @@ public class InsertCommandTest extends AbstractRestCommandTest {
 
         InsertCommand command = new InsertCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute();
+        String output = command.execute().toString();
 
         Assert.assertNotNull(output);
 
