@@ -30,6 +30,7 @@ import com.redhat.lightblue.metadata.mongo.MongoMetadata;
 import com.redhat.lightblue.mongo.config.MongoConfiguration;
 import com.redhat.lightblue.util.JsonUtils;
 import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.util.test.FileUtil;
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -63,8 +64,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-
-import static com.redhat.lightblue.util.test.FileUtil.readFile;
 
 /**
  *
@@ -188,25 +187,28 @@ public class ITCaseCrudResourceTest {
     @Deployment
     public static WebArchive createDeployment() {
         File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeDependencies().resolve().withTransitivity().asFile();
+        final String PATH_BASE = "src/test/resources/" + ITCaseCrudResourceTest.class.getSimpleName() + "/config/";
 
         WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(new File(PATH + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
-                .addAsResource(new File(PATH + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
-                .addAsResource(new File(PATH + DATASOURCESJSON), DATASOURCESJSON)
-                .addAsResource(new File(PATH + CONFIGPROPERTIES), CONFIGPROPERTIES);
-
+                .addAsResource(new File(PATH_BASE + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
+                .addAsResource(new File(PATH_BASE + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
+                .addAsResource(new File(PATH_BASE + RestConfiguration.DATASOURCE_FILENAME), RestConfiguration.DATASOURCE_FILENAME)
+                .addAsResource(new File(PATH_BASE + "config.properties"), "config.properties");
         for (File file : libs) {
             archive.addAsLibrary(file);
         }
         archive.addPackages(true, "com.redhat.lightblue");
         return archive;
-
     }
 
-    private static final String PATH = "src/test/resources/it/it-";
-    private static final String CONFIGPROPERTIES = "config.properties";
-    private static final String DATASOURCESJSON = "datasources.json";
+    private String readFile(String filename) throws IOException, URISyntaxException {
+        return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
+    }
+
+    private String readConfigFile(String filename) throws IOException, URISyntaxException {
+        return readFile("config/" + filename);
+    }
 
     @Inject
     private CrudResource cutCrudResource; //class under test
@@ -214,7 +216,7 @@ public class ITCaseCrudResourceTest {
     @Test
     public void testFirstIntegrationTest() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
+        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readConfigFile(RestConfiguration.DATASOURCE_FILENAME))));
         RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
         
         String expectedCreated = readFile("expectedCreated.json");
