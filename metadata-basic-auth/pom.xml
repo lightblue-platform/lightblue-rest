@@ -3,19 +3,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.redhat.lightblue.rest</groupId>
-        <artifactId>rest-pom</artifactId>
+        <artifactId>lightblue-rest-pom</artifactId>
         <version>1.3.0-SNAPSHOT</version>
     </parent>
     <groupId>com.redhat.lightblue.rest</groupId>
-    <artifactId>rest-metadata-basic-auth</artifactId>
+    <artifactId>lightblue-rest-metadata-basic-auth</artifactId>
     <version>1.3.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
-            <artifactId>rest-metadata</artifactId>
-            <version>1.3.0-SNAPSHOT</version>
+            <artifactId>lightblue-rest-metadata</artifactId>
+            <version>${project.version}</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
@@ -30,7 +30,7 @@
                     <overlays>
                         <overlay>
                             <groupId>com.redhat.lightblue.rest</groupId>
-                            <artifactId>rest-metadata</artifactId>
+                            <artifactId>lightblue-rest-metadata</artifactId>
                         </overlay>
                     </overlays>
                 </configuration>
@@ -57,7 +57,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <name>lightblue-${project.artifactId}</name>
+                            <name>${project.artifactId}</name>
                             <copyright>Red Hat</copyright>
                             <distribution>RHEL</distribution>
                             <group>Lightblue Platform</group>

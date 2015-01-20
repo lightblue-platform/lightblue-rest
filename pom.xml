@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.redhat.lightblue.rest</groupId>
-    <artifactId>rest-pom</artifactId>
+    <artifactId>lightblue-rest-pom</artifactId>
     <packaging>pom</packaging>
     <version>1.3.0-SNAPSHOT</version>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
@@ -60,6 +60,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <type>pom</type>
             </dependency>
             <dependency>
+                <groupId>org.jboss.security</groupId>
+                <artifactId>jboss-negotiation-common</artifactId>
+                <version>2.3.4.Final</version>
+            </dependency>
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>1.7.7</version>
@@ -82,58 +87,58 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
-                <artifactId>core-api</artifactId>
+                <artifactId>lightblue-core-api</artifactId>
                 <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
-                <artifactId>util</artifactId>
+                <artifactId>lightblue-core-util</artifactId>
                 <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>com.redhat.lightblue.config</groupId>
-                <artifactId>core-config</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>mongo-metadata</artifactId>
+                <groupId>com.redhat.lightblue</groupId>
+                <artifactId>lightblue-core-config</artifactId>
                 <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>mongo-crud</artifactId>
+                <artifactId>lightblue-mongo-metadata</artifactId>
                 <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>mongo-config</artifactId>
+                <artifactId>lightblue-mongo-crud</artifactId>
                 <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>mongo-test</artifactId>
+                <artifactId>lightblue-mongo-config</artifactId>
+                <version>1.3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.mongo</groupId>
+                <artifactId>lightblue-mongo-test</artifactId>
                 <version>1.3.0-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.rdbms</groupId>
-                <artifactId>rdbms-metadata</artifactId>
+                <artifactId>lightblue-rdbms-metadata</artifactId>
                 <version>0.9.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.rdbms</groupId>
-                <artifactId>rdbms-crud</artifactId>
+                <artifactId>lightblue-rdbms-crud</artifactId>
                 <version>0.9.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.rdbms</groupId>
-                <artifactId>rdbms-config</artifactId>
+                <artifactId>lightblue-rdbms-config</artifactId>
                 <version>0.9.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.hook</groupId>
-                <artifactId>audit</artifactId>
+                <artifactId>lightblue-audit-hook</artifactId>
                 <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
