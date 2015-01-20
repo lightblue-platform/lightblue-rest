@@ -29,6 +29,8 @@ import com.redhat.lightblue.util.JsonUtils;
  */
 public class RestConfiguration {
 
+    public static final String DATASOURCE_FILENAME = "datasources.json";
+
     private static DataSourcesConfiguration datasources;
     private static LightblueFactory factory;
 
@@ -50,7 +52,7 @@ public class RestConfiguration {
 
     static {
         try {
-            datasources = new DataSourcesConfiguration(JsonUtils.json(Thread.currentThread().getContextClassLoader().getResourceAsStream("datasources.json")));
+            datasources = new DataSourcesConfiguration(JsonUtils.json(Thread.currentThread().getContextClassLoader().getResourceAsStream(DATASOURCE_FILENAME)));
         } catch (Exception e) {
             throw new RuntimeException("Cannot initialize datasources.", e);
         }

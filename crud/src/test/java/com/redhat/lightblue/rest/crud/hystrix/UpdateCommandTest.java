@@ -18,53 +18,14 @@
  */
 package com.redhat.lightblue.rest.crud.hystrix;
 
-import com.netflix.hystrix.util.ExceptionThreadingUtility;
-import com.redhat.lightblue.config.CrudConfiguration;
-import com.redhat.lightblue.config.MetadataConfiguration;
-import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import java.io.File;
 
 /**
  *
  * @author nmalik
  */
-@RunWith(Arquillian.class)
 public class UpdateCommandTest extends AbstractRestCommandTest {
-
-    @Deployment
-    public static WebArchive createDeployment() {
-        ExceptionThreadingUtility.assignCallingThread(Thread.currentThread());
-
-        File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeDependencies().resolve().withTransitivity().asFile();
-
-        WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(new File(PATH + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
-                .addAsResource(new File(PATH + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
-                .addAsResource(new File(PATH + DATASOURCESJSON), DATASOURCESJSON)
-                .addAsResource(new File(PATH + CONFIGPROPERTIES), CONFIGPROPERTIES);
-
-        for (File file : libs) {
-            archive.addAsLibrary(file);
-        }
-        archive.addPackages(true, "com.redhat.lightblue");
-        return archive;
-
-    }
-
-    private static final String PATH = "src/test/resources/it/it-";
-    private static final String CONFIGPROPERTIES = "config.properties";
-    private static final String DATASOURCESJSON = "datasources.json";
-
     @Test
     public void execute() {
         UpdateCommand command = new UpdateCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
