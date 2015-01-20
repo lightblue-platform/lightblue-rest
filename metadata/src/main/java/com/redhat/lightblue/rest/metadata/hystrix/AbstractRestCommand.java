@@ -28,6 +28,7 @@ import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.redhat.lightblue.ClientIdentification;
 import com.redhat.lightblue.Request;
+import com.redhat.lightblue.config.JsonTranslator;
 import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.parser.JSONMetadataParser;
 import com.redhat.lightblue.rest.RestConfiguration;
@@ -88,6 +89,17 @@ public abstract class AbstractRestCommand extends HystrixCommand<String> {
             throw Error.get(RestMetadataConstants.ERR_CANT_GET_PARSER, e.getMessage());
         }
         return parser;
+    }
+
+    protected JsonTranslator getJsonTranslator() {
+        JsonTranslator tx = null;
+        try {
+            tx = RestConfiguration.getFactory().getJsonTranslator();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw Error.get(RestMetadataConstants.ERR_CANT_GET_TRANSLATOR, e.getMessage());
+        }
+        return tx;
     }
 
     protected void addCallerId(Request req) {

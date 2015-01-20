@@ -18,13 +18,42 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
+import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
-import com.redhat.lightblue.rest.metadata.hystrix.*;
-import com.redhat.lightblue.util.Error;
-
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.redhat.lightblue.metadata.Metadata;
+import com.redhat.lightblue.metadata.MetadataConstants;
+import com.redhat.lightblue.metadata.MetadataRoles;
+import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.metadata.hystrix.CreateEntityMetadataCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.CreateEntitySchemaCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetDependenciesCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetEntityMetadataCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetEntityNamesCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetEntityRolesCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.GetEntityVersionsCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.RemoveEntityCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.SetDefaultVersionCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntityInfoCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntitySchemaStatusCommand;
+import com.redhat.lightblue.util.Error;
 
 /**
  * @author nmalik
@@ -32,57 +61,75 @@ import javax.ws.rs.core.MediaType;
  */
 @Produces(MediaType.APPLICATION_JSON)
 public abstract class AbstractMetadataResource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMetadataResource.class);
+
     private static final String PARAM_ENTITY = "entity";
     private static final String PARAM_VERSION = "version";
 
+    private static final Metadata metadata;
+    static {
+        try {
+            metadata = RestConfiguration.getFactory().getMetadata();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw Error.get(RestMetadataConstants.ERR_CANT_GET_METADATA, e.getMessage());
+        }
+    }
+
     @GET
     @Path("/dependencies")
-    public String getDepGraph() {
-        return getDepGraph(null, null);
+    public String getDepGraph(@Context SecurityContext sc) {
+        return getDepGraph(sc, null, null);
     }
 
     @GET
     @Path("/{entity}/dependencies")
-    public String getDepGraph(@PathParam(PARAM_ENTITY) String entity) {
-        return getDepGraph(entity, null);
+    public String getDepGraph(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
+        return getDepGraph(sc, entity, null);
     }
 
     @GET
     @Path("/{entity}/{version}/dependencies")
-    public String getDepGraph(@PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
+    public String getDepGraph(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.FIND_DEPENDENCIES);
         return new GetDependenciesCommand(null, entity, version).execute();
     }
 
     @GET
     @Path("/roles")
-    public String getEntityRoles() {
-        return getEntityRoles(null, null);
+    public String getEntityRoles(@Context SecurityContext sc ) {
+        return getEntityRoles(sc, null, null);
     }
 
     @GET
     @Path("/{entity}/roles")
-    public String getEntityRoles(@PathParam(PARAM_ENTITY) String entity) {
-        return getEntityRoles(entity, null);
+    public String getEntityRoles(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
+        return getEntityRoles(sc, entity, null);
     }
 
     @GET
     @Path("/{entity}/{version}/roles")
-    public String getEntityRoles(@PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
+    public String getEntityRoles(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.FIND_ROLES);
         return new GetEntityRolesCommand(null, entity, version).execute();
     }
 
     @GET
     @Path("/")
-    public String getEntityNames() {
+    public String getEntityNames(@Context SecurityContext sc) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
         return new GetEntityNamesCommand(null, new String[0]).execute();
     }
 
     @GET
     @Path("/s={statuses}")
-    public String getEntityNames(@PathParam("statuses") String statuses) {
+    public String getEntityNames(@Context SecurityContext sc, @PathParam("statuses") String statuses) {
         StringTokenizer tok = new StringTokenizer(" ,;:.");
         String[] s = new String[tok.countTokens()];
         int i = 0;
@@ -90,76 +137,124 @@ public abstract class AbstractMetadataResource {
             s[i++] = tok.nextToken();
         }
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
         return new GetEntityNamesCommand(null, s).execute();
     }
 
     @GET
     @Path("/{entity}")
-    public String getEntityVersions(@PathParam(PARAM_ENTITY) String entity) {
+    public String getEntityVersions(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_VERSIONS);
         return new GetEntityVersionsCommand(null, entity).execute();
     }
 
     @GET
     @Path("/{entity}/{version}")
-    public String getMetadata(@PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
+    public String getMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.FIND_ENTITY_METADATA);
         return new GetEntityMetadataCommand(null, entity, version).execute();
     }
 
     @PUT
     @Path("/{entity}/{version}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public String createMetadata(@PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String data) {
+    public String createMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String data) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.INSERT);
         return new CreateEntityMetadataCommand(null, entity, version, data).execute();
     }
 
     @PUT
     @Path("/{entity}/schema={version}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public String createSchema(@PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String schema) {
+    public String createSchema(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String schema) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.INSERT_SCHEMA);
         return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
     }
 
     @PUT
     @Path("/{entity}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public String updateEntityInfo(@PathParam(PARAM_ENTITY) String entity, String info) {
+    public String updateEntityInfo(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, String info) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.UPDATE_ENTITYINFO);
         return new UpdateEntityInfoCommand(null, entity, info).execute();
     }
 
     @PUT
     @Path("/{entity}/{version}/{status}")
-    public String updateSchemaStatus(@PathParam(PARAM_ENTITY) String entity,
-                                     @PathParam(PARAM_VERSION) String version,
-                                     @PathParam("status") String status,
-                                     @QueryParam("comment") String comment) {
+    public String updateSchemaStatus(@Context SecurityContext sc,
+            @PathParam(PARAM_ENTITY) String entity,
+            @PathParam(PARAM_VERSION) String version,
+            @PathParam("status") String status,
+            @QueryParam("comment") String comment) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.UPDATE_ENTITY_SCHEMASTATUS);
         return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
     }
 
     @POST
     @Path("/{entity}/{version}/default")
-    public String setDefaultVersion(@PathParam(PARAM_ENTITY) String entity,
-                                    @PathParam(PARAM_VERSION) String version) {
+    public String setDefaultVersion(@Context SecurityContext sc,
+            @PathParam(PARAM_ENTITY) String entity,
+            @PathParam(PARAM_VERSION) String version) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
         return new SetDefaultVersionCommand(null, entity, version).execute();
     }
 
     @DELETE
     @Path("/{entity}")
-    public String removeEntity(@PathParam(PARAM_ENTITY) String entity) {
+    public String removeEntity(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.DELETE_ENTITY);
         return new RemoveEntityCommand(null, entity).execute();
     }
 
     @DELETE
     @Path("/{entity}/default")
-    public String clearDefaultVersion(@PathParam(PARAM_ENTITY) String entity) {
+    public String clearDefaultVersion(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
+
+        checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
         return new SetDefaultVersionCommand(null, entity, null).execute();
     }
+
+    private void checkPermission(SecurityContext sc, MetadataRoles roleAllowed){
+        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
+        if(mappedRoles == null || mappedRoles.size() == 0){
+            // No authorization was configured
+            return;
+        }
+
+        List<String> roles = mappedRoles.get(roleAllowed);
+
+        if(roles.contains(MetadataConstants.ROLE_NOONE)){
+            throw new SecurityException("Unauthorized Request");
+        }
+        else if(roles.contains(MetadataConstants.ROLE_ANYONE)){
+            return;
+        }
+
+        for(String role : roles){
+            if (sc.isUserInRole(role)){
+                return;
+            }
+        }
+
+        throw new SecurityException("Unauthorized Request. One of the following roles is required: " + roles);
+    }
+
 }

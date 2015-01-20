@@ -23,6 +23,7 @@ import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.DeleteRequest;
 import com.redhat.lightblue.mediator.Mediator;
+import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.JsonUtils;
 import org.slf4j.Logger;
@@ -51,24 +52,24 @@ public class DeleteCommand extends AbstractRestCommand {
     }
 
     @Override
-    protected String run() {
+    protected CallStatus run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
         try {
-            DeleteRequest ireq = DeleteRequest.fromJson((ObjectNode) JsonUtils.json(request));
+            DeleteRequest ireq = getJsonTranslator().parse(DeleteRequest.class,JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
             Response r = getMediator().delete(ireq);
-            return r.toJson().toString();
+            return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("delete failure: {}", e);
-            return e.toString();
+            return new CallStatus(e);
         } catch (Exception e) {
             LOGGER.error("delete failure: {}", e);
-            return Error.get(RestCrudConstants.ERR_REST_DELETE, e.toString()).toString();
+            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_DELETE, e.toString()));
         }
     }
 }

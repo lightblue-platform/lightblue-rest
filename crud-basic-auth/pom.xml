@@ -3,19 +3,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.redhat.lightblue.rest</groupId>
-        <artifactId>rest-pom</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <artifactId>lightblue-rest-pom</artifactId>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
     <groupId>com.redhat.lightblue.rest</groupId>
-    <artifactId>rest-crud-basic-auth</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <artifactId>lightblue-rest-crud-basic-auth</artifactId>
+    <version>1.3.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
-            <artifactId>rest-crud</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+            <artifactId>lightblue-rest-crud</artifactId>
+            <version>${project.version}</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
@@ -30,8 +30,8 @@
                     <overlays>
                         <overlay>
                             <groupId>com.redhat.lightblue.rest</groupId>
-                            <artifactId>rest-crud</artifactId>
-                        </overlay>           
+                            <artifactId>lightblue-rest-crud</artifactId>
+                        </overlay>
                     </overlays>
                 </configuration>
             </plugin>
@@ -57,7 +57,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <name>lightblue-${project.artifactId}</name>
+                            <name>${project.artifactId}</name>
                             <copyright>Red Hat</copyright>
                             <distribution>RHEL</distribution>
                             <group>Lightblue Platform</group>
@@ -77,8 +77,8 @@
                                 </mapping>
                             </mappings>
                         </configuration>
-                    </plugin>      
-                </plugins>  
+                    </plugin>
+                </plugins>
             </build>
         </profile>
     </profiles>

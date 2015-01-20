@@ -30,7 +30,7 @@ public class UpdateCommandTest extends AbstractRestCommandTest {
     public void execute() {
         UpdateCommand command = new UpdateCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute();
+        String output = command.execute().toString();
 
         Assert.assertNotNull(output);
 

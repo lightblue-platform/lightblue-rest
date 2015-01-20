@@ -58,23 +58,47 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         ldapContext = new InitialLdapContext(env, null);
     }
 
+    //this can be reverted to use LdapFindUserByUidCommand once we have the Hystrix stuff figured out
     @Override
     public List<String> getUserRoles(String userName) {
-        List<String> userRoles = new ArrayList<>();
-
-        try {
-            userRoles.addAll(getUserRolesFromCache(userName));
-
-            if (userRoles.isEmpty()) {
-                userRoles.addAll(getUserRolesFromLdap(findUserByUid(userName)));
-            }
-        } catch (NamingException ne) {
-            LOGGER.error("Problem getting roles for user: " + userName, ne);
+      List<String> userRoles = new ArrayList<>();
+  
+      try {
+        userRoles.addAll(getUserRolesFromCache(userName));
+  
+        if (userRoles.isEmpty()) {
+          userRoles.addAll(getUserRolesFromLdap(findUserByUid(userName)));
         }
-
-        return userRoles;
+      } catch (NamingException ne) {
+        LOGGER.error("Problem getting roles for user: " + userName, ne);
+      }
+  
+      return userRoles;
     }
 
+    //This can be removed once we have the Hystrix issues figured out and are using the LdapFindUserByUidCommand again
+    private SearchResult findUserByUid(String uid) throws NamingException {
+      String searchFilter = "(uid=" + uid + ")";
+
+      SearchControls searchControls = new SearchControls();
+      searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+      NamingEnumeration<SearchResult> results = ldapContext.search(ldapSearchBase, searchFilter, searchControls);
+
+      SearchResult searchResult = null;
+      if (results.hasMoreElements()) {
+          searchResult = results.nextElement();
+
+          //make sure there is not another item available, there should be only 1 match
+          if (results.hasMoreElements()) {
+              LOGGER.error("Matched multiple users for the accountName: " + uid);
+              return null;
+          }
+      }
+
+      return searchResult;
+  }
+    
     @Override
     public Collection<String> getUsersInGroup(String groupName) {
         throw new UnsupportedOperationException("Not yet implemented");
@@ -93,28 +117,6 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private List<String> getUserRolesFromCache(String userName) {
         //TODO add persistent caching backed by lightblue here at some point
         return Collections.emptyList();
-    }
-
-    private SearchResult findUserByUid(String uid) throws NamingException {
-        String searchFilter = "(uid=" + uid + ")";
-
-        SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-
-        NamingEnumeration<SearchResult> results = ldapContext.search(ldapSearchBase, searchFilter, searchControls);
-
-        SearchResult searchResult = null;
-        if (results.hasMoreElements()) {
-            searchResult = results.nextElement();
-
-            //make sure there is not another item available, there should be only 1 match
-            if (results.hasMoreElements()) {
-                LOGGER.error("Matched multiple users for the accountName: " + uid);
-                return null;
-            }
-        }
-
-        return searchResult;
     }
 
     private List<String> getUserRolesFromLdap(SearchResult ldapUser) throws NamingException {

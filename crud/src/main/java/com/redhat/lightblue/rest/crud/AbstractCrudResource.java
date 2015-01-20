@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redhat.lightblue.EntityVersion;
+import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.query.Projection;
 import com.redhat.lightblue.query.QueryExpression;
@@ -34,11 +35,9 @@ import com.redhat.lightblue.util.Error;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -61,108 +60,137 @@ public abstract class AbstractCrudResource {
     private static final String PARAM_ENTITY = "entity";
     private static final String PARAM_VERSION = "version";
 
+    /**
+     * @deprecated Deprecated due to inconsistent path. Use {@link #insert(String, String)} instead.
+     */
     @PUT
     @Path("/{entity}")
-    public String insert(@PathParam(PARAM_ENTITY) String entity,
-                         String request) {
+    @Deprecated
+    public Response insertAlt(@PathParam(PARAM_ENTITY) String entity,
+                            String request) {
+        return insert(entity, null, request);
+    }
+
+    /**
+     * @deprecated Deprecated due to inconsistent path. Use {@link #insert(String, String, String)} instead.
+     */
+    @PUT
+    @Path("/{entity}/{version}")
+    @Deprecated
+    public Response insertAlt(@PathParam(PARAM_ENTITY) String entity,
+                              @PathParam(PARAM_VERSION) String version,
+                              String request) {
+        return insert(entity, version, request);
+    }
+
+    @PUT
+    @Path("/insert/{entity}")
+    public Response insert(@PathParam(PARAM_ENTITY) String entity,
+                           String request) {
         return insert(entity, null, request);
     }
 
     @PUT
-    @Path("/{entity}/{version}")
-    public String insert(@PathParam(PARAM_ENTITY) String entity,
-                         @PathParam(PARAM_VERSION) String version,
-                         String request) {
+    @Path("/insert/{entity}/{version}")
+    public Response insert(@PathParam(PARAM_ENTITY) String entity,
+                           @PathParam(PARAM_VERSION) String version,
+                           String request) {
         Error.reset();
-        return new InsertCommand(null, entity, version, request).execute();
+        CallStatus st=new InsertCommand(null, entity, version, request).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     @POST
     @Path("/save/{entity}")
-    public String save(@PathParam(PARAM_ENTITY) String entity,
+    public Response save(@PathParam(PARAM_ENTITY) String entity,
                        String request) {
         return save(entity, null, request);
     }
 
     @POST
     @Path("/save/{entity}/{version}")
-    public String save(@PathParam(PARAM_ENTITY) String entity,
-                       @PathParam(PARAM_VERSION) String version,
-                       String request) {
+    public Response save(@PathParam(PARAM_ENTITY) String entity,
+                         @PathParam(PARAM_VERSION) String version,
+                         String request) {
         Error.reset();
-        return new SaveCommand(null, entity, version, request).execute();
+        CallStatus st=new SaveCommand(null, entity, version, request).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     @POST
     @Path("/update/{entity}")
-    public String update(@PathParam(PARAM_ENTITY) String entity,
-                         String request) {
+    public Response update(@PathParam(PARAM_ENTITY) String entity,
+                           String request) {
         return update(entity, null, request);
     }
 
     @POST
     @Path("/update/{entity}/{version}")
-    public String update(@PathParam(PARAM_ENTITY) String entity,
-                         @PathParam(PARAM_VERSION) String version,
-                         String request) {
+    public Response update(@PathParam(PARAM_ENTITY) String entity,
+                           @PathParam(PARAM_VERSION) String version,
+                           String request) {
         Error.reset();
-        return new UpdateCommand(null, entity, version, request).execute();
+        CallStatus st=new UpdateCommand(null, entity, version, request).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     @POST
     @Path("/delete/{entity}")
-    public String delete(@PathParam(PARAM_ENTITY) String entity,
-                         String request) {
+    public Response delete(@PathParam(PARAM_ENTITY) String entity,
+                           String request) {
         return delete(entity, null, request);
     }
 
     @POST
     @Path("/delete/{entity}/{version}")
-    public String delete(@PathParam(PARAM_ENTITY) String entity,
-                         @PathParam(PARAM_VERSION) String version,
-                         String req) {
+    public Response delete(@PathParam(PARAM_ENTITY) String entity,
+                           @PathParam(PARAM_VERSION) String version,
+                           String req) {
         Error.reset();
-        return new DeleteCommand(null, entity, version, req).execute();
+        CallStatus st=new DeleteCommand(null, entity, version, req).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     @POST
     @Path("/find/{entity}")
-    public String find(@PathParam(PARAM_ENTITY) String entity,
-                       String request) {
+    public Response find(@PathParam(PARAM_ENTITY) String entity,
+                         String request) {
         return find(entity, null, request);
     }
 
     @POST
     @Path("/find/{entity}/{version}")
-    public String find(@PathParam(PARAM_ENTITY) String entity,
-                       @PathParam(PARAM_VERSION) String version,
-                       String request) {
+    public Response find(@PathParam(PARAM_ENTITY) String entity,
+                         @PathParam(PARAM_VERSION) String version,
+                         String request) {
         Error.reset();
-        return new FindCommand(null, entity, version, request).execute();
+        CallStatus st=new FindCommand(null, entity, version, request).execute();
+        LOGGER.info("Find call status:{}",st);
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     @GET
     @Path("/find/{entity}")
     //?Q&P&S&from&to
-    public String simpleFind(@PathParam(PARAM_ENTITY) String entity,
-                             @QueryParam("Q") String q,
-                             @QueryParam("P") String p,
-                             @QueryParam("S") String s,
-                             @DefaultValue("0") @QueryParam("from") long from,
-                             @DefaultValue("-1") @QueryParam("to") long to) throws IOException {
+    public Response simpleFind(@PathParam(PARAM_ENTITY) String entity,
+                               @QueryParam("Q") String q,
+                               @QueryParam("P") String p,
+                               @QueryParam("S") String s,
+                               @DefaultValue("0") @QueryParam("from") long from,
+                               @DefaultValue("-1") @QueryParam("to") long to) throws IOException {
         return simpleFind(entity, null, q, p, s, from, to);
     }
 
     @GET
     @Path("/find/{entity}/{version}")
     //?Q&P&S&from&to
-    public String simpleFind(@PathParam(PARAM_ENTITY) String entity,
-                             @PathParam(PARAM_VERSION) String version,
-                             @QueryParam("Q") String q,
-                             @QueryParam("P") String p,
-                             @QueryParam("S") String s,
-                             @DefaultValue("0") @QueryParam("from") long from,
-                             @DefaultValue("-1") @QueryParam("to") long to) throws IOException {
+    public Response simpleFind(@PathParam(PARAM_ENTITY) String entity,
+                               @PathParam(PARAM_VERSION) String version,
+                               @QueryParam("Q") String q,
+                               @QueryParam("P") String p,
+                               @QueryParam("S") String s,
+                               @DefaultValue("0") @QueryParam("from") long from,
+                               @DefaultValue("-1") @QueryParam("to") long to) throws IOException {
         Error.reset();
         // spec -> https://github.com/lightblue-platform/lightblue/wiki/Rest-Spec-Data#get-simple-find
         String sq = null;
@@ -170,9 +198,10 @@ public abstract class AbstractCrudResource {
             List<String> queryList = Arrays.asList(q.split(";"));
             if (queryList.size() > 1) {
                 StringBuilder sbq = new StringBuilder("{ \"$and\" : [");
-                for (int i = 0; i < queryList.size(); i++) {
-                    sbq.append(buildQueryFieldTemplate(queryList.get(i)));
-                    if ((i + 1) < queryList.size()) {
+                Iterator<String> itr = queryList.iterator();
+                while (itr.hasNext()) {
+                    sbq.append(buildQueryFieldTemplate(itr.next()));
+                    if (itr.hasNext()) {
                         sbq.append(',');
                     }
                 }
@@ -190,9 +219,10 @@ public abstract class AbstractCrudResource {
             List<String> projectionList = Arrays.asList(p.split(","));
             if (projectionList.size() > 1) {
                 StringBuilder sbp = new StringBuilder("[");
-                for (int i = 0; i < projectionList.size(); i++) {
-                    sbp.append(buildProjectionTemplate(projectionList.get(i)));
-                    if ((i + 1) < projectionList.size()) {
+                Iterator<String> itr = projectionList.iterator();
+                while (itr.hasNext()) {
+                    sbp.append(buildProjectionTemplate(itr.next()));
+                    if (itr.hasNext()) {
                         sbp.append(',');
                     }
                 }
@@ -210,9 +240,10 @@ public abstract class AbstractCrudResource {
             List<String> sortList = Arrays.asList(s.split(","));
             if (sortList.size() > 1) {
                 StringBuilder sbs = new StringBuilder("[");
-                for (int i = 0; i < sortList.size(); i++) {
-                    sbs.append(buildSortTemplate(sortList.get(i)));
-                    if ((i + 1) < sortList.size()) {
+                Iterator<String> itr = sortList.iterator();
+                while (itr.hasNext()) {
+                    sbs.append(buildSortTemplate(itr.next()));
+                    if (itr.hasNext()) {
                         sbs.append(',');
                     }
                 }
@@ -234,7 +265,8 @@ public abstract class AbstractCrudResource {
         findRequest.setTo(to);
         String request = findRequest.toString();
 
-        return new FindCommand(null, entity, version, request).execute();
+        CallStatus st=new FindCommand(null, entity, version, request).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     private String buildQueryFieldTemplate(String s1) {

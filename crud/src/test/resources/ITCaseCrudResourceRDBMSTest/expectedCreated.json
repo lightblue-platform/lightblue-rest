@@ -7,9 +7,8 @@
             "fields": [{"field":"name","dir": "$asc"}]
         }],
         "datastore": {
-            "backend":"mongo",
-            "datasource" : "mongo",
-            "collection": "country"
+            "backend":"rdbms",
+            "datasource" : "simplefile"
         }
     },
     "schema": {

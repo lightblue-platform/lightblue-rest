@@ -22,15 +22,15 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author nmalik
  */
 public class SaveCommandTest extends AbstractRestCommandTest {
+
     @Test
     public void execute() {
         SaveCommand command = new SaveCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute();
+        String output = command.execute().toString();
 
         Assert.assertNotNull(output);
 

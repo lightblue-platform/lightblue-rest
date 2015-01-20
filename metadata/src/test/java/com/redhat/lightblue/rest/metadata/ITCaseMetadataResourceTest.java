@@ -18,29 +18,14 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.Mongo;
 import com.redhat.lightblue.config.DataSourcesConfiguration;
 import com.redhat.lightblue.config.LightblueFactory;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.metadata.mongo.MongoMetadata;
-import com.redhat.lightblue.mongo.config.MongoConfiguration;
+import com.redhat.lightblue.mongo.test.EmbeddedMongo;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.util.JsonUtils;
-import de.flapdoodle.embed.mongo.Command;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
-import de.flapdoodle.embed.process.io.IStreamProcessor;
-import de.flapdoodle.embed.process.io.Processors;
-import de.flapdoodle.embed.process.runtime.Network;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -48,17 +33,13 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.json.JSONException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.SecurityContext;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -70,116 +51,19 @@ import static com.redhat.lightblue.util.test.FileUtil.readFile;
 @RunWith(Arquillian.class)
 public class ITCaseMetadataResourceTest {
 
-    public static class FileStreamProcessor implements IStreamProcessor {
-        private FileOutputStream outputStream;
-
-        public FileStreamProcessor(File file) throws FileNotFoundException {
-            outputStream = new FileOutputStream(file);
-        }
-
-        @Override
-        public void process(String block) {
-            try {
-                outputStream.write(block.getBytes());
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        @Override
-        public void onProcessed() {
-            try {
-                outputStream.close();
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-    }
-
-    private static final String MONGO_HOST = "localhost";
-    private static final int MONGO_PORT = 27777;
-    private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
-
-    private static final String DB_NAME = "testmetadata";
-
-    private static MongodExecutable mongodExe;
-    private static MongodProcess mongod;
-    private static Mongo mongo;
-    private static DB db;
-
-    static {
-        try {
-            IStreamProcessor mongodOutput = Processors.named("[mongod>]",
-                    new FileStreamProcessor(File.createTempFile("mongod", "log")));
-            IStreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
-            IStreamProcessor commandsOutput = Processors.namedConsole("[console>]");
-
-            IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                    .defaults(Command.MongoD)
-                    .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-                    .build();
-
-            MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
-            mongodExe = runtime.prepare(
-                    new MongodConfigBuilder()
-                            .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
-                            .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                            .build()
-            );
-            try {
-                mongod = mongodExe.start();
-            } catch (Throwable t) {
-                // try again, could be killed breakpoint in IDE
-                mongod = mongodExe.start();
-            }
-            mongo = new Mongo(IN_MEM_CONNECTION_URL);
-
-            MongoConfiguration config = new MongoConfiguration();
-            config.setDatabase(DB_NAME);
-            // disable ssl for test (enabled by default)
-            config.setSsl(Boolean.FALSE);
-            config.addServerAddress(MONGO_HOST, MONGO_PORT);
-
-            db = config.getDB();
-
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    clearDatabase();
-                }
-
-            });
-        } catch (IOException e) {
-            throw new Error(e);
-        }
-    }
+    private static EmbeddedMongo mongo = EmbeddedMongo.getInstance();
 
     @Before
     public void setup() {
-        db.createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
+        mongo.getDB().createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
         BasicDBObject index = new BasicDBObject("name", 1);
         index.put("version.value", 1);
-        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).ensureIndex(index, "name", true);
+        mongo.getDB().getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).ensureIndex(index, "name", true);
     }
 
     @After
     public void teardown() {
-        if (mongo != null) {
-            mongo.dropDatabase(DB_NAME);
-        }
-    }
-
-    public static void clearDatabase() {
-        if (mongod != null) {
-            mongod.stop();
-            mongodExe.stop();
-        }
-        db = null;
-        mongo = null;
-        mongod = null;
-        mongodExe = null;
+        mongo.reset();
     }
 
     @Deployment
@@ -211,72 +95,89 @@ public class ITCaseMetadataResourceTest {
     public void testFirstIntegrationTest() throws IOException, URISyntaxException, JSONException {
         Assert.assertNotNull("MetadataResource was not injected by the container", cutMetadataResource);
 
-        System.setProperty("mongodb.host", MONGO_HOST);
-        System.setProperty("mongodb.port", String.valueOf(MONGO_PORT));
+        SecurityContext sc = new TestSecurityContext();
 
         RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
         RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
         System.out.println("factory:" + RestConfiguration.getFactory());
         String expectedCreated = readFile("expectedCreated.json");
-        String resultCreated = cutMetadataResource.createMetadata("country", "1.0.0", readFile("resultCreated.json"));
+        String resultCreated = cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFile("resultCreated.json"));
         JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
         String expectedDepGraph = readFile("expectedDepGraph.json").replace("Notsupportedyet", " Not supported yet");
-        String resultDepGraph = cutMetadataResource.getDepGraph(); //TODO Not implemented yet
+        String resultDepGraph = cutMetadataResource.getDepGraph(sc);
         JSONAssert.assertEquals(expectedDepGraph, resultDepGraph, false);
 
         String expectedDepGraph1 = readFile("expectedDepGraph1.json").replace("Notsupportedyet", " Not supported yet");
-        String resultDepGraph1 = cutMetadataResource.getDepGraph("country"); //TODO Not implemented yet
+        String resultDepGraph1 = cutMetadataResource.getDepGraph(sc, "country");
         JSONAssert.assertEquals(expectedDepGraph1, resultDepGraph1, false);
 
         String expectedDepGraph2 = readFile("expectedDepGraph2.json").replace("Notsupportedyet", " Not supported yet");
-        String resultDepGraph2 = cutMetadataResource.getDepGraph("country", "1.0.0"); //TODO Not implemented yet
+        String resultDepGraph2 = cutMetadataResource.getDepGraph(sc, "country", "1.0.0");
         JSONAssert.assertEquals(expectedDepGraph2, resultDepGraph2, false);
 
         String expectedEntityNames = "{\"entities\":[\"country\"]}";
-        String resultEntityNames = cutMetadataResource.getEntityNames();
+        String resultEntityNames = cutMetadataResource.getEntityNames(sc);
         JSONAssert.assertEquals(expectedEntityNames, resultEntityNames, false);
 
         // no default version
         String expectedEntityRoles = esc("{'status':'ERROR','modifiedCount':0,'matchCount':0,'dataErrors':[{'data':{'name':'country'},'errors':[{'objectType':'error','context':'GetEntityRolesCommand','errorCode':'ERR_NO_METADATA','msg':'Could not get metadata for given input. Error message: version'}]}]}");
         String expectedEntityRoles1 = esc("{'status':'ERROR','modifiedCount':0,'matchCount':0,'dataErrors':[{'data':{'name':'country'},'errors':[{'objectType':'error','context':'GetEntityRolesCommand/country','errorCode':'ERR_NO_METADATA','msg':'Could not get metadata for given input. Error message: version'}]}]}");
-        String resultEntityRoles = cutMetadataResource.getEntityRoles();
-        String resultEntityRoles1 = cutMetadataResource.getEntityRoles("country");
+        String resultEntityRoles = cutMetadataResource.getEntityRoles(sc);
+        String resultEntityRoles1 = cutMetadataResource.getEntityRoles(sc, "country");
         JSONAssert.assertEquals(expectedEntityRoles, resultEntityRoles, false);
         JSONAssert.assertEquals(expectedEntityRoles1, resultEntityRoles1, false);
 
         String expectedEntityRoles2 = readFile("expectedEntityRoles2.json");
-        String resultEntityRoles2 = cutMetadataResource.getEntityRoles("country", "1.0.0");
+        String resultEntityRoles2 = cutMetadataResource.getEntityRoles(sc, "country", "1.0.0");
         JSONAssert.assertEquals(expectedEntityRoles2, resultEntityRoles2, false);
 
         String expectedEntityVersions = esc("[{'version':'1.0.0','changelog':'blahblah'}]");
-        String resultEntityVersions = cutMetadataResource.getEntityVersions("country");
+        String resultEntityVersions = cutMetadataResource.getEntityVersions(sc, "country");
         JSONAssert.assertEquals(expectedEntityVersions, resultEntityVersions, false);
 
-        String expectedGetMetadata = esc("{'entityInfo':{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'active'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
-        String resultGetMetadata = cutMetadataResource.getMetadata("country", "1.0.0");
+        String expectedGetMetadata = esc("{'entityInfo':{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]},{'name': null,'unique': true,'fields': [{'field': '_id','dir': '$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'active'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
+        String resultGetMetadata = cutMetadataResource.getMetadata(sc, "country", "1.0.0");
         JSONAssert.assertEquals(expectedGetMetadata, resultGetMetadata, false);
 
         String expectedCreateSchema = readFile("expectedCreateSchema.json");
-        String resultCreateSchema = cutMetadataResource.createSchema("country", "1.1.0", readFile("expectedCreateSchemaInput.json"));
+        String resultCreateSchema = cutMetadataResource.createSchema(sc, "country", "1.1.0", readFile("expectedCreateSchemaInput.json"));
         JSONAssert.assertEquals(expectedCreateSchema, resultCreateSchema, false);
 
         String expectedUpdateEntityInfo = readFile("expectedUpdateEntityInfo.json");
-        String resultUpdateEntityInfo = cutMetadataResource.updateEntityInfo("country", readFile("expectedUpdateEntityInfoInput.json"));
+        String resultUpdateEntityInfo = cutMetadataResource.updateEntityInfo(sc, "country", readFile("expectedUpdateEntityInfoInput.json"));
         JSONAssert.assertEquals(expectedUpdateEntityInfo, resultUpdateEntityInfo, false);
 
-        String x = cutMetadataResource.setDefaultVersion("country", "1.0.0");
-        String expected = esc("{'entityInfo':{'name':'country','defaultVersion':'1.0.0','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'active'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
+        String x = cutMetadataResource.setDefaultVersion(sc, "country", "1.0.0");
+        String expected = esc("{'entityInfo':{'name':'country','defaultVersion':'1.0.0','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]},{'name': null,'unique': true,'fields': [{'field': '_id','dir': '$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'active'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
         JSONAssert.assertEquals(expected, x, false);
 
-        x = cutMetadataResource.clearDefaultVersion("country");
-        System.out.println(x);
-        expected = esc("{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}}");
+        x = cutMetadataResource.clearDefaultVersion(sc, "country");
+        //System.out.println(x);
+        expected = esc("{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]},{'name': null,'unique': true,'fields': [{'field': '_id','dir': '$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}}");
         JSONAssert.assertEquals(expected, x, false);
 
-        String expectedUpdateSchemaStatus = esc("{'entityInfo':{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'deprecated'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
-        String resultUpdateSchemaStatus = cutMetadataResource.updateSchemaStatus("country", "1.0.0", "deprecated", "No comment");
+        String expectedUpdateSchemaStatus = esc("{'entityInfo':{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]},{'name': null,'unique': true,'fields': [{'field': '_id','dir': '$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'deprecated'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
+        String resultUpdateSchemaStatus = cutMetadataResource.updateSchemaStatus(sc, "country", "1.0.0", "deprecated", "No comment");
         JSONAssert.assertEquals(expectedUpdateSchemaStatus, resultUpdateSchemaStatus, false);
 
+    }
+
+    @Test
+    public void createMetadataAlsoUpdates() throws Exception {
+        Assert.assertNotNull("MetadataResource was not injected by the container", cutMetadataResource);
+
+        SecurityContext sc = new TestSecurityContext();
+
+        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
+        RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
+        System.out.println("factory:" + RestConfiguration.getFactory());
+        String expectedCreated = readFile("expectedCreated.json");
+        String resultCreated = cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFile("resultCreated.json"));
+        JSONAssert.assertEquals(expectedCreated, resultCreated, false);
+
+        String expectedUpdateEntityInfo = readFile("expectedCreateSchema.json");
+        String resultUpdateEntityInfo = cutMetadataResource.createMetadata(sc, "country", "1.1.0",expectedUpdateEntityInfo);
+        JSONAssert.assertEquals(expectedUpdateEntityInfo, resultUpdateEntityInfo, false);
     }
 }

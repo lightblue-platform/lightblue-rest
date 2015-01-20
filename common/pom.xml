@@ -21,32 +21,30 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.redhat.lightblue.rest</groupId>
-        <artifactId>rest-pom</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <artifactId>lightblue-rest-pom</artifactId>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
     <groupId>com.redhat.lightblue.rest</groupId>
-    <artifactId>rest-common</artifactId>
+    <artifactId>lightblue-rest-common</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.0-SNAPSHOT</version>
-    <name>lightblue-rest common: ${project.groupId}|${project.artifactId}</name>
+    <version>1.3.0-SNAPSHOT</version>
+    <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
-            <groupId>com.redhat.lightblue.config</groupId>
-            <artifactId>core-config</artifactId>
+            <groupId>com.redhat.lightblue</groupId>
+            <artifactId>lightblue-core-config</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>mongo-metadata</artifactId>
+            <artifactId>lightblue-mongo-metadata</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>mongo-crud</artifactId>
+            <artifactId>lightblue-mongo-crud</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>1.46.0</version>
-            <scope>test</scope>
+            <groupId>com.redhat.lightblue.mongo</groupId>
+            <artifactId>lightblue-mongo-test</artifactId>
         </dependency>
     </dependencies>
 </project>
