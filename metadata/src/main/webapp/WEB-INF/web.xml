@@ -28,4 +28,13 @@
         <url-pattern>/health</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>version</servlet-name>
+        <jsp-file>/version.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>version</servlet-name>
+        <url-pattern>/version</url-pattern>
+    </servlet-mapping>
+
 </web-app>
