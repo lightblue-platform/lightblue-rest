@@ -299,7 +299,7 @@ public class ITCaseCrudResourceRDBMSTest {
 
             String expectedInserted = readFile("expectedInserted.json");
             String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity().toString();
-            //System.err.println("!!!!!!!!!!!!!!!!!" + resultInserted);
+            System.err.println("!!!!!!!!!!!!!!!!!" + resultInserted);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
             conn = ds.getConnection();
@@ -347,7 +347,7 @@ public class ITCaseCrudResourceRDBMSTest {
             String expectedFound = readFile("expectedFound.json");
             String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json")).getEntity().toString();
             // TODO / NOTE we can change the result format if needed, now it return an array of arrays
-            System.err.println("!!!!!!!!!!!!!!!!!" + resultFound);
+            //System.err.println("!!!!!!!!!!!!!!!!!" + resultFound);
             JSONAssert.assertEquals(expectedFound, resultFound, false);
         } catch (NamingException | SQLException ex) {
             throw new IllegalStateException(ex);
@@ -383,7 +383,7 @@ public class ITCaseCrudResourceRDBMSTest {
             String expectedFound = readFile("expectedFoundAll.json");
             String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFoundAll.json")).getEntity().toString();
             // TODO / NOTE we can change the result format if needed, now it return an array of arrays
-            // System.err.println("!!!!!!!!!!!!!!!!!" + resultFound);
+            //System.err.println("!!!!!!!!!!!!!!!!!" + resultFound);
             JSONAssert.assertEquals(expectedFound, resultFound, false);
         } catch (NamingException | SQLException ex) {
             throw new IllegalStateException(ex);
@@ -417,7 +417,7 @@ public class ITCaseCrudResourceRDBMSTest {
 
             String expectedUpdated = readFile("expectedUpdated.json");
             String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
-            //System.err.println("!!!!!!!!!!!!!!!!!" + resultUpdated);
+            System.err.println("!!!!!!!!!!!!!!!!!" + resultUpdated);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
             conn = ds.getConnection();
@@ -463,7 +463,7 @@ public class ITCaseCrudResourceRDBMSTest {
 
             String expectedDeleted = readFile("expectedDeleted.json");
             String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json")).getEntity().toString();
-            System.err.println("!!!!!!!!!!!!!!!!!" + resultDeleted);
+            //System.err.println("!!!!!!!!!!!!!!!!!" + resultDeleted);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
             conn = ds.getConnection();
