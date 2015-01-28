@@ -1,13 +1,6 @@
 {
     "status": "COMPLETE",
-    "modifiedCount": 1,
+    "modifiedCount": 2,
     "matchCount": 0,
-    "processed": [
-        {
-            "iso3code": "CAN",
-            "name": "Canad",
-            "iso2code": "CA",
-            "objectType": "country"
-        }
-    ]
+    "processed": [{"name":"Canad","iso2code":"CA","iso3code":"CAN","objectType":"country"},{}]
 }

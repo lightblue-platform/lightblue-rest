@@ -2,5 +2,5 @@
     "status": "COMPLETE",
     "modifiedCount": 0,
     "matchCount": 0,
-    "processed": [["c"],["CA"],["a"]]
+    "processed": [{"ISO2CODE":"CA","ISO3CODE":"c","NAME":"a"}]
 }
