@@ -10,8 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class CorsInitializingServletContextListener implements ServletContextListener {
+    static final String CORS_CONFIGURATION_RESOURCE_PARAM = "cors.configuration.resource";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CorsInitializingServletContextListener.class);
-    private static final String CORS_CONFIGURATION_RESOURCE_PARAM = "cors.configuration.resource";
 
     private final CorsFilterRegistration corsFilter;
 

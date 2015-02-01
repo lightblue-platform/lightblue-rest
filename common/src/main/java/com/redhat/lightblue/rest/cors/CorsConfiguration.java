@@ -51,18 +51,26 @@ public final class CorsConfiguration implements Serializable {
      * access control documentation on MDN.</a>
      */
     public static class Builder {
-        // Sensible defaults.
-        private List<String> urlPatterns = unmodifiableList(Arrays.asList("/*"));;
-        private List<String> allowedOrigins = unmodifiableList(Arrays.asList("*"));;
-        private List<String> allowedMethods = unmodifiableList(Arrays.asList("GET", "PUT", "POST",
-                "HEAD", "OPTIONS"));
-        private List<String> allowedHeaders = unmodifiableList(Arrays.asList("Origin", "Accept",
-                "X-Requested-With", "Content-Type", "Access-Control-Request-Method",
+        static final List<String> DEFAULT_URL_PATTERNS = unmodifiableList(Arrays.asList("/*"));
+        static final List<String> DEFAULT_ALLOWED_ORIGINS = unmodifiableList(Arrays.asList("*"));
+        static final List<String> DEFAULT_ALLOWED_METHODS = unmodifiableList(Arrays.asList("GET",
+                "PUT", "POST", "HEAD", "OPTIONS"));;
+        static final List<String> DEFAULT_ALLOWED_HEADERS = unmodifiableList(Arrays.asList("Origin",
+                "Accept", "X-Requested-With", "Content-Type", "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"));
-        private List<String> exposedHeaders = Collections.emptyList();
-        private int preflightMaxAge = 1800;
-        private boolean allowCredentials = true;
-        private boolean enableLogging = false;
+        static final List<String> DEFAULT_EXPOSED_HEADERS = Collections.emptyList();
+        static final int DEFAULT_PREFLIGHT_MAX_AGE = 1800;
+        static final boolean DEFAULT_ALLOW_CREDENTIALS = true;
+        static final boolean DEFAULT_ENABLE_LOGGING = false;
+
+        private List<String> urlPatterns = DEFAULT_URL_PATTERNS;
+        private List<String> allowedOrigins = DEFAULT_ALLOWED_ORIGINS;
+        private List<String> allowedMethods = DEFAULT_ALLOWED_METHODS;
+        private List<String> allowedHeaders = DEFAULT_ALLOWED_HEADERS;
+        private List<String> exposedHeaders = DEFAULT_EXPOSED_HEADERS;
+        private int preflightMaxAge = DEFAULT_PREFLIGHT_MAX_AGE;
+        private boolean allowCredentials = DEFAULT_ALLOW_CREDENTIALS;
+        private boolean enableLogging = DEFAULT_ENABLE_LOGGING;
 
         /**
          * Sets the URL patterns to use with a copy of the contents from the provided array,
@@ -250,7 +258,7 @@ public final class CorsConfiguration implements Serializable {
             String[] copy = new String[methods.length];
             System.arraycopy(methods, 0, copy, 0, methods.length);
 
-            this.allowedHeaders = unmodifiableList(Arrays.asList(copy));
+            this.allowedMethods = unmodifiableList(Arrays.asList(copy));
 
             return this;
         }
@@ -270,7 +278,7 @@ public final class CorsConfiguration implements Serializable {
 
             String[] copied = methods.toArray(new String[methods.size()]);
 
-            this.allowedHeaders = unmodifiableList(Arrays.asList(copied));
+            this.allowedMethods = unmodifiableList(Arrays.asList(copied));
 
             return this;
         }
@@ -358,6 +366,8 @@ public final class CorsConfiguration implements Serializable {
          * field values are provided.
          *
          * <dl>
+         *     <dt>urlPatterns</dt>
+         *     <dd>Array of strings. See {@link #urlPatterns}</dd>
          *     <dt>allowedOrigins</dt>
          *     <dd>Array of strings. See {@link #allowedOrigins(String...)}</dd>
          *     <dt>allowedMethods</dt>
@@ -379,6 +389,7 @@ public final class CorsConfiguration implements Serializable {
 
             JsonNode configJson = JsonUtils.json(json);
 
+            urlPatterns = fromJsonArray(configJson.findPath("urlPatterns"), urlPatterns);
             allowedOrigins = fromJsonArray(configJson.findPath("allowedOrigins"), allowedOrigins);
             allowedMethods = fromJsonArray(configJson.findPath("allowedMethods"), allowedMethods);
             allowedHeaders = fromJsonArray(configJson.findPath("allowedHeaders"), allowedHeaders);
@@ -465,5 +476,43 @@ public final class CorsConfiguration implements Serializable {
 
     public boolean isLoggingEnabled() {
         return enableLogging;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CorsConfiguration that = (CorsConfiguration) o;
+
+        return allowCredentials == that.allowCredentials &&
+                enableLogging == that.enableLogging &&
+                preflightMaxAge == that.preflightMaxAge &&
+                allowedHeaders.equals(that.allowedHeaders) &&
+                allowedMethods.equals(that.allowedMethods) &&
+                allowedOrigins.equals(that.allowedOrigins) &&
+                exposedHeaders.equals(that.exposedHeaders) &&
+                urlPatterns.equals(that.urlPatterns);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(allowCredentials, enableLogging, preflightMaxAge, allowedHeaders,
+                allowedMethods, allowedOrigins, exposedHeaders, urlPatterns);
+    }
+
+    @Override
+    public String toString() {
+        return "CorsConfiguration{" +
+                "urlPatterns=" + urlPatterns +
+                ", allowedOrigins=" + allowedOrigins +
+                ", allowedMethods=" + allowedMethods +
+                ", allowedHeaders=" + allowedHeaders +
+                ", exposedHeaders=" + exposedHeaders +
+                ", preflightMaxAge=" + preflightMaxAge +
+                ", allowCredentials=" + allowCredentials +
+                ", enableLogging=" + enableLogging +
+                '}';
     }
 }

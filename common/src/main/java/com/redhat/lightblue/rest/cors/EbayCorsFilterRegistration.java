@@ -10,7 +10,7 @@ import java.util.List;
 public class EbayCorsFilterRegistration implements CorsFilterRegistration {
     @Override
     public void register(ServletContext context, CorsConfiguration config) {
-        FilterRegistration.Dynamic filter = context.addFilter("cors", new CORSFilter());
+        FilterRegistration.Dynamic filter = context.addFilter("cors", CORSFilter.class);
 
         addUrlPatterns(filter, config);
         addInitParameters(filter, config);

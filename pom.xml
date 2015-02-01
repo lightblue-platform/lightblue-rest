@@ -83,7 +83,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.11</version>
+                <version>4.12</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
@@ -157,13 +158,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
+                <version>1.3</version>
+                <!-- Must leave compile scope to prevent Mockito's transitive, conflicting, runtime
+                     scope dependency from interfering. Make sure that this dependency is only
+                     pulled in transitively from test dependencies so it is not included at compile
+                     time. In other words, don't declare hamcrest-core explicitly in child projects. -->
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-library</artifactId>
+                <version>1.3</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>1.10.19</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
