@@ -27,22 +27,23 @@ public class CorsInitializingServletContextListener implements ServletContextLis
     public void contextInitialized(ServletContextEvent sce) {
         try {
             ServletContext context = sce.getServletContext();
+            String configJsonResource = getConfigJsonResource(context);
 
-            if (!isCorsConfigurationResourceDefined(context)) {
+            if (configJsonResource == null) {
                 LOGGER.info("No CORS json configuration resource location provided. CORS will not "
                         + "be enabled.");
                 return;
             }
 
-            String configJsonResource = getConfigJsonResource(context);
+            InputStream configJsonStream = getConfigStream(configJsonResource);
 
-            if (!isResourceFound(configJsonResource)) {
+            if (configJsonStream == null) {
                 LOGGER.info("CORS json configuration not found at " + configJsonResource + ". CORS "
                         + "will not be enabled.");
                 return;
             }
 
-            corsFilter.register(context, getConfig(configJsonResource));
+            corsFilter.register(context, getConfig(configJsonStream));
         } catch (IOException e) {
             LOGGER.error("Error reading CORS configuration file. CORS will not be enabled.", e);
         }
@@ -53,21 +54,13 @@ public class CorsInitializingServletContextListener implements ServletContextLis
 
     }
 
-    protected boolean isCorsConfigurationResourceDefined(ServletContext context) {
-        return getConfigJsonResource(context) == null;
-    }
-
     protected String getConfigJsonResource(ServletContext context) {
         return context.getInitParameter(CORS_CONFIGURATION_RESOURCE_PARAM);
     }
 
-    protected boolean isResourceFound(String resourcePath) {
-        return getConfigStream(resourcePath) != null;
-    }
-
-    protected CorsConfiguration getConfig(String resourcePath) throws IOException {
+    protected CorsConfiguration getConfig(InputStream configJsonStream) throws IOException {
         return new CorsConfiguration.Builder()
-                .fromJson(getConfigStream(resourcePath))
+                .fromJson(configJsonStream)
                 .build();
     }
 

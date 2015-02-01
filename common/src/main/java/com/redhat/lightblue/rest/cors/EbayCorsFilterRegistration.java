@@ -10,7 +10,7 @@ import java.util.List;
 public class EbayCorsFilterRegistration implements CorsFilterRegistration {
     @Override
     public void register(ServletContext context, CorsConfiguration config) {
-        FilterRegistration.Dynamic filter = context.addFilter("cors", CORSFilter.class);
+        FilterRegistration.Dynamic filter = context.addFilter("cors", new CORSFilter());
 
         addUrlPatterns(filter, config);
         addInitParameters(filter, config);
@@ -29,18 +29,19 @@ public class EbayCorsFilterRegistration implements CorsFilterRegistration {
         String allowedHeaders = commaDelimited(config.getAllowedHeaders());
         String exposedHeaders = commaDelimited(config.getExposedHeaders());
         String preflightMaxAge = Integer.toString(config.getPreflightMaxAge());
-        String supportCredentials = Boolean.toString(config.areCredentialsSupported());
+        String allowCredentials = Boolean.toString(config.areCredentialsAllowed());
         String enableLogging = Boolean.toString(config.isLoggingEnabled());
-        String decorateRequest = Boolean.toString(config.shouldDecorateRequests());
 
         filter.setInitParameter("cors.allowed.origins", allowedOrigins);
         filter.setInitParameter("cors.allowed.methods", allowedMethods);
         filter.setInitParameter("cors.allowed.headers", allowedHeaders);
         filter.setInitParameter("cors.exposed.headers", exposedHeaders);
         filter.setInitParameter("cors.preflight.maxage", preflightMaxAge);
-        filter.setInitParameter("cors.support.credentials", supportCredentials);
+        filter.setInitParameter("cors.support.credentials", allowCredentials);
         filter.setInitParameter("cors.logging.enabled", enableLogging);
-        filter.setInitParameter("cors.request.decorate", decorateRequest);
+
+        // Not necessary for Lightblue services.
+        filter.setInitParameter("cors.request.decorate", "false");
     }
 
     private String commaDelimited(List<String> list) {
