@@ -33,6 +33,12 @@
                             <artifactId>lightblue-rest-crud</artifactId>
                         </overlay>
                     </overlays>
+                    <webResources>
+                      <resource>
+                          <directory>src/main/webapp</directory>
+                          <filtering>true</filtering>
+                      </resource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>
