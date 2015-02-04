@@ -39,7 +39,7 @@ public class CorsConfigurationBuilderTest {
     }
 
     @Test
-    public void shoulNotOverrideDefaultsIfNotProvidedInJsonConfiguration() throws IOException {
+    public void shouldNotOverrideDefaultsIfNotProvidedInJsonConfiguration() throws IOException {
         CorsConfiguration config = new CorsConfiguration.Builder()
                 .fromJsonResource("emptyCorsConfig.json")
                 .build();
