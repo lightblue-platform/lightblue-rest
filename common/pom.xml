@@ -46,5 +46,13 @@
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>lightblue-mongo-test</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.ebaysf.web</groupId>
+            <artifactId>cors-filter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
     </dependencies>
 </project>

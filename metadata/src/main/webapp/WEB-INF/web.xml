@@ -28,4 +28,12 @@
         <url-pattern>/health</url-pattern>
     </servlet-mapping>
 
+    <listener>
+        <listener-class>com.redhat.lightblue.rest.cors.CorsInitializingServletContextListener</listener-class>
+    </listener>
+
+    <context-param>
+        <param-name>cors.configuration.resource</param-name>
+        <param-value>lightblue-metadata-cors.json</param-value>
+    </context-param>
 </web-app>
