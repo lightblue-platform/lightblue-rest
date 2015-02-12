@@ -20,7 +20,6 @@ package com.redhat.lightblue.rest.metadata.hystrix;
 
 import com.redhat.lightblue.metadata.EntityInfo;
 import com.redhat.lightblue.metadata.Metadata;
-import com.redhat.lightblue.metadata.parser.JSONMetadataParser;
 import com.redhat.lightblue.rest.metadata.RestMetadataConstants;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;

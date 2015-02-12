@@ -161,7 +161,6 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-    @Ignore
     public void deleteSimpleIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-metadata.json");
         String entityInfo = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-entityInfo.json");
@@ -172,7 +171,7 @@ public class ITMongoIndexManipulationTest {
         Assert.assertNotNull(metadata);
         Assert.assertTrue(metadata.length() > 0);
 
-        // create metadata without any non-default indexes
+        // create metadata with one non-default index
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
@@ -183,7 +182,7 @@ public class ITMongoIndexManipulationTest {
         // verify no indexes, since collection hasn't been touched yet (no indexes, no data)
         Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
 
-        // update entityInfo to delete an index
+        // update entityInfo to remove index
         metadataResource.updateEntityInfo(sc, entityName, entityInfo);
 
         // verify has _id and field1 index by simply check on index count
@@ -285,7 +284,6 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-    @Ignore
     public void deleteArrayIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-deleteArrayIndex-metadata.json");
         String entityInfo = readFile(getClass().getSimpleName() + "-deleteArrayIndex-entityInfo.json");

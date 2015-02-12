@@ -1,0 +1,14 @@
+{
+  "urlPatterns": ["/test", "/data"],
+  "allowedOrigins": ["http://test.com", "http://test2.com"],
+  "allowedMethods": ["GET", "POST"],
+  "allowedHeaders": [
+    "Origin",
+    "Accept",
+    "X-Requested-With"
+  ],
+  "exposedHeaders": ["test", "exposed", "headers"],
+  "preflightMaxAge": 10,
+  "allowCredentials": false,
+  "enableLogging": true
+}

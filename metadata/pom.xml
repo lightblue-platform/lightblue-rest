@@ -84,6 +84,12 @@
                 <version>2.4</version>
                 <configuration>
                     <attachClasses>true</attachClasses>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>

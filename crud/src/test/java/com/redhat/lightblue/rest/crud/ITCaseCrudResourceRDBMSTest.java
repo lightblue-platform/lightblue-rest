@@ -299,7 +299,7 @@ public class ITCaseCrudResourceRDBMSTest {
 
             String expectedInserted = readFile("expectedInserted.json");
             String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity().toString();
-            //System.err.println("!!!!!!!!!!!!!!!!!" + resultInserted);
+            System.err.println("!!!!!!!!!!!!!!!!!" + resultInserted);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
             conn = ds.getConnection();
@@ -355,6 +355,41 @@ public class ITCaseCrudResourceRDBMSTest {
         mongo.dropDatabase(DB_NAME);
     }
 
+
+    @Test
+    public void testSelectAll() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
+        try {
+            Context initCtx = new InitialContext();
+            DataSource ds = (DataSource) initCtx.lookup("java:/mydatasource");
+            Connection conn = ds.getConnection();
+            Statement stmt = conn.createStatement();
+            stmt.execute("CREATE TABLE Country ( name varchar(255), iso2code varchar(255), iso3code varchar(255) );");
+            stmt.execute("INSERT INTO Country (name,iso2code,iso3code) VALUES ('a','CA','c');");
+            stmt.close();
+            conn.close();
+
+            Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+            RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readConfigFile(RestConfiguration.DATASOURCE_FILENAME))));
+            RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
+
+            String expectedCreated = readFile("expectedCreated.json");
+            String metadata = readFile("metadata.json");
+            EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
+            RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+            EntityMetadata em2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("country", "1.0.0");
+            String resultCreated = RestConfiguration.getFactory().getJSONParser().convert(em2).toString();
+            JSONAssert.assertEquals(expectedCreated, resultCreated, false);
+
+            String expectedFound = readFile("expectedFoundAll.json");
+            String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFoundAll.json")).getEntity().toString();
+            // TODO / NOTE we can change the result format if needed, now it return an array of arrays
+            //System.err.println("!!!!!!!!!!!!!!!!!" + resultFound);
+            JSONAssert.assertEquals(expectedFound, resultFound, false);
+        } catch (NamingException | SQLException ex) {
+            throw new IllegalStateException(ex);
+        }
+        mongo.dropDatabase(DB_NAME);
+    }
 
     @Test
     public void testUpdate() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
@@ -428,7 +463,7 @@ public class ITCaseCrudResourceRDBMSTest {
 
             String expectedDeleted = readFile("expectedDeleted.json");
             String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json")).getEntity().toString();
-            System.err.println("!!!!!!!!!!!!!!!!!" + resultDeleted);
+            //System.err.println("!!!!!!!!!!!!!!!!!" + resultDeleted);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
             conn = ds.getConnection();
