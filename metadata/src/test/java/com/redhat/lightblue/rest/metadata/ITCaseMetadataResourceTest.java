@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static com.redhat.lightblue.util.test.FileUtil.readFile;
+import static com.redhat.lightblue.util.test.FileUtil.readFileAndTrim;
 
 /**
  * @author lcestari
@@ -97,22 +98,22 @@ public class ITCaseMetadataResourceTest {
 
         SecurityContext sc = new TestSecurityContext();
 
-        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
+        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFileAndTrim("datasources.json"))));
         RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
         System.out.println("factory:" + RestConfiguration.getFactory());
-        String expectedCreated = readFile("expectedCreated.json");
-        String resultCreated = cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFile("resultCreated.json"));
+        String expectedCreated = readFileAndTrim("expectedCreated.json");
+        String resultCreated = cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFileAndTrim("resultCreated.json"));
         JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
-        String expectedDepGraph = readFile("expectedDepGraph.json").replace("Notsupportedyet", " Not supported yet");
+        String expectedDepGraph = readFileAndTrim("expectedDepGraph.json").replace("Notsupportedyet", " Not supported yet");
         String resultDepGraph = cutMetadataResource.getDepGraph(sc);
         JSONAssert.assertEquals(expectedDepGraph, resultDepGraph, false);
 
-        String expectedDepGraph1 = readFile("expectedDepGraph1.json").replace("Notsupportedyet", " Not supported yet");
+        String expectedDepGraph1 = readFileAndTrim("expectedDepGraph1.json").replace("Notsupportedyet", " Not supported yet");
         String resultDepGraph1 = cutMetadataResource.getDepGraph(sc, "country");
         JSONAssert.assertEquals(expectedDepGraph1, resultDepGraph1, false);
 
-        String expectedDepGraph2 = readFile("expectedDepGraph2.json").replace("Notsupportedyet", " Not supported yet");
+        String expectedDepGraph2 = readFileAndTrim("expectedDepGraph2.json").replace("Notsupportedyet", " Not supported yet");
         String resultDepGraph2 = cutMetadataResource.getDepGraph(sc, "country", "1.0.0");
         JSONAssert.assertEquals(expectedDepGraph2, resultDepGraph2, false);
 
@@ -128,7 +129,7 @@ public class ITCaseMetadataResourceTest {
         JSONAssert.assertEquals(expectedEntityRoles, resultEntityRoles, false);
         JSONAssert.assertEquals(expectedEntityRoles1, resultEntityRoles1, false);
 
-        String expectedEntityRoles2 = readFile("expectedEntityRoles2.json");
+        String expectedEntityRoles2 = readFileAndTrim("expectedEntityRoles2.json");
         String resultEntityRoles2 = cutMetadataResource.getEntityRoles(sc, "country", "1.0.0");
         JSONAssert.assertEquals(expectedEntityRoles2, resultEntityRoles2, false);
 
@@ -140,12 +141,12 @@ public class ITCaseMetadataResourceTest {
         String resultGetMetadata = cutMetadataResource.getMetadata(sc, "country", "1.0.0");
         JSONAssert.assertEquals(expectedGetMetadata, resultGetMetadata, false);
 
-        String expectedCreateSchema = readFile("expectedCreateSchema.json");
-        String resultCreateSchema = cutMetadataResource.createSchema(sc, "country", "1.1.0", readFile("expectedCreateSchemaInput.json"));
+        String expectedCreateSchema = readFileAndTrim("expectedCreateSchema.json");
+        String resultCreateSchema = cutMetadataResource.createSchema(sc, "country", "1.1.0", readFileAndTrim("expectedCreateSchemaInput.json"));
         JSONAssert.assertEquals(expectedCreateSchema, resultCreateSchema, false);
 
-        String expectedUpdateEntityInfo = readFile("expectedUpdateEntityInfo.json");
-        String resultUpdateEntityInfo = cutMetadataResource.updateEntityInfo(sc, "country", readFile("expectedUpdateEntityInfoInput.json"));
+        String expectedUpdateEntityInfo = readFileAndTrim("expectedUpdateEntityInfo.json");
+        String resultUpdateEntityInfo = cutMetadataResource.updateEntityInfo(sc, "country", readFileAndTrim("expectedUpdateEntityInfoInput.json"));
         JSONAssert.assertEquals(expectedUpdateEntityInfo, resultUpdateEntityInfo, false);
 
         String x = cutMetadataResource.setDefaultVersion(sc, "country", "1.0.0");
@@ -153,13 +154,16 @@ public class ITCaseMetadataResourceTest {
         JSONAssert.assertEquals(expected, x, false);
 
         x = cutMetadataResource.clearDefaultVersion(sc, "country");
-        //System.out.println(x);
         expected = esc("{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]},{'name': null,'unique': true,'fields': [{'field': '_id','dir': '$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}}");
         JSONAssert.assertEquals(expected, x, false);
 
         String expectedUpdateSchemaStatus = esc("{'entityInfo':{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]},{'name': null,'unique': true,'fields': [{'field': '_id','dir': '$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'deprecated'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
         String resultUpdateSchemaStatus = cutMetadataResource.updateSchemaStatus(sc, "country", "1.0.0", "deprecated", "No comment");
         JSONAssert.assertEquals(expectedUpdateSchemaStatus, resultUpdateSchemaStatus, false);
+
+        String expectedJsonSchemaFound= readFile("expectedJsonSchema.json");
+        String resultJsonSchemaFound = cutMetadataResource.getJsonSchema(sc,  "country",  "1.0.0");
+        JSONAssert.assertEquals(expectedJsonSchemaFound, resultJsonSchemaFound, false);
 
     }
 
@@ -169,14 +173,14 @@ public class ITCaseMetadataResourceTest {
 
         SecurityContext sc = new TestSecurityContext();
 
-        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
+        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFileAndTrim("datasources.json"))));
         RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
         System.out.println("factory:" + RestConfiguration.getFactory());
-        String expectedCreated = readFile("expectedCreated.json");
-        String resultCreated = cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFile("resultCreated.json"));
+        String expectedCreated = readFileAndTrim("expectedCreated.json");
+        String resultCreated = cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFileAndTrim("resultCreated.json"));
         JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
-        String expectedUpdateEntityInfo = readFile("expectedCreateSchema.json");
+        String expectedUpdateEntityInfo = readFileAndTrim("expectedCreateSchema.json");
         String resultUpdateEntityInfo = cutMetadataResource.createMetadata(sc, "country", "1.1.0",expectedUpdateEntityInfo);
         JSONAssert.assertEquals(expectedUpdateEntityInfo, resultUpdateEntityInfo, false);
     }
