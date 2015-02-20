@@ -18,19 +18,23 @@
  */
 package com.redhat.lightblue.rest.crud.hystrix;
 
+import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
- *
  * @author nmalik
  */
+@RunWith(Arquillian.class)
 public class InsertCommandTest extends AbstractRestCommandTest {
+
     @Test
     public void execute() {
+
         InsertCommand command = new InsertCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute();
+        String output = command.execute().toString();
 
         Assert.assertNotNull(output);
 

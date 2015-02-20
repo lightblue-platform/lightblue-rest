@@ -23,6 +23,7 @@ import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.InsertionRequest;
 import com.redhat.lightblue.mediator.Mediator;
+import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.JsonUtils;
 import org.slf4j.Logger;
@@ -51,24 +52,24 @@ public class InsertCommand extends AbstractRestCommand {
     }
 
     @Override
-    protected String run() {
+    protected CallStatus run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
         try {
-            InsertionRequest ireq = InsertionRequest.fromJson((ObjectNode) JsonUtils.json(request));
+            InsertionRequest ireq = getJsonTranslator().parse(InsertionRequest.class,JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
             Response r = getMediator().insert(ireq);
-            return r.toJson().toString();
+            return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("insert failure: {}", e);
-            return e.toString();
+            return new CallStatus(e);
         } catch (Exception e) {
             LOGGER.error("insert failure: {}", e);
-            return Error.get(RestCrudConstants.ERR_REST_INSERT, e.toString()).toString();
+            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_INSERT, e.toString()));
         }
     }
 }

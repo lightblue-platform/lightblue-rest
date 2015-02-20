@@ -26,9 +26,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.redhat.lightblue.rest</groupId>
-    <artifactId>rest-pom</artifactId>
+    <artifactId>lightblue-rest-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <description>REST front-ends for Lightblue</description>
     <licenses>
@@ -60,19 +60,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <type>pom</type>
             </dependency>
             <dependency>
-                <groupId>com.netflix.hystrix</groupId>
-                <artifactId>hystrix-core</artifactId>
-                <version>1.3.16</version>
-            </dependency>
-            <dependency>
-                <groupId>com.netflix.hystrix</groupId>
-                <artifactId>hystrix-metrics-event-stream</artifactId>
-                <version>1.3.16</version>
-            </dependency>
-            <dependency>
-                <groupId>com.netflix.hystrix</groupId>
-                <artifactId>hystrix-servo-metrics-publisher</artifactId>
-                <version>1.3.16</version>
+                <groupId>org.jboss.security</groupId>
+                <artifactId>jboss-negotiation-common</artifactId>
+                <version>2.3.4.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -93,37 +83,104 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.11</version>
+                <version>4.12</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
-                <artifactId>core-api</artifactId>
-                <version>${lightblue-core.version}</version>
+                <artifactId>lightblue-core-api</artifactId>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
-                <artifactId>util</artifactId>
-                <version>${lightblue-core.version}</version>
+                <artifactId>lightblue-core-util</artifactId>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>com.redhat.lightblue.config</groupId>
-                <artifactId>core-config</artifactId>
-                <version>${lightblue-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>mongo-metadata</artifactId>
-                <version>${lightblue-mongo.version}</version>
+                <groupId>com.redhat.lightblue</groupId>
+                <artifactId>lightblue-core-config</artifactId>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>mongo-crud</artifactId>
-                <version>${lightblue-mongo.version}</version>
+                <artifactId>lightblue-mongo-metadata</artifactId>
+                <version>1.3.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>mongo-config</artifactId>
-                <version>${lightblue-mongo.version}</version>
+                <artifactId>lightblue-mongo-crud</artifactId>
+                <version>1.3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.mongo</groupId>
+                <artifactId>lightblue-mongo-config</artifactId>
+                <version>1.3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.mongo</groupId>
+                <artifactId>lightblue-mongo-test</artifactId>
+                <version>1.3.0-SNAPSHOT</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.rdbms</groupId>
+                <artifactId>lightblue-rdbms-metadata</artifactId>
+                <version>0.9.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.rdbms</groupId>
+                <artifactId>lightblue-rdbms-crud</artifactId>
+                <version>0.9.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.rdbms</groupId>
+                <artifactId>lightblue-rdbms-config</artifactId>
+                <version>0.9.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.hook</groupId>
+                <artifactId>lightblue-audit-hook</artifactId>
+                <version>1.3.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                 <artifactId>guava</artifactId>
+                 <version>14.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ebaysf.web</groupId>
+                <artifactId>cors-filter</artifactId>
+                <version>1.0.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
+                <version>1.3</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-library</artifactId>
+                <version>1.3</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>1.10.19</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hamcrest</groupId>
+                        <artifactId>hamcrest-library</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -131,7 +188,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jboss.spec</groupId>
@@ -146,16 +210,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jaxrs</artifactId>
-            <version>2.3.6.Final</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.hystrix</groupId>
-            <artifactId>hystrix-metrics-event-stream</artifactId>
-        </dependency>
+       <dependency>
+           <groupId>org.jboss.resteasy</groupId>
+           <artifactId>resteasy-jaxrs</artifactId>
+           <version>2.3.6.Final</version>
+           <scope>provided</scope>
+       </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.junit</groupId>
             <artifactId>arquillian-junit-container</artifactId>
@@ -197,8 +257,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <sonar.host.url>http://127.0.0.1:8080</sonar.host.url>
         <sonar.projectName>lightblue-rest</sonar.projectName>
         <rpm.install.basedir>/usr/share/jbossas/standalone/deployments</rpm.install.basedir>
-        <lightblue-core.version>1.1.0-SNAPSHOT</lightblue-core.version>
-        <lightblue-mongo.version>1.0.1</lightblue-mongo.version>
     </properties>
     <build>
         <plugins>
@@ -256,7 +314,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
                         <configuration>
-                            <useAgent>true</useAgent>
+                            <useAgent>false</useAgent>
                         </configuration>
                     </plugin>
                     <plugin>

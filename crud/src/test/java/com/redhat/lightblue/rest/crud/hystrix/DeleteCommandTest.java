@@ -22,7 +22,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author nmalik
  */
 public class DeleteCommandTest extends AbstractRestCommandTest {
@@ -30,7 +29,7 @@ public class DeleteCommandTest extends AbstractRestCommandTest {
     public void execute() {
         DeleteCommand command = new DeleteCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute();
+        String output = command.execute().toString();
 
         Assert.assertNotNull(output);
 

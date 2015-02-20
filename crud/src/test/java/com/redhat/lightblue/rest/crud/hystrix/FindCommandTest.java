@@ -22,15 +22,15 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author nmalik
  */
 public class FindCommandTest extends AbstractRestCommandTest {
     @Test
     public void execute() {
+
         FindCommand command = new FindCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute();
+        String output = command.execute().toString();
 
         Assert.assertNotNull(output);
 

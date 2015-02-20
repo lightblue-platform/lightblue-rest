@@ -21,41 +21,51 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.redhat.lightblue.rest</groupId>
-        <artifactId>rest-pom</artifactId>
-        <version>1.1.0-SNAPSHOT</version>
+        <artifactId>lightblue-rest-pom</artifactId>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
     <groupId>com.redhat.lightblue.rest</groupId>
-    <artifactId>rest-metadata</artifactId>
+    <artifactId>lightblue-rest-metadata</artifactId>
     <packaging>war</packaging>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
-            <artifactId>rest-common</artifactId>
+            <artifactId>lightblue-rest-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.redhat.lightblue.config</groupId>
-            <artifactId>core-config</artifactId>
+            <groupId>com.redhat.lightblue</groupId>
+            <artifactId>lightblue-core-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.hook</groupId>
+            <artifactId>lightblue-audit-hook</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue</groupId>
-            <artifactId>util</artifactId>
+            <artifactId>lightblue-core-util</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>mongo-config</artifactId>
+            <artifactId>lightblue-mongo-config</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>mongo-metadata</artifactId>
+            <artifactId>lightblue-mongo-metadata</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.flapdoodle.embed</groupId>
-            <artifactId>de.flapdoodle.embed.mongo</artifactId>
-            <version>1.46.0</version>
-            <scope>test</scope>
+            <groupId>com.redhat.lightblue.mongo</groupId>
+            <artifactId>lightblue-mongo-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.rdbms</groupId>
+            <artifactId>lightblue-rdbms-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.rdbms</groupId>
+            <artifactId>lightblue-rdbms-metadata</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -74,6 +84,12 @@
                 <version>2.4</version>
                 <configuration>
                     <attachClasses>true</attachClasses>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>
@@ -98,7 +114,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <name>lightblue-${project.artifactId}</name>
+                            <name>${project.artifactId}</name>
                             <copyright>Red Hat</copyright>
                             <distribution>RHEL</distribution>
                             <group>Lightblue Platform</group>

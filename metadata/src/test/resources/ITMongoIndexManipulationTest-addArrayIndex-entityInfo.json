@@ -1,0 +1,19 @@
+{
+    "name": "test",
+    "datastore": {
+        "backend": "mongo",
+        "collection": "test",
+        "datasource": "mongo"
+    },
+    "indexes": [
+        {
+            "fields": [
+                {
+                    "field": "field7.elemf1",
+                    "dir": "$asc"
+                }
+            ],
+            "unique": false
+        }
+    ]
+}

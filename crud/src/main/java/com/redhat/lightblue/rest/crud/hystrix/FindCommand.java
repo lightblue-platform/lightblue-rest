@@ -23,6 +23,7 @@ import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.mediator.Mediator;
+import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.JsonUtils;
 import org.slf4j.Logger;
@@ -51,25 +52,25 @@ public class FindCommand extends AbstractRestCommand {
     }
 
     @Override
-    protected String run() {
+    protected CallStatus run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
         try {
-            FindRequest ireq = FindRequest.fromJson((ObjectNode) JsonUtils.json(request));
+            FindRequest ireq = getJsonTranslator().parse(FindRequest.class,JsonUtils.json(request));
             LOGGER.debug("Find request:{}", ireq);
             validateReq(ireq, entity, version);
             addCallerId(ireq);
             Response r = getMediator().find(ireq);
-            return r.toJson().toString();
+            return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("find failure: {}", e);
-            return e.toString();
+            return new CallStatus(e);
         } catch (Exception e) {
             LOGGER.error("find failure: {}", e);
-            return Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()).toString();
+            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         }
     }
 }

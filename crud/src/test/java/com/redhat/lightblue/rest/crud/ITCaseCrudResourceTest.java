@@ -30,6 +30,7 @@ import com.redhat.lightblue.metadata.mongo.MongoMetadata;
 import com.redhat.lightblue.mongo.config.MongoConfiguration;
 import com.redhat.lightblue.util.JsonUtils;
 import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.util.test.FileUtil;
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -63,8 +64,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-
-import static com.redhat.lightblue.util.test.FileUtil.readFile;
 
 /**
  *
@@ -101,7 +100,7 @@ public class ITCaseCrudResourceTest {
     }
 
     private static final String MONGO_HOST = "localhost";
-    private static final int MONGO_PORT = 27777;
+    private static final int MONGO_PORT = 27757;
     private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
 
     private static final String DB_NAME = "testmetadata";
@@ -188,25 +187,28 @@ public class ITCaseCrudResourceTest {
     @Deployment
     public static WebArchive createDeployment() {
         File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeDependencies().resolve().withTransitivity().asFile();
+        final String PATH_BASE = "src/test/resources/" + ITCaseCrudResourceTest.class.getSimpleName() + "/config/";
 
         WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(new File(PATH + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
-                .addAsResource(new File(PATH + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
-                .addAsResource(new File(PATH + DATASOURCESJSON), DATASOURCESJSON)
-                .addAsResource(new File(PATH + CONFIGPROPERTIES), CONFIGPROPERTIES);
-
+                .addAsResource(new File(PATH_BASE + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
+                .addAsResource(new File(PATH_BASE + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
+                .addAsResource(new File(PATH_BASE + RestConfiguration.DATASOURCE_FILENAME), RestConfiguration.DATASOURCE_FILENAME)
+                .addAsResource(new File(PATH_BASE + "config.properties"), "config.properties");
         for (File file : libs) {
             archive.addAsLibrary(file);
         }
         archive.addPackages(true, "com.redhat.lightblue");
         return archive;
-
     }
 
-    private static final String PATH = "src/test/resources/it/it-";
-    private static final String CONFIGPROPERTIES = "config.properties";
-    private static final String DATASOURCESJSON = "datasources.json";
+    private String readFile(String filename) throws IOException, URISyntaxException {
+        return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
+    }
+
+    private String readConfigFile(String filename) throws IOException, URISyntaxException {
+        return readFile("config/" + filename);
+    }
 
     @Inject
     private CrudResource cutCrudResource; //class under test
@@ -214,9 +216,9 @@ public class ITCaseCrudResourceTest {
     @Test
     public void testFirstIntegrationTest() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile(DATASOURCESJSON))));
+        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readConfigFile(RestConfiguration.DATASOURCE_FILENAME))));
         RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
-
+        
         String expectedCreated = readFile("expectedCreated.json");
         String metadata = readFile("metadata.json");
         EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
@@ -226,16 +228,16 @@ public class ITCaseCrudResourceTest {
         JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
         String expectedInserted = readFile("expectedInserted.json");
-        String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json"));
+        String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedInserted, resultInserted, false);
 
         String expectedUpdated = readFile("expectedUpdated.json");
-        String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json"));
+        String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedUpdated, resultUpdated, false);
 
         String expectedFound = readFile("expectedFound.json");
-        String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json"));
-        JSONAssert.assertEquals(expectedFound, resultFound, false);
+        String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json")).getEntity().toString();
+        JSONAssert.assertEquals(expectedFound, resultFound, false); // #TODO #FIX Not finding the right version
 
         String resultSimpleFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
                 "country",
@@ -244,15 +246,15 @@ public class ITCaseCrudResourceTest {
                 "name:1r,iso3code:1,iso2code:0r",
                 "name:a,iso3code:d,iso2code:d",
                 0,
-                -1);
+                -1).getEntity().toString();
         JSONAssert.assertEquals(expectedFound, resultSimpleFound, false);
 
         String expectedDeleted = readFile("expectedDeleted.json");
-        String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json"));
+        String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedDeleted, resultDeleted, false);
 
         String expectedFound2 = readFile("expectedFound2.json");
-        String resultFound2 = cutCrudResource.find("country", "1.0.0", readFile("resultFound2.json"));
+        String resultFound2 = cutCrudResource.find("country", "1.0.0", readFile("resultFound2.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedFound2, resultFound2, false);
     }
 }
