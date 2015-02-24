@@ -51,10 +51,7 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.json.JSONException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -75,6 +72,7 @@ import java.sql.Statement;
  * @author lcestari
  */
 @RunWith(Arquillian.class)
+@Ignore
 public class ITCaseCrudResourceRDBMSTest {
 
     private static boolean notRegistered = true;

@@ -35,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
+import com.restcompress.provider.LZF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,18 +78,21 @@ public abstract class AbstractMetadataResource {
     }
 
     @GET
+    @LZF
     @Path("/dependencies")
     public String getDepGraph(@Context SecurityContext sc) {
         return getDepGraph(sc, null, null);
     }
 
     @GET
+    @LZF
     @Path("/{entity}/dependencies")
     public String getDepGraph(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         return getDepGraph(sc, entity, null);
     }
 
     @GET
+    @LZF
     @Path("/{entity}/{version}/dependencies")
     public String getDepGraph(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
@@ -98,18 +102,21 @@ public abstract class AbstractMetadataResource {
     }
 
     @GET
+    @LZF
     @Path("/roles")
     public String getEntityRoles(@Context SecurityContext sc ) {
         return getEntityRoles(sc, null, null);
     }
 
     @GET
+    @LZF
     @Path("/{entity}/roles")
     public String getEntityRoles(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         return getEntityRoles(sc, entity, null);
     }
 
     @GET
+    @LZF
     @Path("/{entity}/{version}/roles")
     public String getEntityRoles(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
@@ -119,6 +126,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @GET
+    @LZF
     @Path("/")
     public String getEntityNames(@Context SecurityContext sc) {
         Error.reset();
@@ -128,6 +136,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @GET
+    @LZF
     @Path("/s={statuses}")
     public String getEntityNames(@Context SecurityContext sc, @PathParam("statuses") String statuses) {
         StringTokenizer tok = new StringTokenizer(" ,;:.");
@@ -143,6 +152,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @GET
+    @LZF
     @Path("/{entity}")
     public String getEntityVersions(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
@@ -152,6 +162,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @GET
+    @LZF
     @Path("/{entity}/{version}")
     public String getMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
@@ -161,6 +172,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @PUT
+    @LZF
     @Path("/{entity}/{version}")
     @Consumes(MediaType.APPLICATION_JSON)
     public String createMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String data) {
@@ -171,6 +183,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @PUT
+    @LZF
     @Path("/{entity}/schema={version}")
     @Consumes(MediaType.APPLICATION_JSON)
     public String createSchema(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String schema) {
@@ -181,6 +194,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @PUT
+    @LZF
     @Path("/{entity}")
     @Consumes(MediaType.APPLICATION_JSON)
     public String updateEntityInfo(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, String info) {
@@ -191,6 +205,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @PUT
+    @LZF
     @Path("/{entity}/{version}/{status}")
     public String updateSchemaStatus(@Context SecurityContext sc,
             @PathParam(PARAM_ENTITY) String entity,
@@ -204,6 +219,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @POST
+    @LZF
     @Path("/{entity}/{version}/default")
     public String setDefaultVersion(@Context SecurityContext sc,
             @PathParam(PARAM_ENTITY) String entity,
@@ -215,6 +231,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @DELETE
+    @LZF
     @Path("/{entity}")
     public String removeEntity(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
@@ -224,6 +241,7 @@ public abstract class AbstractMetadataResource {
     }
 
     @DELETE
+    @LZF
     @Path("/{entity}/default")
     public String clearDefaultVersion(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
