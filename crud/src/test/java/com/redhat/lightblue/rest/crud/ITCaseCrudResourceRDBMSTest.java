@@ -71,6 +71,7 @@ import java.sql.Statement;
 /**
  * @author lcestari
  */
+@Ignore
 @RunWith(Arquillian.class)
 @Ignore
 public class ITCaseCrudResourceRDBMSTest {
