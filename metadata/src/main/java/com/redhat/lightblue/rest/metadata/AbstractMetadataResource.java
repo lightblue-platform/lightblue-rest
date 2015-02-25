@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.MetadataConstants;
-import com.redhat.lightblue.metadata.MetadataRoles;
+import com.redhat.lightblue.metadata.MetadataRole;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.util.Error;
 
@@ -83,7 +83,7 @@ public abstract class AbstractMetadataResource {
     public String getDepGraph(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.FIND_DEPENDENCIES);
+        checkPermission(sc, MetadataRole.FIND_DEPENDENCIES);
         return new GetDependenciesCommand(null, entity, version).execute();
     }
 
@@ -104,7 +104,7 @@ public abstract class AbstractMetadataResource {
     public String getEntityRoles(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.FIND_ROLES);
+        checkPermission(sc, MetadataRole.FIND_ROLES);
         return new GetEntityRolesCommand(null, entity, version).execute();
     }
 
@@ -113,7 +113,7 @@ public abstract class AbstractMetadataResource {
     public String getEntityNames(@Context SecurityContext sc) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
+        checkPermission(sc, MetadataRole.FIND_ENTITY_NAMES);
         return new GetEntityNamesCommand(null, new String[0]).execute();
     }
 
@@ -128,7 +128,7 @@ public abstract class AbstractMetadataResource {
         }
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.FIND_ENTITY_NAMES);
+        checkPermission(sc, MetadataRole.FIND_ENTITY_NAMES);
         return new GetEntityNamesCommand(null, s).execute();
     }
 
@@ -137,7 +137,7 @@ public abstract class AbstractMetadataResource {
     public String getEntityVersions(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.FIND_ENTITY_VERSIONS);
+        checkPermission(sc, MetadataRole.FIND_ENTITY_VERSIONS);
         return new GetEntityVersionsCommand(null, entity).execute();
     }
 
@@ -146,7 +146,7 @@ public abstract class AbstractMetadataResource {
     public String getMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.FIND_ENTITY_METADATA);
+        checkPermission(sc, MetadataRole.FIND_ENTITY_METADATA);
         return new GetEntityMetadataCommand(null, entity, version).execute();
     }
 
@@ -156,7 +156,7 @@ public abstract class AbstractMetadataResource {
     public String createMetadata(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String data) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.INSERT);
+        checkPermission(sc, MetadataRole.INSERT);
         return new CreateEntityMetadataCommand(null, entity, version, data).execute();
     }
 
@@ -166,7 +166,7 @@ public abstract class AbstractMetadataResource {
     public String createSchema(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, String schema) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.INSERT_SCHEMA);
+        checkPermission(sc, MetadataRole.INSERT_SCHEMA);
         return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
     }
 
@@ -188,7 +188,7 @@ public abstract class AbstractMetadataResource {
     public String updateEntityInfo(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, String info) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.UPDATE_ENTITYINFO);
+        checkPermission(sc, MetadataRole.UPDATE_ENTITYINFO);
         return new UpdateEntityInfoCommand(null, entity, info).execute();
     }
 
@@ -201,7 +201,7 @@ public abstract class AbstractMetadataResource {
             @QueryParam("comment") String comment) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.UPDATE_ENTITY_SCHEMASTATUS);
+        checkPermission(sc, MetadataRole.UPDATE_ENTITY_SCHEMASTATUS);
         return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
     }
 
@@ -212,7 +212,7 @@ public abstract class AbstractMetadataResource {
             @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
+        checkPermission(sc, MetadataRole.UPDATE_DEFAULTVERSION);
         return new SetDefaultVersionCommand(null, entity, version).execute();
     }
 
@@ -221,7 +221,7 @@ public abstract class AbstractMetadataResource {
     public String removeEntity(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.DELETE_ENTITY);
+        checkPermission(sc, MetadataRole.DELETE_ENTITY);
         return new RemoveEntityCommand(null, entity).execute();
     }
 
@@ -230,12 +230,12 @@ public abstract class AbstractMetadataResource {
     public String clearDefaultVersion(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity) {
         Error.reset();
 
-        checkPermission(sc, MetadataRoles.UPDATE_DEFAULTVERSION);
+        checkPermission(sc, MetadataRole.UPDATE_DEFAULTVERSION);
         return new SetDefaultVersionCommand(null, entity, null).execute();
     }
 
-    private void checkPermission(SecurityContext sc, MetadataRoles roleAllowed){
-        final Map<MetadataRoles, List<String>> mappedRoles = metadata.getMappedRoles();
+    private void checkPermission(SecurityContext sc, MetadataRole roleAllowed){
+        final Map<MetadataRole, List<String>> mappedRoles = metadata.getMappedRoles();
         if(mappedRoles == null || mappedRoles.size() == 0){
             // No authorization was configured
             return;
