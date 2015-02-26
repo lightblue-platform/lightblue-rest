@@ -31,6 +31,20 @@
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
+            <groupId>com.codeablereason.restcompress.provider</groupId>
+            <artifactId>rest-compress-lib</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-nop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-common</artifactId>
             <version>${project.version}</version>
