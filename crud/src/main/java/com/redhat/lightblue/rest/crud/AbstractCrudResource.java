@@ -18,6 +18,7 @@
  */
 package com.redhat.lightblue.rest.crud;
 
+import com.restcompress.provider.LZF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +66,7 @@ public abstract class AbstractCrudResource {
      */
     @PUT
     @Path("/{entity}")
+    @LZF
     @Deprecated
     public Response insertAlt(@PathParam(PARAM_ENTITY) String entity,
                             String request) {
@@ -84,6 +86,7 @@ public abstract class AbstractCrudResource {
     }
 
     @PUT
+    @LZF
     @Path("/insert/{entity}")
     public Response insert(@PathParam(PARAM_ENTITY) String entity,
                            String request) {
@@ -91,6 +94,7 @@ public abstract class AbstractCrudResource {
     }
 
     @PUT
+    @LZF
     @Path("/insert/{entity}/{version}")
     public Response insert(@PathParam(PARAM_ENTITY) String entity,
                            @PathParam(PARAM_VERSION) String version,
@@ -101,6 +105,7 @@ public abstract class AbstractCrudResource {
     }
 
     @POST
+    @LZF
     @Path("/save/{entity}")
     public Response save(@PathParam(PARAM_ENTITY) String entity,
                        String request) {
@@ -108,6 +113,7 @@ public abstract class AbstractCrudResource {
     }
 
     @POST
+    @LZF
     @Path("/save/{entity}/{version}")
     public Response save(@PathParam(PARAM_ENTITY) String entity,
                          @PathParam(PARAM_VERSION) String version,
@@ -118,6 +124,7 @@ public abstract class AbstractCrudResource {
     }
 
     @POST
+    @LZF
     @Path("/update/{entity}")
     public Response update(@PathParam(PARAM_ENTITY) String entity,
                            String request) {
@@ -125,6 +132,7 @@ public abstract class AbstractCrudResource {
     }
 
     @POST
+    @LZF
     @Path("/update/{entity}/{version}")
     public Response update(@PathParam(PARAM_ENTITY) String entity,
                            @PathParam(PARAM_VERSION) String version,
@@ -135,6 +143,7 @@ public abstract class AbstractCrudResource {
     }
 
     @POST
+    @LZF
     @Path("/delete/{entity}")
     public Response delete(@PathParam(PARAM_ENTITY) String entity,
                            String request) {
@@ -142,6 +151,7 @@ public abstract class AbstractCrudResource {
     }
 
     @POST
+    @LZF
     @Path("/delete/{entity}/{version}")
     public Response delete(@PathParam(PARAM_ENTITY) String entity,
                            @PathParam(PARAM_VERSION) String version,
@@ -152,6 +162,7 @@ public abstract class AbstractCrudResource {
     }
 
     @POST
+    @LZF
     @Path("/find/{entity}")
     public Response find(@PathParam(PARAM_ENTITY) String entity,
                          String request) {
@@ -159,6 +170,7 @@ public abstract class AbstractCrudResource {
     }
 
     @POST
+    @LZF
     @Path("/find/{entity}/{version}")
     public Response find(@PathParam(PARAM_ENTITY) String entity,
                          @PathParam(PARAM_VERSION) String version,
@@ -170,6 +182,7 @@ public abstract class AbstractCrudResource {
     }
 
     @GET
+    @LZF
     @Path("/find/{entity}")
     //?Q&P&S&from&to
     public Response simpleFind(@PathParam(PARAM_ENTITY) String entity,
@@ -182,6 +195,7 @@ public abstract class AbstractCrudResource {
     }
 
     @GET
+    @LZF
     @Path("/find/{entity}/{version}")
     //?Q&P&S&from&to
     public Response simpleFind(@PathParam(PARAM_ENTITY) String entity,
