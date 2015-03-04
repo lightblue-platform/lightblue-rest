@@ -238,6 +238,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- The following dependency is necessary -->
+        <dependency>
+            <groupId>io.reactivex</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>1.0.7</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <modules>
         <module>common</module>
@@ -258,6 +266,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <sonar.projectName>lightblue-rest</sonar.projectName>
         <rpm.install.basedir>/usr/share/jbossas/standalone/deployments</rpm.install.basedir>
         <guava>18.0</guava>
+
+        <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
+        <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
+        <maven.compiler.debuglevel>lines,vars,source</maven.compiler.debuglevel>
+        <maven.compiler.verbose>true</maven.compiler.verbose>
     </properties>
     <build>
         <plugins>
