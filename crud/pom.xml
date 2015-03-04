@@ -68,18 +68,6 @@
             <artifactId>lightblue-mongo-config</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.redhat.lightblue.rdbms</groupId>
-            <artifactId>lightblue-rdbms-crud</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.rdbms</groupId>
-            <artifactId>lightblue-rdbms-metadata</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.rdbms</groupId>
-            <artifactId>lightblue-rdbms-config</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>lightblue-mongo-test</artifactId>
         </dependency>
