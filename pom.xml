@@ -128,21 +128,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.redhat.lightblue.rdbms</groupId>
-                <artifactId>lightblue-rdbms-metadata</artifactId>
-                <version>0.9.1-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.rdbms</groupId>
-                <artifactId>lightblue-rdbms-crud</artifactId>
-                <version>0.9.1-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.rdbms</groupId>
-                <artifactId>lightblue-rdbms-config</artifactId>
-                <version>0.9.1-SNAPSHOT</version>
-            </dependency>
-            <dependency>
                 <groupId>com.redhat.lightblue.hook</groupId>
                 <artifactId>lightblue-audit-hook</artifactId>
                 <version>1.3.0-SNAPSHOT</version>
