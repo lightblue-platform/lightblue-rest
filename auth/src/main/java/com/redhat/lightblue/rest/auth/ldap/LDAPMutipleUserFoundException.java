@@ -7,5 +7,6 @@ package com.redhat.lightblue.rest.auth.ldap;
  */
 public class LDAPMutipleUserFoundException extends Exception {
     public LDAPMutipleUserFoundException(String message) {
+        super(message);
     }
 }
