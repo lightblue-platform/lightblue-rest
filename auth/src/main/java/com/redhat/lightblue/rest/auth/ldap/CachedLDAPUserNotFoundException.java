@@ -5,6 +5,6 @@ package com.redhat.lightblue.rest.auth.ldap;
  *
  * Created by lcestari on 3/6/15.
  */
-// TODO do we log error for each execption (even when it is something like CachedLDAPUserNotFoundException (this) class )
+// TODO REVIEWER check the Exception classes, log level used and related things are properly used/created all over the code
 public class CachedLDAPUserNotFoundException extends Exception {
 }

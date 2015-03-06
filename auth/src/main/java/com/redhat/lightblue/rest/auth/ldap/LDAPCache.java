@@ -3,7 +3,6 @@ package com.redhat.lightblue.rest.auth.ldap;
 import com.google.common.cache.*;
 import org.jboss.logging.Logger;
 
-import javax.naming.NamingException;
 import javax.naming.directory.SearchResult;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

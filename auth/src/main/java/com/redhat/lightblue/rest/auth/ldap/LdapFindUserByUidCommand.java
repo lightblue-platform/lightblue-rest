@@ -50,13 +50,21 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
         try {
             searchResult = LDAPSearcher.searchLDAPServer(cacheKey);
         } catch (NamingException e) {
+            LOGGER.error("Naming problem with LDAP for user: " + cacheKey.uid, e);
            //propagate the exception
             throw e;
         } catch (LDAPUserNotFoundException | LDAPMutipleUserFoundException e) {
+            // Return null in case the User not found or multiple Users were found (which is inconsistent)
+
+            if(e instanceof LDAPUserNotFoundException)
+                LOGGER.info("No result found roles for user: " + cacheKey.uid, e);
+            else{
+                LOGGER.error("Multiples users found and only one was expected for user: " + cacheKey.uid, e);
+            }
+
             searchResult = LDAPCache.getLDAPCacheSession().getIfPresent(cacheKey);
-            // if (not found on the server OR server state is inconsistent ) and cache hold the old value, evict the entry
             if (searchResult != null) {
-                // invalidate all caches
+                // if (not found on the server OR server state is inconsistent ) and cache hold the old value, evict the entry
                 LDAPCache.invalidateKey(cacheKey);
             }
         }
@@ -98,13 +106,16 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
             if(failedExecutionThrowable instanceof NamingException) {
                 SearchResult searchResult = LDAPCache.getLDAPCacheSession().getIfPresent(cacheKey);
                 if (searchResult == null) {
-                   throw new CachedLDAPUserNotFoundException();
+                    CachedLDAPUserNotFoundException e = new CachedLDAPUserNotFoundException();
+                    LOGGER.error("Failed to connect to the server and no result found roles for user: " + cacheKey.uid, e);
+                    throw e;
                 }
                 // was able to use the cache or use the LDAP server on the second retry
                 return searchResult;
 
             } else if(failedExecutionThrowable instanceof Exception) {
                 // if it is an exception, propagate it until someone handle it properly
+                LOGGER.error("An internal problem occurred during the query for roles for the  user: " + cacheKey.uid, failedExecutionThrowable);
                 throw ((Exception) failedExecutionThrowable);
             } else {
                 // probably java.lang.Error or a custom Throwable exception. In this case we can't handle the problem
