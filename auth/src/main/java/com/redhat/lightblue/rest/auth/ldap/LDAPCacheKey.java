@@ -15,12 +15,12 @@ public class LDAPCacheKey {
     final String searchFilter;
     final SearchControls searchControls = new SearchControls();
 
-    public LDAPCacheKey(String uid, LdapContext ldapContext, String ldapSearchBase, String searchFilter) {
+    public LDAPCacheKey(String uid, LdapContext ldapContext, String ldapSearchBase, String searchFilter, int searchControlScope) {
         this.uid = uid;
         this.ldapContext = ldapContext;
         this.ldapSearchBase = ldapSearchBase;
         this.searchFilter = searchFilter;
-        this.searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+        this.searchControls.setSearchScope(searchControlScope);
     }
 
     @Override

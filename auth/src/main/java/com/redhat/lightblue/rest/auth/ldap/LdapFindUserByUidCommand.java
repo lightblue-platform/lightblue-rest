@@ -8,6 +8,7 @@ import com.redhat.lightblue.util.ServoGraphiteSetup;
 import org.jboss.logging.Logger;
 
 import javax.naming.NamingException;
+import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
 import java.util.concurrent.ExecutionException;
@@ -40,7 +41,7 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
             throw new IllegalArgumentException(String.format(INVALID_PARAM, "ldapContext"));
         }
 
-        this.cacheKey = new LDAPCacheKey(uid, ldapContext, ldapSearchBase,  "(uid=" + uid + ")");
+        this.cacheKey = new LDAPCacheKey(uid, ldapContext, ldapSearchBase,  "(uid=" + uid + ")", SearchControls.SUBTREE_SCOPE);
     }
 
     @Override

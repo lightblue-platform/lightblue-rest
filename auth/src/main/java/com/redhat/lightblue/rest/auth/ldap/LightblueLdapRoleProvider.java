@@ -92,7 +92,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     }
 
     private List<String> getUserRolesFromCache(String userName) {
-        LDAPCacheKey cacheKey = new LDAPCacheKey(userName,ldapContext,ldapSearchBase, "(uid=" + userName + ")");
+        LDAPCacheKey cacheKey = new LDAPCacheKey(userName, ldapContext, ldapSearchBase, "(uid=" + userName + ")", SearchControls.SUBTREE_SCOPE);
         return LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
     }
 
