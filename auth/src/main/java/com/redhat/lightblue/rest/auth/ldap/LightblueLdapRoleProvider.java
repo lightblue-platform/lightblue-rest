@@ -69,6 +69,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
                 SearchResult searchResult = new LdapFindUserByUidCommand(ldapContext, ldapSearchBase, userName).execute();
                 userRoles.addAll(getUserRolesFromLdap(searchResult));
             }
+        // TODO  Whole the other exceptions be handled here or elt them reach the app server
         } catch (NamingException ne) {
             LOGGER.error("Problem getting roles for user: " + userName, ne);
         }

@@ -11,7 +11,6 @@ import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
-import java.util.concurrent.ExecutionException;
 
 /**
  * LDAP Hystrix command that can provide metrics for this service and fall back in case the server was unreachable as well.
@@ -84,35 +83,34 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
         private static final Logger LOGGER = Logger.getLogger(FallbackViaLDAPServerProblemCommand.class);
 
         private final LDAPCacheKey cacheKey;
-        private final Throwable failedExecutionException;
+        private final Throwable failedExecutionThrowable;
 
-        public FallbackViaLDAPServerProblemCommand(LDAPCacheKey cacheKey, Throwable failedExecutionException) {
+        public FallbackViaLDAPServerProblemCommand(LDAPCacheKey cacheKey, Throwable failedExecutionThrowable) {
             super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(GROUPKEY)).
                     andCommandKey(HystrixCommandKey.Factory.asKey(GROUPKEY + ":" + FallbackViaLDAPServerProblemCommand.class.getSimpleName())));
             this.cacheKey = cacheKey;
-            this.failedExecutionException = failedExecutionException;
+            this.failedExecutionThrowable = failedExecutionThrowable;
         }
 
         @Override
         protected SearchResult run() throws Exception {
             //iff it was a problem with the server, try the following:
-            if(failedExecutionException instanceof NamingException) {
+            if(failedExecutionThrowable instanceof NamingException) {
                 SearchResult searchResult = LDAPCache.getLDAPCacheSession().getIfPresent(cacheKey);
                 if (searchResult == null) {
-                   // retry to reach teh server and update the cache as it is not present, in case of error, fail
-                    searchResult = LDAPCache.getLDAPCacheSession().get(cacheKey);
+                   throw new CachedLDAPUserNotFoundException();
                 }
                 // was able to use the cache or use the LDAP server on the second retry
                 return searchResult;
 
-            } else if(failedExecutionException instanceof Exception) {
+            } else if(failedExecutionThrowable instanceof Exception) {
                 // if it is an exception, propagate it until someone handle it properly
-                throw ((Exception)failedExecutionException);
+                throw ((Exception) failedExecutionThrowable);
             } else {
                 // probably java.lang.Error or a custom Throwable exception. In this case we can't handle the problem
                 // and if we wrap it we can change the JVM to inconsistent state, so we have to exit with error status
                 // code
-                LOGGER.fatal("a Throwable instance (which is not instance of Exception) was thrown and it can't be handled.",failedExecutionException);
+                LOGGER.fatal("a Throwable instance (which is not instance of Exception) was thrown and it can't be handled.", failedExecutionThrowable);
                 System.exit(-1);
                 return null;
             }

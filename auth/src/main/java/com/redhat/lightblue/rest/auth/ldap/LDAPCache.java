@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class LDAPCache {
     private static final Logger LOGGER = Logger.getLogger(LDAPCache.class);
-    private static final LoadingCache<LDAPCacheKey, SearchResult> ldapCacheSession; // non-persisted cache
+    private static final Cache<LDAPCacheKey, SearchResult> ldapCacheSession; // non-persisted cache
     private static final Cache<LDAPCacheKey, List<String>> userRolesCacheSession; // non-persisted cache
 
     // The values should be loaded from somewhere and also we should define the default values/behavior as well
@@ -34,13 +34,7 @@ public class LDAPCache {
                                 LOGGER.debug("This data from " + notification.getKey() + " evacuated due:" + notification.getCause());
                             }
                         }
-                ).build(
-                        new CacheLoader<LDAPCacheKey, SearchResult>() {
-                            public SearchResult load(LDAPCacheKey key) throws NamingException, LDAPUserNotFoundException, LDAPMutipleUserFoundException {
-                                return LDAPSearcher.searchLDAPServer(key);
-                            }
-                        }
-                );
+                ).build();
 
         userRolesCacheSession = CacheBuilder.newBuilder()
                 .concurrencyLevel(10) // handle 10 concurrent request without a problem
@@ -59,7 +53,7 @@ public class LDAPCache {
                 ).build();
     }
 
-    public static LoadingCache<LDAPCacheKey, SearchResult> getLDAPCacheSession() {
+    public static Cache<LDAPCacheKey, SearchResult> getLDAPCacheSession() {
         return ldapCacheSession;
     }
 
