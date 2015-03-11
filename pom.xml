@@ -72,7 +72,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>${guava}</version>
+                <version>18.0</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -223,14 +223,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- The following dependency is necessary -->
-        <dependency>
-            <groupId>io.reactivex</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>1.0.7</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
     <modules>
         <module>common</module>
@@ -250,7 +242,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <sonar.host.url>http://127.0.0.1:8080</sonar.host.url>
         <sonar.projectName>lightblue-rest</sonar.projectName>
         <rpm.install.basedir>/usr/share/jbossas/standalone/deployments</rpm.install.basedir>
-        <guava>18.0</guava>
 
         <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
         <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
