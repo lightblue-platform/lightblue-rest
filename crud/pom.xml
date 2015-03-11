@@ -47,6 +47,10 @@
             <artifactId>lightblue-audit-hook</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.lightblue</groupId>
+            <artifactId>lightblue-core-hystrix</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-common</artifactId>
             <version>${project.version}</version>

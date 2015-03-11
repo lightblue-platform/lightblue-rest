@@ -18,7 +18,7 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
-import com.redhat.lightblue.util.ServoGraphiteSetup;
+import com.redhat.lightblue.hystrix.ServoGraphiteSetup;
 import javax.ws.rs.Path;
 
 /**
