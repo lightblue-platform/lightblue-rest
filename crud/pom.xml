@@ -47,6 +47,10 @@
             <artifactId>lightblue-audit-hook</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.lightblue</groupId>
+            <artifactId>lightblue-core-hystrix</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-common</artifactId>
             <version>${project.version}</version>
@@ -62,18 +66,6 @@
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>lightblue-mongo-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.rdbms</groupId>
-            <artifactId>lightblue-rdbms-crud</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.rdbms</groupId>
-            <artifactId>lightblue-rdbms-metadata</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.rdbms</groupId>
-            <artifactId>lightblue-rdbms-config</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>

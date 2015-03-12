@@ -3,7 +3,7 @@ package com.redhat.lightblue.rest.auth.ldap;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
-import com.redhat.lightblue.util.ServoGraphiteSetup;
+import com.redhat.lightblue.hystrix.ServoGraphiteSetup;
 import org.jboss.logging.Logger;
 
 import javax.naming.NamingEnumeration;
