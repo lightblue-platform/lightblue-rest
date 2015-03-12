@@ -14,7 +14,7 @@ import javax.naming.ldap.LdapContext;
 
 /**
  * LDAP Hystrix command that can provide metrics for this service and fall back in case the server was unreachable as well.
- *
+ * <p/>
  * Created by nmalik  and lcestari
  */
 public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
@@ -32,15 +32,15 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
         super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(GROUPKEY)).
                 andCommandKey(HystrixCommandKey.Factory.asKey(GROUPKEY + ":" + LdapFindUserByUidCommand.class.getSimpleName())));
         //check if the informed parameters are valid
-        if(Strings.isNullOrEmpty(uid)) {
+        if (Strings.isNullOrEmpty(uid)) {
             throw new IllegalArgumentException(String.format(INVALID_PARAM, "uid"));
-        } else if(Strings.isNullOrEmpty(ldapSearchBase)) {
+        } else if (Strings.isNullOrEmpty(ldapSearchBase)) {
             throw new IllegalArgumentException(String.format(INVALID_PARAM, "ldapSearchBase"));
-        } else if(ldapContext == null) {
+        } else if (ldapContext == null) {
             throw new IllegalArgumentException(String.format(INVALID_PARAM, "ldapContext"));
         }
 
-        this.cacheKey = new LDAPCacheKey(uid, ldapContext, ldapSearchBase,  "(uid=" + uid + ")", SearchControls.SUBTREE_SCOPE);
+        this.cacheKey = new LDAPCacheKey(uid, ldapContext, ldapSearchBase, "(uid=" + uid + ")", SearchControls.SUBTREE_SCOPE);
     }
 
     @Override
@@ -51,14 +51,14 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
             searchResult = LDAPSearcher.searchLDAPServer(cacheKey);
         } catch (NamingException e) {
             LOGGER.error("Naming problem with LDAP for user: " + cacheKey.uid, e);
-           //propagate the exception
+            //propagate the exception
             throw e;
-        } catch (LDAPUserNotFoundException | LDAPMutipleUserFoundException e) {
+        } catch (LDAPUserNotFoundException | LDAPMultipleUserFoundException e) {
             // Return null in case the User not found or multiple Users were found (which is inconsistent)
 
-            if(e instanceof LDAPUserNotFoundException)
+            if (e instanceof LDAPUserNotFoundException)
                 LOGGER.info("No result found roles for user: " + cacheKey.uid, e);
-            else{
+            else {
                 LOGGER.error("Multiples users found and only one was expected for user: " + cacheKey.uid, e);
             }
 
@@ -102,29 +102,14 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
 
         @Override
         protected SearchResult run() throws Exception {
-            //iff it was a problem with the server, try the following:
-            if(failedExecutionThrowable instanceof NamingException) {
-                SearchResult searchResult = LDAPCache.getLDAPCacheSession().getIfPresent(cacheKey);
-                if (searchResult == null) {
-                    CachedLDAPUserNotFoundException e = new CachedLDAPUserNotFoundException();
-                    LOGGER.error("Failed to connect to the server and no result found roles for user: " + cacheKey.uid, e);
-                    throw e;
-                }
-                // was able to use the cache or use the LDAP server on the second retry
-                return searchResult;
-
-            } else if(failedExecutionThrowable instanceof Exception) {
-                // if it is an exception, propagate it until someone handle it properly
-                LOGGER.error("An internal problem occurred during the query for roles for the  user: " + cacheKey.uid, failedExecutionThrowable);
-                throw ((Exception) failedExecutionThrowable);
-            } else {
-                // probably java.lang.Error or a custom Throwable exception. In this case we can't handle the problem
-                // and if we wrap it we can change the JVM to inconsistent state, so we have to exit with error status
-                // code
-                LOGGER.fatal("a Throwable instance (which is not instance of Exception) was thrown and it can't be handled.", failedExecutionThrowable);
-                System.exit(-1);
-                return null;
+            SearchResult searchResult = LDAPCache.getLDAPCacheSession().getIfPresent(cacheKey);
+            if (searchResult == null) {
+                CachedLDAPUserNotFoundException e = new CachedLDAPUserNotFoundException();
+                LOGGER.error("Failed to connect to the server and no result found roles for user: " + cacheKey.uid, e);
+                throw e;
             }
+            // was able to use the cache or use the LDAP server on the second retry
+            return searchResult;
         }
 
     }

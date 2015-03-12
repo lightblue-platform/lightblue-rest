@@ -5,9 +5,9 @@ import javax.naming.ldap.LdapContext;
 
 /**
  * This class holds the values to represent an unique cache key. It is also used to query data as well
- *
+ * <p/>
  * Created by lcestari on 2/23/15.
-*/
+ */
 public class LDAPCacheKey {
     final String uid;
     final LdapContext ldapContext;

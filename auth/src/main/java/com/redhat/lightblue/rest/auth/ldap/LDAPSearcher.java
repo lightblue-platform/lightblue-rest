@@ -13,7 +13,7 @@ import javax.naming.directory.SearchResult;
 public class LDAPSearcher {
     private static final Logger LOGGER = Logger.getLogger(LDAPSearcher.class);
 
-    public static SearchResult searchLDAPServer(LDAPCacheKey ldapCacheKey) throws NamingException, LDAPUserNotFoundException, LDAPMutipleUserFoundException {
+    public static SearchResult searchLDAPServer(LDAPCacheKey ldapCacheKey) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
         // Extension a: returns an exception as the LDAP server is down (eg.: this can be meaningful to use the cache )
         NamingEnumeration<SearchResult> results = ldapCacheKey.ldapContext.search(ldapCacheKey.ldapSearchBase, ldapCacheKey.searchFilter, ldapCacheKey.searchControls);
         SearchResult searchResult = null;
@@ -22,10 +22,10 @@ public class LDAPSearcher {
 
             //make sure there is not another item available, there should be only 1 match
             if (results.hasMoreElements()) {
-                String message = new StringBuilder().append("Matched multiple users for the accountName: ").append(ldapCacheKey.uid).toString();
+                String message = "Matched multiple users for the accountName: " + ldapCacheKey.uid;
                 LOGGER.error(message);
                 // Extension b: returns an exception to warn about the bad inconsistent state
-                throw new LDAPMutipleUserFoundException(message);
+                throw new LDAPMultipleUserFoundException(message);
             }
 
             // Basic flow: returns the unique entry from LDAP server

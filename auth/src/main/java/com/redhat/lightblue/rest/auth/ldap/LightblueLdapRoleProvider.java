@@ -18,11 +18,9 @@
  */
 package com.redhat.lightblue.rest.auth.ldap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.List;
+import com.netflix.hystrix.exception.HystrixRuntimeException;
+import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
+import org.jboss.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -33,9 +31,10 @@ import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-
-import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
-import org.jboss.logging.Logger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.List;
 
 public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private final Logger LOGGER = Logger.getLogger(LightblueLdapRoleProvider.class);
@@ -71,12 +70,15 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
             }
 
         } catch (NamingException ne) {
-            // TODO REVIEWER Shall we handle the other exceptions like this exception (it was already like this before)?  Right now we are just leaving to application server to handle them
+            // caught this exception because getUserRolesFromLdap() method which access the remote server
+            LOGGER.error("Naming problem with LDAP for user: " + userName, ne);
+        } catch (HystrixRuntimeException ce) {
+            // Not found in cache, returns an empty list
         }
 
         return userRoles;
     }
-    
+
     @Override
     public Collection<String> getUsersInGroup(String groupName) {
         throw new UnsupportedOperationException("Not yet implemented");
@@ -101,7 +103,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         List<String> groups = new ArrayList<>();
 
         //if no user found it should return an empty list (I think)
-        if(ldapUser == null || ldapUser.getAttributes() == null || ldapUser.getAttributes().get("memberOf") == null ){
+        if (ldapUser == null || ldapUser.getAttributes() == null || ldapUser.getAttributes().get("memberOf") == null) {
             return groups;
         }
 

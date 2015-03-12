@@ -1,15 +1,19 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
-import com.google.common.cache.*;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import org.jboss.logging.Logger;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.naming.directory.SearchResult;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * This class hold the references to all local caches and have helper method to deal with them
- *
+ * <p/>
  * Created by lcestari on 2/23/15.
  */
 public class LDAPCache {
@@ -29,7 +33,7 @@ public class LDAPCache {
                                 LOGGER.info("Removal Listener created");
                             }
 
-                            public void onRemoval(RemovalNotification notification) {
+                            public void onRemoval(@ParametersAreNonnullByDefault RemovalNotification notification) {
                                 LOGGER.debug("This data from " + notification.getKey() + " evacuated due:" + notification.getCause());
                             }
                         }
@@ -45,7 +49,7 @@ public class LDAPCache {
                                 LOGGER.info("Removal Listener created");
                             }
 
-                            public void onRemoval(RemovalNotification notification) {
+                            public void onRemoval(@ParametersAreNonnullByDefault RemovalNotification notification) {
                                 LOGGER.debug("This data from " + notification.getKey() + " evacuated due:" + notification.getCause());
                             }
                         }
@@ -60,7 +64,7 @@ public class LDAPCache {
         return userRolesCacheSession;
     }
 
-    public static void invalidateKey(LDAPCacheKey key){
+    public static void invalidateKey(LDAPCacheKey key) {
         ldapCacheSession.invalidate(key);
         userRolesCacheSession.invalidate(key);
     }
