@@ -58,7 +58,7 @@ public class CertLdapLoginModule extends CertRolesLoginModule {
 
     private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, LDAP_SERVER, SEARCH_BASE, BIND_DN, BIND_PWD};
     
-    private Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
+    private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
 
     @Override
 	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String,?> sharedState, Map<String,?> options) {
