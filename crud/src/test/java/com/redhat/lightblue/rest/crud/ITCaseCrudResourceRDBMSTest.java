@@ -71,8 +71,8 @@ import java.sql.Statement;
 /**
  * @author lcestari
  */
-@Ignore
 @RunWith(Arquillian.class)
+@Ignore
 public class ITCaseCrudResourceRDBMSTest {
 
     private static boolean notRegistered = true;

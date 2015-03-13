@@ -45,34 +45,34 @@ public class RequestDumper extends HttpServlet implements Servlet {
     }
 
     public static String dump(HttpServletRequest request) {
-        StringBuffer buf = new StringBuffer("\n\n");
+        StringBuilder buf = new StringBuilder("\n\n");
 
         buf.append("REQUEST:\n--------\n");
         if (request.getUserPrincipal() != null) {
-            buf.append("Principal name: [" + request.getUserPrincipal().getName() + "]\n");
+            buf.append("Principal name: [").append(request.getUserPrincipal().getName()).append("]\n");
         } else {
             buf.append("Principal is [null]\n");
         }
 
-        buf.append("AuthType: [" + request.getAuthType() + "]\n");
-        buf.append("request URI: [" + request.getRequestURI() + "]\n");
-        buf.append("request URL: [" + request.getRequestURL().toString() + "]\n");
-        buf.append("isRequestedSessionIdFromCookie: [" + request.isRequestedSessionIdFromCookie() + "]\n");
-        buf.append("isRequestedSessionIdFromURL: [" + request.isRequestedSessionIdFromURL() + "]\n");
-        buf.append("isRequestedSessionIdValid: [" + request.isRequestedSessionIdValid() + "]\n");
-        buf.append("isSecure: [" + request.isSecure() + "]\n");
-        buf.append("In authenticated role?: [" + request.isUserInRole("authenticated") + "]\n");
-        buf.append("In lightblue-user role?: [" + request.isUserInRole("lightblue-user") + "]\n");
-        buf.append("In user-admin role?: [" + request.isUserInRole("user-admin") + "]\n");
-        buf.append("In readonly role?: [" + request.isUserInRole("readonly") + "]\n");
-        buf.append("In updater role?: [" + request.isUserInRole("updater") + "]\n");
-        buf.append("In nonexistant role?: [" + request.isUserInRole("nonexistant") + "]\n");
+        buf.append("AuthType: [").append(request.getAuthType()).append("]\n");
+        buf.append("request URI: [").append(request.getRequestURI()).append("]\n");
+        buf.append("request URL: [").append(request.getRequestURL().toString()).append("]\n");
+        buf.append("isRequestedSessionIdFromCookie: [").append(request.isRequestedSessionIdFromCookie()).append("]\n");
+        buf.append("isRequestedSessionIdFromURL: [").append(request.isRequestedSessionIdFromURL()).append("]\n");
+        buf.append("isRequestedSessionIdValid: [").append(request.isRequestedSessionIdValid()).append("]\n");
+        buf.append("isSecure: [").append(request.isSecure()).append("]\n");
+        buf.append("In authenticated role?: [").append(request.isUserInRole("authenticated")).append("]\n");
+        buf.append("In lightblue-user role?: [").append(request.isUserInRole("lightblue-user")).append("]\n");
+        buf.append("In user-admin role?: [").append(request.isUserInRole("user-admin")).append("]\n");
+        buf.append("In readonly role?: [").append(request.isUserInRole("readonly")).append("]\n");
+        buf.append("In updater role?: [").append(request.isUserInRole("updater")).append("]\n");
+        buf.append("In nonexistant role?: [").append(request.isUserInRole("nonexistant")).append("]\n");
 
         buf.append("\n\n");
 
         buf.append("BODY: \n------\n");
 
-        StringBuffer requestBuffer = new StringBuffer();
+        StringBuilder requestBuffer = new StringBuilder();
         String line = null;
         try {
             BufferedReader reader = request.getReader();
@@ -102,14 +102,14 @@ public class RequestDumper extends HttpServlet implements Servlet {
         Cookie[] cookies = request.getCookies();
 
         if (cookies != null) {
-            for (int i = 0; i < cookies.length; i++) {
-                buf.append("Cookie: [" + cookies[i].getName() + "] Value: [" + cookies[i].getValue() + "]\n");
-                buf.append("    comment: [" + cookies[i].getComment() + "]\n");
-                buf.append("    domain: [" + cookies[i].getDomain() + "]\n");
-                buf.append("    maxAge: [" + cookies[i].getMaxAge() + "]\n");
-                buf.append("    path: [" + cookies[i].getPath() + "]\n");
-                buf.append("    secure?: [" + cookies[i].getSecure() + "]\n");
-                buf.append("    version: [" + cookies[i].getVersion() + "]\n");
+            for (Cookie cooky : cookies) {
+                buf.append("Cookie: [").append(cooky.getName()).append("] Value: [").append(cooky.getValue()).append("]\n");
+                buf.append("    comment: [").append(cooky.getComment()).append("]\n");
+                buf.append("    domain: [").append(cooky.getDomain()).append("]\n");
+                buf.append("    maxAge: [").append(cooky.getMaxAge()).append("]\n");
+                buf.append("    path: [").append(cooky.getPath()).append("]\n");
+                buf.append("    secure?: [").append(cooky.getSecure()).append("]\n");
+                buf.append("    version: [").append(cooky.getVersion()).append("]\n");
             }
         }
 

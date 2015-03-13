@@ -18,11 +18,9 @@
  */
 package com.redhat.lightblue.rest.auth.ldap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.List;
+import com.netflix.hystrix.exception.HystrixRuntimeException;
+import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
+import org.jboss.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -33,9 +31,10 @@ import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-
-import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
-import org.jboss.logging.Logger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.List;
 
 public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private final Logger LOGGER = Logger.getLogger(LightblueLdapRoleProvider.class);
@@ -58,47 +57,28 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         ldapContext = new InitialLdapContext(env, null);
     }
 
-    //this can be reverted to use LdapFindUserByUidCommand once we have the Hystrix stuff figured out
     @Override
     public List<String> getUserRoles(String userName) {
-      List<String> userRoles = new ArrayList<>();
-  
-      try {
-        userRoles.addAll(getUserRolesFromCache(userName));
-  
-        if (userRoles.isEmpty()) {
-          userRoles.addAll(getUserRolesFromLdap(findUserByUid(userName)));
+        List<String> userRoles = new ArrayList<>();
+
+        try {
+            userRoles.addAll(getUserRolesFromCache(userName));
+
+            if (userRoles.isEmpty()) {
+                SearchResult searchResult = new LdapFindUserByUidCommand(ldapContext, ldapSearchBase, userName).execute();
+                userRoles.addAll(getUserRolesFromLdap(searchResult));
+            }
+
+        } catch (NamingException ne) {
+            // caught this exception because getUserRolesFromLdap() method which access the remote server
+            LOGGER.error("Naming problem with LDAP for user: " + userName, ne);
+        } catch (HystrixRuntimeException ce) {
+            // Not found in cache, returns an empty list
         }
-      } catch (NamingException ne) {
-        LOGGER.error("Problem getting roles for user: " + userName, ne);
-      }
-  
-      return userRoles;
+
+        return userRoles;
     }
 
-    //This can be removed once we have the Hystrix issues figured out and are using the LdapFindUserByUidCommand again
-    private SearchResult findUserByUid(String uid) throws NamingException {
-      String searchFilter = "(uid=" + uid + ")";
-
-      SearchControls searchControls = new SearchControls();
-      searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-
-      NamingEnumeration<SearchResult> results = ldapContext.search(ldapSearchBase, searchFilter, searchControls);
-
-      SearchResult searchResult = null;
-      if (results.hasMoreElements()) {
-          searchResult = results.nextElement();
-
-          //make sure there is not another item available, there should be only 1 match
-          if (results.hasMoreElements()) {
-              LOGGER.error("Matched multiple users for the accountName: " + uid);
-              return null;
-          }
-      }
-
-      return searchResult;
-  }
-    
     @Override
     public Collection<String> getUsersInGroup(String groupName) {
         throw new UnsupportedOperationException("Not yet implemented");
@@ -115,12 +95,17 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     }
 
     private List<String> getUserRolesFromCache(String userName) {
-        //TODO add persistent caching backed by lightblue here at some point
-        return Collections.emptyList();
+        LDAPCacheKey cacheKey = new LDAPCacheKey(userName, ldapContext, ldapSearchBase, "(uid=" + userName + ")", SearchControls.SUBTREE_SCOPE);
+        return LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
     }
 
     private List<String> getUserRolesFromLdap(SearchResult ldapUser) throws NamingException {
         List<String> groups = new ArrayList<>();
+
+        //if no user found it should return an empty list (I think)
+        if (ldapUser == null || ldapUser.getAttributes() == null || ldapUser.getAttributes().get("memberOf") == null) {
+            return groups;
+        }
 
         NamingEnumeration<?> groupAttributes = ldapUser.getAttributes().get("memberOf").getAll();
 
