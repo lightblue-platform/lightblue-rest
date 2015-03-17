@@ -84,7 +84,7 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
      */
     @Override
     protected SearchResult getFallback() {
-        LOGGER.error("Error during the execution of the command. Falling back to the cache");
+        LOGGER.warn("Error during the execution of the command. Falling back to the cache");
         return new FallbackViaLDAPServerProblemCommand(cacheKey, getFailedExecutionException()).execute();
 
     }
