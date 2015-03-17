@@ -43,6 +43,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     String ldapSearchBase;
 
     public LightblueLdapRoleProvider(String server, String searchBase, String bindDn, String bindDNPwd) throws NamingException {
+        LOGGER.debug("Creating LightblueLdapRoleProvider");
         Hashtable<String, Object> env = new Hashtable<>();
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
         if (bindDn != null) {
@@ -54,13 +55,14 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, server);
         ldapSearchBase = searchBase;
+        LOGGER.debug("Creating InitialLdapContext ");
         ldapContext = new InitialLdapContext(env, null);
     }
 
     @Override
     public List<String> getUserRoles(String userName) {
+        LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRoles");
         List<String> userRoles = new ArrayList<>();
-
         try {
             userRoles.addAll(getUserRolesFromCache(userName));
 
@@ -74,6 +76,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
             LOGGER.error("Naming problem with LDAP for user: " + userName, ne);
         } catch (HystrixRuntimeException ce) {
             // Not found in cache, returns an empty list
+            LOGGER.error("Not found in cache, returns an empty list " + userName, ce);
         }
 
         return userRoles;
@@ -81,25 +84,30 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
 
     @Override
     public Collection<String> getUsersInGroup(String groupName) {
+        LOGGER.error("Invoking LightblueLdapRoleProvider#getUsersInGroup (not supported))");
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public void flushRoleCache(String roleName) {
+        LOGGER.error("Invoking LightblueLdapRoleProvider#flushRoleCache (not supported))");
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public void flushUserCache(String userName) {
+        LOGGER.error("Invoking LightblueLdapRoleProvider#flushUserCache (not supported))");
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     private List<String> getUserRolesFromCache(String userName) {
+        LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRolesFromCache");
         LDAPCacheKey cacheKey = new LDAPCacheKey(userName, ldapContext, ldapSearchBase, "(uid=" + userName + ")", SearchControls.SUBTREE_SCOPE);
         return LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
     }
 
     private List<String> getUserRolesFromLdap(SearchResult ldapUser) throws NamingException {
+        LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRolesFromLdap");
         List<String> groups = new ArrayList<>();
 
         //if no user found it should return an empty list (I think)
