@@ -187,6 +187,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.apache.directory.server</groupId>
+                <artifactId>apacheds-server-integ</artifactId>
+                <version>1.5.7</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>

@@ -20,7 +20,8 @@ package com.redhat.lightblue.rest.auth.ldap;
 
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -31,13 +32,10 @@ import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 public class LightblueLdapRoleProvider implements LightblueRoleProvider {
-    private final Logger LOGGER = Logger.getLogger(LightblueLdapRoleProvider.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
 
     LdapContext ldapContext;
     String ldapSearchBase;
@@ -64,8 +62,12 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRoles");
         List<String> userRoles = new ArrayList<>();
         try {
-            userRoles.addAll(getUserRolesFromCache(userName));
+            List<String> userRolesFromCache = getUserRolesFromCache(userName);
+            if( userRolesFromCache != null && userRolesFromCache.isEmpty() ) {
+                userRoles.addAll(userRolesFromCache);
+            }
 
+            // Not found on cache due it expired or it wasn't search for this user yet (assuming the user exist)
             if (userRoles.isEmpty()) {
                 SearchResult searchResult = new LdapFindUserByUidCommand(ldapContext, ldapSearchBase, userName).execute();
                 userRoles.addAll(getUserRolesFromLdap(searchResult));
@@ -103,7 +105,8 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private List<String> getUserRolesFromCache(String userName) {
         LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRolesFromCache");
         LDAPCacheKey cacheKey = new LDAPCacheKey(userName, ldapContext, ldapSearchBase, "(uid=" + userName + ")", SearchControls.SUBTREE_SCOPE);
-        return LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
+        List<String> ifPresent = LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
+        return ifPresent;
     }
 
     private List<String> getUserRolesFromLdap(SearchResult ldapUser) throws NamingException {

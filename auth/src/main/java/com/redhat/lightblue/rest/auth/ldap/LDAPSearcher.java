@@ -1,6 +1,7 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -11,7 +12,7 @@ import javax.naming.directory.SearchResult;
  * Created by lcestari on 2/23/15.
  */
 public class LDAPSearcher {
-    private static final Logger LOGGER = Logger.getLogger(LDAPSearcher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LDAPSearcher.class);
 
     public static SearchResult searchLDAPServer(LDAPCacheKey ldapCacheKey) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
         LOGGER.debug("LDAPSearcher#searchLDAPServer was invoked and it will call the remote LDAP server");

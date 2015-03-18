@@ -4,7 +4,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.naming.directory.SearchResult;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * Created by lcestari on 2/23/15.
  */
 public class LDAPCache {
-    private static final Logger LOGGER = Logger.getLogger(LDAPCache.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LDAPCache.class);
     private static final Cache<LDAPCacheKey, SearchResult> ldapCacheSession; // non-persisted cache
     private static final Cache<LDAPCacheKey, List<String>> userRolesCacheSession; // non-persisted cache
 
