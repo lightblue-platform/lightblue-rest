@@ -62,7 +62,8 @@ public class CertLdapLoginModule extends CertRolesLoginModule {
 
     @Override
 	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String,?> sharedState, Map<String,?> options) {
-		addValidOptions(ALL_VALID_OPTIONS);
+        LOGGER.debug("CertLdapLoginModule#initialize was invoked");
+        addValidOptions(ALL_VALID_OPTIONS);
 		super.initialize(subject, callbackHandler, sharedState, options);
 	}
     

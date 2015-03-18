@@ -38,6 +38,7 @@ public class LDAPCache {
                             }
                         }
                 ).build();
+        LOGGER.debug("LDAPCache: ldapCacheSession was created on a static block");
 
         userRolesCacheSession = CacheBuilder.newBuilder()
                 .concurrencyLevel(10) // handle 10 concurrent request without a problem
@@ -54,17 +55,21 @@ public class LDAPCache {
                             }
                         }
                 ).build();
+        LOGGER.debug("LDAPCache: userRolesCacheSession was created on a static block");
     }
 
     public static Cache<LDAPCacheKey, SearchResult> getLDAPCacheSession() {
+        LOGGER.debug("LDAPCache#getLDAPCacheSession");
         return ldapCacheSession;
     }
 
     public static Cache<LDAPCacheKey, List<String>> getUserRolesCacheSession() {
+        LOGGER.debug("LDAPCache#getUserRolesCacheSession");
         return userRolesCacheSession;
     }
 
     public static void invalidateKey(LDAPCacheKey key) {
+        LOGGER.debug("LDAPCache#invalidateKey was invoked");
         ldapCacheSession.invalidate(key);
         userRolesCacheSession.invalidate(key);
     }
