@@ -31,6 +31,10 @@
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
+            <groupId>com.codeablereason.restcompress.provider</groupId>
+            <artifactId>rest-compress-lib</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-common</artifactId>
             <version>${project.version}</version>
@@ -48,6 +52,10 @@
             <artifactId>lightblue-core-util</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.lightblue</groupId>
+            <artifactId>lightblue-core-hystrix</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>lightblue-mongo-config</artifactId>
         </dependency>
@@ -58,14 +66,6 @@
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>lightblue-mongo-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.rdbms</groupId>
-            <artifactId>lightblue-rdbms-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.rdbms</groupId>
-            <artifactId>lightblue-rdbms-metadata</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -133,6 +133,13 @@
                                     </sources>
                                 </mapping>
                             </mappings>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>2.6</version>
+                        <configuration>
+                            <attachClasses>true</attachClasses>
                         </configuration>
                     </plugin>
                 </plugins>

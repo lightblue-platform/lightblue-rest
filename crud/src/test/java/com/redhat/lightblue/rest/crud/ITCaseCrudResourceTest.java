@@ -203,7 +203,7 @@ public class ITCaseCrudResourceTest {
     }
 
     private String readFile(String filename) throws IOException, URISyntaxException {
-        return FileUtil.readFileAndTrim(this.getClass().getSimpleName() + "/" + filename);
+        return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
     }
 
     private String readConfigFile(String filename) throws IOException, URISyntaxException {

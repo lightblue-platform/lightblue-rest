@@ -71,8 +71,8 @@ import java.sql.Statement;
 /**
  * @author lcestari
  */
-@Ignore
 @RunWith(Arquillian.class)
+@Ignore
 public class ITCaseCrudResourceRDBMSTest {
 
     private static boolean notRegistered = true;
@@ -262,7 +262,7 @@ public class ITCaseCrudResourceRDBMSTest {
     }
 
     private String readFile(String filename) throws IOException, URISyntaxException {
-        return FileUtil.readFileAndTrim(this.getClass().getSimpleName() + "/" + filename);
+        return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
     }
 
     private String readConfigFile(String filename) throws IOException, URISyntaxException {

@@ -6,7 +6,6 @@
         <artifactId>lightblue-rest-pom</artifactId>
         <version>1.3.0-SNAPSHOT</version>
     </parent>
-    <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>lightblue-rest-auth</artifactId>
     <version>1.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -31,6 +30,19 @@
         <dependency>
             <groupId>com.redhat.lightblue</groupId>
             <artifactId>lightblue-core-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue</groupId>
+            <artifactId>lightblue-core-hystrix</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-server-integ</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <profiles>
