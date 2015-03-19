@@ -63,7 +63,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         List<String> userRoles = new ArrayList<>();
         try {
             List<String> userRolesFromCache = getUserRolesFromCache(userName);
-            if( userRolesFromCache != null && userRolesFromCache.isEmpty() ) {
+            if( userRolesFromCache != null && !userRolesFromCache.isEmpty() ) {
                 userRoles.addAll(userRolesFromCache);
             }
 
