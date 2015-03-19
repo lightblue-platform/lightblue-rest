@@ -40,3 +40,4 @@ crud-cert-auth/overlays
 rhc-port-forward-status
 etc/rhc-port-forward-status
 *versionsBackup
+auth/apacheds-work

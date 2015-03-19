@@ -39,6 +39,7 @@ import org.jboss.security.auth.spi.CertRolesLoginModule;
 
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
 import com.redhat.lightblue.rest.auth.ldap.LightblueLdapRoleProvider;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author dhaynes
@@ -48,7 +49,7 @@ import com.redhat.lightblue.rest.auth.ldap.LightblueLdapRoleProvider;
  *
  */
 public class CertLdapLoginModule extends CertRolesLoginModule {
-    private final Logger LOGGER = Logger.getLogger(CertLdapLoginModule.class);
+    private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class);
 
     public static final String AUTH_ROLE_NAME = "authRoleName";
     public static final String LDAP_SERVER = "ldapServer";

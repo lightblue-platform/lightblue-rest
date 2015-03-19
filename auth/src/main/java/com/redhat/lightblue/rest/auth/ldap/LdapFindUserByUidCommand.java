@@ -5,7 +5,8 @@ import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.redhat.lightblue.hystrix.ServoGraphiteSetup;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
@@ -20,7 +21,7 @@ import javax.naming.ldap.LdapContext;
 public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
     public static final String GROUPKEY = "ldap";
     private static final String INVALID_PARAM = "%s is null or empty";
-    private static final Logger LOGGER = Logger.getLogger(LightblueLdapRoleProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
 
     static {
         LOGGER.debug("Invoking ServoGraphiteSetup#initialize on a static block");
@@ -94,7 +95,7 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
         Use the cache in case tje LDAP Server was not available and also to we have metrics around the fallback
      */
     private static class FallbackViaLDAPServerProblemCommand extends HystrixCommand<SearchResult> {
-        private static final Logger LOGGER = Logger.getLogger(FallbackViaLDAPServerProblemCommand.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(FallbackViaLDAPServerProblemCommand.class);
 
         private final LDAPCacheKey cacheKey;
         private final Throwable failedExecutionThrowable;
