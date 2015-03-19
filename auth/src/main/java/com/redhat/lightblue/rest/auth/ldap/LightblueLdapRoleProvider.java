@@ -18,9 +18,10 @@
  */
 package com.redhat.lightblue.rest.auth.ldap;
 
-import com.netflix.hystrix.exception.HystrixRuntimeException;
-import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
-import org.jboss.logging.Logger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -31,10 +32,11 @@ import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.List;
+
+import org.jboss.logging.Logger;
+
+import com.netflix.hystrix.exception.HystrixRuntimeException;
+import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
 
 public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private final Logger LOGGER = Logger.getLogger(LightblueLdapRoleProvider.class);
@@ -103,7 +105,8 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private List<String> getUserRolesFromCache(String userName) {
         LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRolesFromCache");
         LDAPCacheKey cacheKey = new LDAPCacheKey(userName, ldapContext, ldapSearchBase, "(uid=" + userName + ")", SearchControls.SUBTREE_SCOPE);
-        return LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
+        List<String> rolesFromCache = LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey); 
+        return (rolesFromCache == null) ? new ArrayList<String>() : rolesFromCache;
     }
 
     private List<String> getUserRolesFromLdap(SearchResult ldapUser) throws NamingException {
