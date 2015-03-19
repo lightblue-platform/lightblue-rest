@@ -84,20 +84,6 @@ public class LightblueLdapRoleProviderTest {
     }
 
     @Test
-    @Ignore
-    public void testInMemoryLdapServer() throws Exception {
-        try {
-            SearchRequest request = new SearchRequest(BASEDB_USERS, SearchScope.SUB, "uid=derek63", "*");
-            LDAPConnection connection = new LDAPConnection("localhost", LdapServerExternalResource.DEFAULT_PORT);
-            SearchResult result = connection.search(request);
-            System.out.println(result.toString());
-        } catch (LDAPException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Test
     public void testUserWithRoles() throws Exception {
         List<String> expectedUserRoles = new ArrayList<>();
         expectedUserRoles.add("lightblue-contributors");
