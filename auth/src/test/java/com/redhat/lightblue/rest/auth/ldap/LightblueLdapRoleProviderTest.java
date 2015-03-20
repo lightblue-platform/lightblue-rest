@@ -1,252 +1,103 @@
+/*
+ Copyright 2014 Red Hat, Inc. and/or its affiliates.
+
+ This file is part of lightblue.
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.redhat.lightblue.rest.auth.ldap;
 
-import org.apache.directory.server.constants.ServerDNConstants;
-import org.apache.directory.server.core.DefaultDirectoryService;
-import org.apache.directory.server.core.DirectoryService;
-import org.apache.directory.server.core.partition.Partition;
-import org.apache.directory.server.core.partition.impl.btree.jdbm.JdbmPartition;
-import org.apache.directory.server.core.partition.ldif.LdifPartition;
-import org.apache.directory.server.core.schema.SchemaPartition;
-import org.apache.directory.server.ldap.LdapServer;
-import org.apache.directory.server.protocol.shared.transport.TcpTransport;
-import org.apache.directory.shared.ldap.entry.DefaultServerEntry;
-import org.apache.directory.shared.ldap.schema.SchemaManager;
-import org.apache.directory.shared.ldap.schema.ldif.extractor.SchemaLdifExtractor;
-import org.apache.directory.shared.ldap.schema.ldif.extractor.impl.DefaultSchemaLdifExtractor;
-import org.apache.directory.shared.ldap.schema.loader.ldif.LdifSchemaLoader;
-import org.apache.directory.shared.ldap.schema.manager.impl.DefaultSchemaManager;
-import org.apache.directory.shared.ldap.schema.registries.SchemaLoader;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.directory.*;
-
-import static org.junit.Assert.*;
-
-
-import java.io.File;
-import java.io.PrintWriter;
-import java.util.Hashtable;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.FixMethodOrder;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
+
+import com.redhat.lightblue.ldap.test.LdapServerExternalResource;
+import com.redhat.lightblue.ldap.test.LdapServerExternalResource.InMemoryLdapServer;
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.SearchRequest;
+import com.unboundid.ldap.sdk.SearchResult;
+import com.unboundid.ldap.sdk.SearchScope;
+
+@InMemoryLdapServer
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LightblueLdapRoleProviderTest {
 
-    public static final String LDAP_LOCALHOST_11389 = "ldap://localhost:11389";
-    private static DirectoryService directoryService;
-    private static LdapServer ldapServer;
+    @ClassRule
+    public static LdapServerExternalResource ldapServer = LdapServerExternalResource.createDefaultInstance();
+    
+    private static final String BASEDB_USERS = "ou=Users,dc=example,dc=com";
+    private static final String USER_WITH_ROLES = "uid=derek63,ou=Users,dc=example,dc=com";
+    private static final String USER_WITH_NO_ROLES = "uid=lcestari,ou=Users,dc=example,dc=com";
+    private static final String BASEDB_GROUPS = "ou=Departments,dc=example,dc=com";
+
+    private static LightblueLdapRoleProvider provider;
 
     @BeforeClass
-    public static void startApacheDs() throws Exception {
-        String buildDirectory = System.getProperty("buildDirectory");
-        File workingDirectory = new File(buildDirectory, "apacheds-work");
-        workingDirectory.mkdir();
+    public static void beforeClass() throws Exception {
+        ldapServer.add(BASEDB_USERS, new Attribute[] { new Attribute("objectClass", "top"), new Attribute("objectClass", "organizationalUnit"),
+                new Attribute("ou", "Users") });
+        ldapServer.add(BASEDB_GROUPS, new Attribute[] { new Attribute("objectClass", "top"), new Attribute("objectClass", "organizationalUnit"),
+                new Attribute("ou", "Groups") });
+        ldapServer.add(USER_WITH_NO_ROLES, new Attribute[] { new Attribute("cn", "lcestari"), new Attribute("uid", "lcestari"),
+                new Attribute("objectClass", "person") });
+        ldapServer.add(USER_WITH_ROLES, new Attribute[] { new Attribute("cn", "derek63"), new Attribute("uid", "derek63"),
+                new Attribute("memberOf", "cn=lightblue-contributors,ou=Groups,dc=example,dc=com"),
+                new Attribute("memberOf", "cn=lightblue-developers,ou=Groups,dc=example,dc=com"), new Attribute("objectClass", "person") });
+        
+        System.setProperty("ldap.host", "localhost");
+        System.setProperty("ldap.port", String.valueOf(LdapServerExternalResource.DEFAULT_PORT));
+        System.setProperty("ldap.database", "test");
+        System.setProperty("ldap.person.basedn", BASEDB_USERS);
+        System.setProperty("ldap.department.basedn", BASEDB_GROUPS);
 
-        directoryService = new DefaultDirectoryService();
-        directoryService.setWorkingDirectory(workingDirectory);
-
-        SchemaPartition schemaPartition = directoryService.getSchemaService().getSchemaPartition();
-
-        LdifPartition ldifPartition = new LdifPartition();
-        String workingDirectoryPath = directoryService.getWorkingDirectory().getPath();
-        ldifPartition.setWorkingDirectory(workingDirectoryPath + "/schema");
-
-        File schemaRepository = new File(workingDirectory, "schema");
-        SchemaLdifExtractor extractor = new DefaultSchemaLdifExtractor(workingDirectory);
-        extractor.extractOrCopy(true);
-
-        schemaPartition.setWrappedPartition(ldifPartition);
-
-        SchemaLoader loader = new LdifSchemaLoader(schemaRepository);
-        SchemaManager schemaManager = new DefaultSchemaManager(loader);
-        directoryService.setSchemaManager(schemaManager);
-
-        schemaManager.loadAllEnabled();
-
-        schemaPartition.setSchemaManager(schemaManager);
-
-        List<Throwable> errors = schemaManager.getErrors();
-
-        if (!errors.isEmpty()) {
-            throw new Exception("Schema load failed : " + errors);
-        }
-
-        JdbmPartition systemPartition = new JdbmPartition();
-        systemPartition.setId("system");
-        systemPartition.setPartitionDir(new File(directoryService.getWorkingDirectory(), "system"));
-        systemPartition.setSuffix(ServerDNConstants.SYSTEM_DN);
-        systemPartition.setSchemaManager(schemaManager);
-        directoryService.setSystemPartition(systemPartition);
-
-
-
-        /*
-        // TODO some snippets trying to make testGetUserRolesValidLDAPDirectory test work
-        Partition testp = new JdbmPartition();
-        testp.setId("testp");
-        testp.setSuffix("dc=testp,dc=com");
-        contextDn = new LdapDN( "dc=testp,dc=com" );
-        contextDn.normalize( service.getRegistries().getAttributeTypeRegistry().getNormalizerMapping() );
-        contextEntry = new DefaultServerEntry( service.getRegistries(), contextDn );
-        contextEntry.add( "objectClass", "top", "domain" );
-        contextEntry.add( "dc", "testp" );
-        testp.setContextEntry(contextEntry);
-        service.addPartition( testp );
-        */
-
-        directoryService.setShutdownHookEnabled(false);
-        directoryService.getChangeLog().setEnabled(false);
-
-
-        ldapServer = new LdapServer();
-        ldapServer.setTransports(new TcpTransport(11389));
-        ldapServer.setDirectoryService(directoryService);
-
-        directoryService.startup();
-        ldapServer.start();
+        provider = new LightblueLdapRoleProvider(
+                "ldap://localhost:" + LdapServerExternalResource.DEFAULT_PORT, 
+                LdapServerExternalResource.DEFAULT_BASE_DN,
+                LdapServerExternalResource.DEFAULT_BINDABLE_DN, 
+                LdapServerExternalResource.DEFAULT_PASSWORD);
     }
 
-    @AfterClass
-    public static void stopApacheDs() throws Exception {
-        ldapServer.stop();
-        directoryService.shutdown();
-        directoryService.getWorkingDirectory().delete();
+    public LightblueLdapRoleProviderTest() throws Exception {
+        super();
     }
 
     @Test
-    public void testGetUserRolesInvalidLDAPDirectory() throws Exception {
-        LightblueLdapRoleProvider provider = new LightblueLdapRoleProvider(LDAP_LOCALHOST_11389, "schema", null, null);
+    public void testUserWithRoles() throws Exception {
+        List<String> expectedUserRoles = new ArrayList<>();
+        expectedUserRoles.add("lightblue-contributors");
+        expectedUserRoles.add("lightblue-developers");
 
-        List<String> userRoles = provider.getUserRoles("nameHere");
+        List<String> userRoles = provider.getUserRoles("derek63");
         assertNotNull(userRoles);
-        assertEquals("getUserRoles method should return an empty list",0, userRoles.size());
+        assertEquals(expectedUserRoles, userRoles);
     }
 
     @Test
-    @Ignore
-    public void testGetUserRolesValidLDAPDirectory() throws Exception {
-        LightblueLdapRoleProvider provider = new LightblueLdapRoleProvider(LDAP_LOCALHOST_11389, "schema", null, null);
-        printLdap();
-        List<String> userRoles = provider.getUserRoles("nameHere");
-        assertNotNull(userRoles);
-        assertEquals("getUserRoles method should return an list with one element",1, userRoles.size());
+    public void testUserWithNoRoles() throws Exception {
+        List<String> userRoles = provider.getUserRoles("lcestari");
+        assertEquals("getUserRoles method should return an empty list", 0, userRoles.size());
     }
 
-    private void printLdap() throws Exception {
-        PrintWriter out = new  PrintWriter(System.out);
-
-        out.println("*** ApacheDS RootDSE ***\n");
-        Hashtable<String, Object> env = new Hashtable<>();
-        env.put(Context.SECURITY_AUTHENTICATION, "simple");
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, LDAP_LOCALHOST_11389);
-        DirContext ctx = new InitialDirContext(env);
-
-        SearchControls ctls = new SearchControls();
-        ctls.setReturningAttributes(new String[] { "*", "+" });
-        ctls.setSearchScope(SearchControls.OBJECT_SCOPE);
-
-        NamingEnumeration<SearchResult> result = ctx.search("",
-                "(objectClass=*)", ctls);
-        if (result.hasMore()) {
-            SearchResult entry = result.next();
-            Attributes as = entry.getAttributes();
-
-            NamingEnumeration<String> ids = as.getIDs();
-            while (ids.hasMore()) {
-                String id = ids.next();
-                Attribute attr = as.get(id);
-                for (int i = 0; i < attr.size(); ++i) {
-                    out.println(id + ": " + attr.get(i));
-                }
-            }
-        }
-        ctx.close();
-
-        out.flush();
-    }
-    /*
-    // TODO some snippets trying to make testGetUserRolesValidLDAPDirectory test work
-        static void runServer() throws Exception {
-        DefaultDirectoryService service = new DefaultDirectoryService();
-        service.getChangeLog().setEnabled(false);
-
-        Partition partition = new JdbmPartition();
-        partition.setId("apache");
-        partition.setSuffix("dc=apache,dc=org");
-        service.addPartition(partition);
-
-        LdapServer ldapService = new LdapServer();
-        ldapService.setTransports(new TcpTransport(1400));
-        ldapService.setDirectoryService(service);
-
-        service.startup();
-
-        // Inject the apache root entry if it does not already exist
-        try {
-            service.getAdminSession().lookup(partition.getSuffixDn());
-        } catch (Exception lnnfe) {
-            DN dnApache = new DN("dc=Apache,dc=Org");
-            ServerEntry entryApache = service.newEntry(dnApache);
-            entryApache.add("objectClass", "top", "domain", "extensibleObject");
-            entryApache.add("dc", "Apache");
-            service.getAdminSession().add(entryApache);
-        }
-
-        DN dnApache = new DN("dc=Apache,dc=Org");
-        ServerEntry entryApache = service.newEntry(dnApache);
-        entryApache.add("objectClass", "top", "domain", "extensibleObject");
-        entryApache.add("dc", "Apache");
-        service.getAdminSession().add(entryApache);
-
-        ldapService.start();
-    }
-
-
-    static void testClient() throws NamingException {
-        Properties p = new Properties();
-        p.setProperty(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        p.setProperty(Context.PROVIDER_URL, "ldap://localhost:1400/");
-        p.setProperty(Context.SECURITY_PRINCIPAL, "uid=admin,ou=system");
-        p.setProperty(Context.SECURITY_CREDENTIALS, "secret");
-        p.setProperty(Context.SECURITY_AUTHENTICATION, "simple");
-
-        DirContext rootCtx = new InitialDirContext(p);
-        DirContext ctx = (DirContext) rootCtx.lookup("dc=apache,dc=org");
-        SearchControls sc = new SearchControls();
-        sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
-
-        NamingEnumeration<SearchResult> searchResults = ctx.search("", "(objectclass=*)", sc);
-
-        while (searchResults.hasMoreElements()) {
-            SearchResult searchResult = searchResults.next();
-            Attributes attributes = searchResult.getAttributes();
-            System.out.println("searchResult.attributes: " + attributes) ;
-        }
-    }
-     */
-    /*
-            Attributes attrs = new BasicAttributes(true);
-        attrs.put("NUMERICOID", "1.3.6.1.4.1.18060.0.4.3.3.1");
-        attrs.put("NAME", "ship");
-        attrs.put("DESC", "An entry which represents a ship");
-        attrs.put("SUP", "top");
-        attrs.put("STRUCTURAL", "true");
-
-        Attribute must = new BasicAttribute("MUST");
-        must.add("cn");
-        attrs.put(must);
-
-        Attribute may = new BasicAttribute("MAY");
-        may.add("numberOfGuns");
-        may.add("numberOfGuns2");
-        may.add("description");
-        attrs.put(may);
-
-        //add
-        schema.createSubcontext("ClassDefinition/ship", attrs);
-     */
 }
