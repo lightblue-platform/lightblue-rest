@@ -77,92 +77,6 @@ public class ITCaseCrudResourceRDBMSTest {
 
     private static boolean notRegistered = true;
 
-    public static class FileStreamProcessor implements IStreamProcessor {
-        private FileOutputStream outputStream;
-
-        public FileStreamProcessor(File file) throws FileNotFoundException {
-            outputStream = new FileOutputStream(file);
-        }
-
-        @Override
-        public void process(String block) {
-            try {
-                outputStream.write(block.getBytes());
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        @Override
-        public void onProcessed() {
-            try {
-                outputStream.close();
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-    }
-
-    private static final String MONGO_HOST = "localhost";
-    private static final int MONGO_PORT = 27777;
-    private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
-
-    private static final String DB_NAME = "testmetadata";
-
-    private static MongodExecutable mongodExe;
-    private static MongodProcess mongod;
-    private static Mongo mongo;
-    private static DB db;
-
-    static {
-        try {
-            IStreamProcessor mongodOutput = Processors.named("[mongod>]",
-                    new FileStreamProcessor(File.createTempFile("mongod", "log")));
-            IStreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
-            IStreamProcessor commandsOutput = Processors.namedConsole("[console>]");
-
-            IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                    .defaults(Command.MongoD)
-                    .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-                    .build();
-
-            MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
-            mongodExe = runtime.prepare(
-                    new MongodConfigBuilder()
-                            .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
-                            .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                            .build()
-            );
-            try {
-                mongod = mongodExe.start();
-            } catch (Throwable t) {
-                // try again, could be killed breakpoint in IDE
-                mongod = mongodExe.start();
-            }
-            mongo = new Mongo(IN_MEM_CONNECTION_URL);
-
-            MongoConfiguration config = new MongoConfiguration();
-            // disable ssl for test (enabled by default)
-            config.setDatabase(DB_NAME);
-            config.setSsl(Boolean.FALSE);
-            config.addServerAddress(MONGO_HOST, MONGO_PORT);
-
-            db = config.getDB();
-
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    clearDatabase();
-                }
-
-            });
-        } catch (IOException e) {
-            throw new java.lang.Error(e);
-        }
-    }
-
     @Before
     public void setup() throws Exception {
         File folder = new File("/tmp");
@@ -177,23 +91,7 @@ public class ITCaseCrudResourceRDBMSTest {
                 System.out.println("Failed to remove " + file.getAbsolutePath());
             }
         }
-
-        mongo.dropDatabase(DB_NAME);
-        mongo.dropDatabase("local");
-        mongo.dropDatabase("admin");
-        mongo.dropDatabase("mongo");
-        mongo.getDB(DB_NAME).dropDatabase();
-        mongo.getDB("local").dropDatabase();
-        mongo.getDB("admin").dropDatabase();
-        mongo.getDB("mongo").dropDatabase();
-
-        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).remove(new BasicDBObject());
-        mongo.getDB("mongo").getCollection("metadata").remove(new BasicDBObject());
-
-        db.createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
-        BasicDBObject index = new BasicDBObject("name", 1);
-        index.put("version.value", 1);
-        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).ensureIndex(index, "name", true);
+        MongoTestHelper.statDatabase();
 
         if (notRegistered) {
             notRegistered = false;
@@ -225,23 +123,11 @@ public class ITCaseCrudResourceRDBMSTest {
         }
     }
 
-    @After
-    public void teardown() {
-        if (mongo != null) {
-            mongo.dropDatabase(DB_NAME);
-        }
+    @AfterClass
+    public static void teardownClass() {
+        MongoTestHelper.clearDatabase();
     }
 
-    public static void clearDatabase() {
-        if (mongod != null) {
-            mongod.stop();
-            mongodExe.stop();
-        }
-        db = null;
-        mongo = null;
-        mongod = null;
-        mongodExe = null;
-    }
 
     @Deployment
     public static WebArchive createDeployment() {
@@ -262,7 +148,7 @@ public class ITCaseCrudResourceRDBMSTest {
     }
 
     private String readFile(String filename) throws IOException, URISyntaxException {
-        return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
+        return FileUtil.readFileAndTrim(this.getClass().getSimpleName() + "/" + filename);
     }
 
     private String readConfigFile(String filename) throws IOException, URISyntaxException {
@@ -315,6 +201,7 @@ public class ITCaseCrudResourceRDBMSTest {
         } catch (SQLException ex) {
             throw new IllegalStateException(ex);
         }
+        MongoTestHelper.clearDatabase();
     }
 
 
@@ -350,7 +237,7 @@ public class ITCaseCrudResourceRDBMSTest {
         } catch (NamingException | SQLException ex) {
             throw new IllegalStateException(ex);
         }
-        mongo.dropDatabase(DB_NAME);
+        MongoTestHelper.clearDatabase();
     }
 
 
@@ -386,7 +273,7 @@ public class ITCaseCrudResourceRDBMSTest {
         } catch (NamingException | SQLException ex) {
             throw new IllegalStateException(ex);
         }
-        mongo.dropDatabase(DB_NAME);
+        MongoTestHelper.clearDatabase();
     }
 
     @Test
@@ -431,7 +318,7 @@ public class ITCaseCrudResourceRDBMSTest {
         } catch (NamingException | SQLException ex) {
             throw new IllegalStateException(ex);
         }
-        mongo.dropDatabase(DB_NAME);
+        MongoTestHelper.clearDatabase();
     }
 
 
@@ -469,12 +356,12 @@ public class ITCaseCrudResourceRDBMSTest {
             stmt.execute("SELECT * FROM Country;");
             ResultSet resultSet = stmt.getResultSet();
 
+            JSONAssert.assertEquals(expectedDeleted, resultDeleted, false);
             Assert.assertEquals(false, resultSet.next());
 
-            JSONAssert.assertEquals(expectedDeleted, resultDeleted, false);
         } catch (NamingException | SQLException ex) {
             throw new IllegalStateException(ex);
         }
-        mongo.dropDatabase(DB_NAME);
+        MongoTestHelper.clearDatabase();
     }
 }
