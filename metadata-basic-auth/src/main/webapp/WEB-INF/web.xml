@@ -54,5 +54,14 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
     <description>The roles that are required to log into the rest-metadata services</description>
     <role-name>authenticated</role-name>
   </security-role>
-  
+
+  <listener>
+    <listener-class>com.redhat.lightblue.rest.cors.CorsInitializingServletContextListener</listener-class>
+  </listener>
+
+  <context-param>
+    <param-name>cors.configuration.resource</param-name>
+    <param-value>lightblue-crud-cors.json</param-value>
+  </context-param>
+
 </web-app>

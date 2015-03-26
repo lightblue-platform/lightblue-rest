@@ -44,7 +44,11 @@ public class CorsInitializingServletContextListener implements ServletContextLis
                 return;
             }
 
-            corsFilter.register(context, getConfig(configJsonStream));
+            CorsConfiguration config = getConfig(configJsonStream);
+            corsFilter.register(context, config);
+
+            LOGGER.info("Enabled CORS with configuration found at '" + configJsonResource + "': "
+                    + config);
         } catch (IOException e) {
             LOGGER.error("Error reading CORS configuration file. CORS will not be enabled.", e);
         }
