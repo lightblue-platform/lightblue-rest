@@ -63,5 +63,14 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
   <servlet-mapping>
       <servlet-name>health</servlet-name>
       <url-pattern>/health</url-pattern>
-  </servlet-mapping>  
+  </servlet-mapping>
+
+  <listener>
+    <listener-class>com.redhat.lightblue.rest.cors.CorsInitializingServletContextListener</listener-class>
+  </listener>
+
+  <context-param>
+    <param-name>cors.configuration.resource</param-name>
+    <param-value>lightblue-crud-cors.json</param-value>
+  </context-param>
 </web-app>
