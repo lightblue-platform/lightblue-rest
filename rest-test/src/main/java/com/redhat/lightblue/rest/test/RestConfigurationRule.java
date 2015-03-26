@@ -16,32 +16,31 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata;
+package com.redhat.lightblue.rest.test;
 
-import javax.ws.rs.core.SecurityContext;
-import java.security.Principal;
+import org.junit.rules.ExternalResource;
+import org.junit.rules.TestRule;
+
+import com.redhat.lightblue.config.LightblueFactory;
+import com.redhat.lightblue.rest.RestConfiguration;
 
 /**
- * Created by nmalik on 12/12/14.
+ * This {@link TestRule} implementation has one sole purpose, which is to ensure that
+ * the {@link LightblueFactory} is reset on the {@link RestConfiguration} appropriately
+ * after each test or test suite.
+ *
+ * @author dcrissman
  */
-public class TestSecurityContext implements SecurityContext {
+public class RestConfigurationRule extends ExternalResource {
+
     @Override
-    public Principal getUserPrincipal() {
-        return null;
+    protected void before() throws Throwable {
+        RestConfiguration.setFactory(null);
     }
 
     @Override
-    public boolean isUserInRole(String role) {
-        return role != null && !role.isEmpty();
+    protected void after() {
+        RestConfiguration.setFactory(null);
     }
 
-    @Override
-    public boolean isSecure() {
-        return false;
-    }
-
-    @Override
-    public String getAuthenticationScheme() {
-        return null;
-    }
 }
