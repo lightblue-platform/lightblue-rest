@@ -137,16 +137,16 @@ public class ITCaseCrudResourceRDBMSTest {
             IStreamProcessor commandsOutput = Processors.namedConsole("[console>]");
 
             IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-            .defaults(Command.MongoD)
-            .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-            .build();
+                    .defaults(Command.MongoD)
+                    .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
+                    .build();
 
             MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
             mongodExe = runtime.prepare(
                     new MongodConfigBuilder()
-                    .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
-                    .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                    .build()
+                            .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
+                            .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
+                            .build()
                     );
             try {
                 mongod = mongodExe.start();
