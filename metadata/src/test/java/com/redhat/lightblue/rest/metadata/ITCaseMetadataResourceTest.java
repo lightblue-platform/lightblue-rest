@@ -18,14 +18,15 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
-import com.mongodb.BasicDBObject;
-import com.redhat.lightblue.config.DataSourcesConfiguration;
-import com.redhat.lightblue.config.LightblueFactory;
-import com.redhat.lightblue.config.MetadataConfiguration;
-import com.redhat.lightblue.metadata.mongo.MongoMetadata;
-import com.redhat.lightblue.mongo.test.EmbeddedMongo;
-import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.util.JsonUtils;
+import static com.redhat.lightblue.util.test.FileUtil.readFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.SecurityContext;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -33,23 +34,29 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.json.JSONException;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.SecurityContext;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import static com.redhat.lightblue.util.test.FileUtil.readFile;
+import com.mongodb.BasicDBObject;
+import com.redhat.lightblue.config.MetadataConfiguration;
+import com.redhat.lightblue.metadata.mongo.MongoMetadata;
+import com.redhat.lightblue.mongo.test.EmbeddedMongo;
+import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.test.RestConfigurationRule;
 
 /**
  * @author lcestari
  */
 @RunWith(Arquillian.class)
 public class ITCaseMetadataResourceTest {
+
+    @Rule
+    public final RestConfigurationRule resetRuleConfiguration = new RestConfigurationRule();
 
     private static EmbeddedMongo mongo = EmbeddedMongo.getInstance();
 
@@ -97,8 +104,6 @@ public class ITCaseMetadataResourceTest {
 
         SecurityContext sc = new TestSecurityContext();
 
-        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
-        RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
         System.out.println("factory:" + RestConfiguration.getFactory());
         String expectedCreated = readFile("expectedCreated.json");
         String resultCreated = cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFile("resultCreated.json"));
@@ -169,15 +174,13 @@ public class ITCaseMetadataResourceTest {
 
         SecurityContext sc = new TestSecurityContext();
 
-        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readFile("datasources.json"))));
-        RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
         System.out.println("factory:" + RestConfiguration.getFactory());
         String expectedCreated = readFile("expectedCreated.json");
         String resultCreated = cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFile("resultCreated.json"));
         JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
         String expectedUpdateEntityInfo = readFile("expectedCreateSchema.json");
-        String resultUpdateEntityInfo = cutMetadataResource.createMetadata(sc, "country", "1.1.0",expectedUpdateEntityInfo);
+        String resultUpdateEntityInfo = cutMetadataResource.createMetadata(sc, "country", "1.1.0", expectedUpdateEntityInfo);
         JSONAssert.assertEquals(expectedUpdateEntityInfo, resultUpdateEntityInfo, false);
     }
 }

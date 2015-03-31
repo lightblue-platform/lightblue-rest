@@ -53,7 +53,6 @@
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-common</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
@@ -70,6 +69,10 @@
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>lightblue-mongo-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.rest</groupId>
+            <artifactId>lightblue-rest-test</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
