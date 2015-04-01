@@ -4,7 +4,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.naming.directory.SearchResult;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * Created by lcestari on 2/23/15.
  */
 public class LDAPCache {
-    private static final Logger LOGGER = Logger.getLogger(LDAPCache.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LDAPCache.class);
     private static final Cache<LDAPCacheKey, SearchResult> ldapCacheSession; // non-persisted cache
     private static final Cache<LDAPCacheKey, List<String>> userRolesCacheSession; // non-persisted cache
 
@@ -38,6 +39,7 @@ public class LDAPCache {
                             }
                         }
                 ).build();
+        LOGGER.debug("LDAPCache: ldapCacheSession was created on a static block");
 
         userRolesCacheSession = CacheBuilder.newBuilder()
                 .concurrencyLevel(10) // handle 10 concurrent request without a problem
@@ -54,17 +56,21 @@ public class LDAPCache {
                             }
                         }
                 ).build();
+        LOGGER.debug("LDAPCache: userRolesCacheSession was created on a static block");
     }
 
     public static Cache<LDAPCacheKey, SearchResult> getLDAPCacheSession() {
+        LOGGER.debug("LDAPCache#getLDAPCacheSession");
         return ldapCacheSession;
     }
 
     public static Cache<LDAPCacheKey, List<String>> getUserRolesCacheSession() {
+        LOGGER.debug("LDAPCache#getUserRolesCacheSession");
         return userRolesCacheSession;
     }
 
     public static void invalidateKey(LDAPCacheKey key) {
+        LOGGER.debug("LDAPCache#invalidateKey was invoked");
         ldapCacheSession.invalidate(key);
         userRolesCacheSession.invalidate(key);
     }

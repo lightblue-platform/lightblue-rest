@@ -18,19 +18,43 @@
  */
 package com.redhat.lightblue.rest.crud;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
+
+import javax.inject.Inject;
+
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.json.JSONException;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
-import com.redhat.lightblue.config.DataSourcesConfiguration;
 import com.redhat.lightblue.config.CrudConfiguration;
-import com.redhat.lightblue.config.LightblueFactory;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.metadata.EntityMetadata;
 import com.redhat.lightblue.metadata.mongo.MongoMetadata;
 import com.redhat.lightblue.mongo.config.MongoConfiguration;
-import com.redhat.lightblue.util.JsonUtils;
 import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.test.RestConfigurationRule;
+import com.redhat.lightblue.util.JsonUtils;
 import com.redhat.lightblue.util.test.FileUtil;
+
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -43,27 +67,6 @@ import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.io.IStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.runtime.Network;
-import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.json.JSONException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.skyscreamer.jsonassert.JSONAssert;
-
-import javax.inject.Inject;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 
 /**
  *
@@ -72,8 +75,11 @@ import java.net.URISyntaxException;
 @RunWith(Arquillian.class)
 public class ITCaseCrudResourceTest {
 
+    @Rule
+    public final RestConfigurationRule resetRuleConfiguration = new RestConfigurationRule();
+
     public static class FileStreamProcessor implements IStreamProcessor {
-        private FileOutputStream outputStream;
+        private final FileOutputStream outputStream;
 
         public FileStreamProcessor(File file) throws FileNotFoundException {
             outputStream = new FileOutputStream(file);
@@ -128,7 +134,7 @@ public class ITCaseCrudResourceTest {
                     .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
                     .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
                     .build()
-            );
+                    );
             try {
                 mongod = mongodExe.start();
             } catch (Throwable t) {
@@ -216,9 +222,7 @@ public class ITCaseCrudResourceTest {
     @Test
     public void testFirstIntegrationTest() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-        RestConfiguration.setDatasources(new DataSourcesConfiguration(JsonUtils.json(readConfigFile(RestConfiguration.DATASOURCE_FILENAME))));
-        RestConfiguration.setFactory(new LightblueFactory(RestConfiguration.getDatasources()));
-        
+
         String expectedCreated = readFile("expectedCreated.json");
         String metadata = readFile("metadata.json");
         EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
