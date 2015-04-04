@@ -1,26 +1,33 @@
 package com.redhat.lightblue.rest.audit;
 
+import com.mifmif.common.regex.Generex;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.impl.SimpleLogger;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.security.Principal;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.Map;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by lcestari on 4/2/15.
  */
 public class LightblueAuditServletFilterTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LightblueAuditServletFilterTest.class);
+
     static TeeInMemoryStringPrintStream out;
     static TeeInMemoryStringPrintStream err;
     static Field simpleLoggerOutField;
@@ -39,22 +46,29 @@ public class LightblueAuditServletFilterTest {
 
     @BeforeClass
     public static void beforeAllTest() throws Exception {
+        System.out.flush();
         out = TeeInMemoryStringPrintStream.teeTo(System.out);
         System.setOut(out);
 
+        System.err.flush();
         err = TeeInMemoryStringPrintStream.teeTo(System.err);
         System.setErr(err);
 
         simpleLoggerOutField = SimpleLogger.class.getDeclaredField("TARGET_STREAM");
         simpleLoggerOutField.setAccessible(true);
         simpleLoggerPrintStream = (PrintStream) simpleLoggerOutField.get(null);
+        simpleLoggerPrintStream.flush();
         simpleLoggerOutField.set(null, err); // Using the default configuration, SimpleLogger will use the err. Either way, we are going to reset to the original value after this set of tests
     }
 
     @AfterClass
     static public void afterAllTest() throws Exception {
+        System.out.flush();
         System.setOut(out.originalPrintStream);
+
+        System.err.flush();
         System.setErr(err.originalPrintStream);
+
         simpleLoggerOutField.set(null, simpleLoggerPrintStream);
     }
 
@@ -101,16 +115,220 @@ public class LightblueAuditServletFilterTest {
         cut.doFilter(req, res, fChain);
         basicCheckAndReset();
     }
+    // Context path is data or metadata, but it doesnt match any rest resource that we have
+    @Test
+    public void testDoFilterNoyValid() throws Exception {
+        req.contextPath = "/metadata";
+        req.principal = new MyPrincipal("UserName");
+        req.method = "DELETE";// Not valid
+        req.servletPath ="/MISTAKE/entity/version1.0-1:2/";// Not valid
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("The URL doesn't map to one of the rest services. Request URI"));
+        err.resetInMemoryConsole();
+
+        req.method = "CHECKOUT";
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("Invalid HTTP method:"));
+    }
 
     // Auditable cases for emtadata
     @Test
     public void testDoFilterMetadata() throws Exception {
         req.contextPath = "/metadata";
         req.principal = new MyPrincipal("UserName");
+
         req.method = "GET";
-        req.servletPath="/entity/version/dependencies";
+
+        req.servletPath ="/entity/version1.0-1:2/dependencies"; //LightblueAuditServletFilter.getDepGraphVersionRegex
         cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/{version}/dependencies\""));
         basicCheckAndReset();
+
+        req.servletPath ="/entity/dependencies"; //LightblueAuditServletFilter.getDepGraphEntityRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/dependencies\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/dependencies"; //LightblueAuditServletFilter.getDepGraphRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /dependencies\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/entity/version1.0-1:2/roles"; //LightblueAuditServletFilter.getEntityRolesVersionRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/{version}/roles\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/entity/roles"; //LightblueAuditServletFilter.getEntityRolesEntityRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/roles\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/roles"; //LightblueAuditServletFilter.getEntityRolesRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /roles\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/"; //LightblueAuditServletFilter.getEntityNamesRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/s=asdass"; //LightblueAuditServletFilter.getEntityNamesStatusRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /s={statuses}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/newEntity"; //LightblueAuditServletFilter.getEntityVersionsRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/newEntity/15.9q:b"; //LightblueAuditServletFilter.getMetadataRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/{version}\""));
+        basicCheckAndReset();
+
+        req.method = "POST";
+
+        req.servletPath ="/newEntity/15.9q:b/default"; //LightblueAuditServletFilter.createSchemaRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"POST /{entity}/{version}/default\""));
+        basicCheckAndReset();
+
+        req.method = "PUT";
+
+        req.servletPath ="/newEntity/15.9q:b"; //LightblueAuditServletFilter.createMetadataRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"PUT /{entity}/{version}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/newEntity/schema=15.9q:b"; //LightblueAuditServletFilter.createSchemaRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"PUT /{entity}/schema={version}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/newEntity"; //LightblueAuditServletFilter.updateEntityInfoRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"PUT /{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/newEntity/15.9q:b/test"; //LightblueAuditServletFilter.updateSchemaStatusRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"PUT /{entity}/{version}/{status}\""));
+        basicCheckAndReset();
+
+        req.method = "DELETE";
+
+        req.servletPath ="/newEntity"; //LightblueAuditServletFilter.updateEntityInfoRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"DELETE /{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/newEntity/default"; //LightblueAuditServletFilter.updateEntityInfoRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"DELETE /{entity}/default\""));
+        basicCheckAndReset();
+    }
+
+    // Auditable cases for emtadata
+    @Test
+    public void testDoFilterData() throws Exception {
+        req.contextPath = "/data";
+        req.principal = new MyPrincipal("UserName");
+
+        req.method = "GET";
+
+        req.servletPath ="/find/nEntity"; //LightblueAuditServletFilter.simpleFindVersionRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"GET /find/{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/find/nEntity/15.9q:b"; //LightblueAuditServletFilter.simpleFindRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"GET /find/{entity}/{version}\""));
+        basicCheckAndReset();
+
+        req.method = "POST";
+
+        req.servletPath ="/save/newEntity"; //LightblueAuditServletFilter.saveRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /save/{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/save/newEntity/15.9q:b"; //LightblueAuditServletFilter.saveVersionRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /save/{entity}/{version}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/save/newEntity"; //LightblueAuditServletFilter.saveRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /save/{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/save/newEntity/15.9q:b"; //LightblueAuditServletFilter.saveVersionRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /save/{entity}/{version}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/update/newEntity"; //LightblueAuditServletFilter.updateRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /update/{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/update/newEntity/15.9q:b"; //LightblueAuditServletFilter.updateVersionRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /update/{entity}/{version}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/delete/newEntity"; //LightblueAuditServletFilter.deleteRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /delete/{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/delete/newEntity/15.9q:b"; //LightblueAuditServletFilter.deleteVersionRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /delete/{entity}/{version}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/find/newEntity"; //LightblueAuditServletFilter.findRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /find/{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/find/newEntity/15.9q:b"; //LightblueAuditServletFilter.findVersionRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /find/{entity}/{version}\""));
+        basicCheckAndReset();
+
+        req.method = "PUT";
+
+        req.servletPath ="/insert/newEntity"; //LightblueAuditServletFilter.insertRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"PUT /insert/{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/insert/newEntity/15.9q:b"; //LightblueAuditServletFilter.insertVersionRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"PUT /insert/{entity}/{version}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/newEntity"; //LightblueAuditServletFilter.insertAltRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"PUT /{entity}\""));
+        basicCheckAndReset();
+
+        req.servletPath ="/newEntity/15.9q:b"; //LightblueAuditServletFilter.insertAltVersionRegex
+        cut.doFilter(req, res, fChain);
+        assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"PUT /{entity}/{version}\""));
+        basicCheckAndReset();
+
+
+    }
+
+    private String generateStringFromPattern(String pattern) {
+        Generex generex = new Generex(pattern);
+        return generex.random().replace(" ","");// it seems there is a bug on the dependency of the dependency with \\S as it generate whitespace some times
     }
 
     private void basicCheckAndReset() {

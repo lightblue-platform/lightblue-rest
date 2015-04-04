@@ -7,7 +7,11 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,69 +20,75 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Filter all the request which must have data or metadata as their context path
+ *
  * Created by lcestari on 4/1/15.
  */
 @WebFilter(urlPatterns = { "/*" }) // Handle any request
 public class LightblueAuditServletFilter implements Filter {
-    public static final String YYYY_MM_DD_T_HH_MM_SS_SSSZ = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
+    //GET
     //AbstractCrudResource @Path("/find/{entity}") or @Path("/find/{entity}/{version}") w/ querystring simpleFind
-    public static final Pattern simpleFindVersionRegex = Pattern.compile("/+find/+(\\w)/+([-._:A-Za-z0-9]+)/*");
-    public static final Pattern simpleFindRegex = Pattern.compile("/+find/+(\\w)/*");
+    public static final Pattern simpleFindVersionRegex = Pattern.compile("/+find/+(\\w+)/+([\\S]+)/*");
+    public static final Pattern simpleFindRegex = Pattern.compile("/+find/+(\\w+)/*");
     //AbstractMetadataResource @Path("/dependencies") or @Path("/{entity}/dependencies") or @Path("/{entity}/{version}/dependencies")
-    public static final Pattern getDepGraphVersionRegex = Pattern.compile("/+(\\w)/+([-._:A-Za-z0-9]+)/+dependencies/*");
-    public static final Pattern getDepGraphEntityRegex = Pattern.compile("/+(\\w)/+dependencies/*");
+    public static final Pattern getDepGraphVersionRegex = Pattern.compile("/+(\\w+)/+([\\S]+)/+dependencies/*");
+    public static final Pattern getDepGraphEntityRegex = Pattern.compile("/+(\\w+)/+dependencies/*");
     public static final Pattern getDepGraphRegex = Pattern.compile("/+dependencies/*");
     //AbstractMetadataResource @Path("/roles") or @Path("/{entity}/roles") or @Path("/{entity}/{version}/roles") getEntityRoles
-    public static final Pattern getEntityRolesVersionRegex = Pattern.compile("/+(\\w)/+([-._:A-Za-z0-9]+)/+roles/*");
-    public static final Pattern getEntityRolesEntityRegex = Pattern.compile("/+(\\w)/+roles/*");
+    public static final Pattern getEntityRolesVersionRegex = Pattern.compile("/+(\\w+)/+([\\S]+)/+roles/*");
+    public static final Pattern getEntityRolesEntityRegex = Pattern.compile("/+(\\w+)/+roles/*");
     public static final Pattern getEntityRolesRegex = Pattern.compile("/+roles/*");
     //AbstractMetadataResource @Path("/") or @Path("/s={statuses}") getEntityNames
     public static final Pattern getEntityNamesRegex = Pattern.compile("/*");
-    public static final Pattern getEntityNamesStatusRegex = Pattern.compile("/+s=(\\w)/*");
+    public static final Pattern getEntityNamesStatusRegex = Pattern.compile("/+s=(\\w+)/*");
     //AbstractMetadataResource @Path("/{entity}") getEntityVersions
-    public static final Pattern getEntityVersionsRegex = Pattern.compile("/+(\\w)/*");
+    public static final Pattern getEntityVersionsRegex = Pattern.compile("/+(\\w+)/*");
     //AbstractMetadataResource @Path("/{entity}/{version}") getMetadata
-    public static final Pattern getMetadataRegex = Pattern.compile("/+(\\w)/+([-._:A-Za-z0-9]+)/*");
+    public static final Pattern getMetadataRegex = Pattern.compile("/+(\\w+)/+([\\S]+)/*");
 
+    //POST
     //AbstractCrudResource @Path("/save/{entity}") or @Path("/save/{entity}/{version}") save
-    public static final Pattern saveRegex = Pattern.compile("/+save/+(\\w)/+/*");
-    public static final Pattern saveVersionRegex = Pattern.compile("/+save/+(\\w)/+([-._:A-Za-z0-9]+)/*");
+    public static final Pattern saveRegex = Pattern.compile("/+save/+(\\w+)/*");
+    public static final Pattern saveVersionRegex = Pattern.compile("/+save/+(\\w+)/+([\\S]+)/*");
     //AbstractCrudResource @Path("/update/{entity}") or @Path("/update/{entity}/{version}") update
-    public static final Pattern updateRegex = Pattern.compile("/+update/+(\\w)/+/*");
-    public static final Pattern updateVersionRegex = Pattern.compile("/+update/+(\\w)/+([-._:A-Za-z0-9]+)/*");
+    public static final Pattern updateRegex = Pattern.compile("/+update/+(\\w+)/*");
+    public static final Pattern updateVersionRegex = Pattern.compile("/+update/+(\\w+)/+([\\S]+)/*");
     //AbstractCrudResource @Path("/delete/{entity}") or @Path("/delete/{entity}/{version}") delete
-    public static final Pattern deleteRegex = Pattern.compile("/+delete/+(\\w)/+/*");
-    public static final Pattern deleteVersionRegex = Pattern.compile("/+delete/+(\\w)/+([-._:A-Za-z0-9]+)/*");
+    public static final Pattern deleteRegex = Pattern.compile("/+delete/+(\\w+)/*");
+    public static final Pattern deleteVersionRegex = Pattern.compile("/+delete/+(\\w+)/+([\\S]+)/*");
     //AbstractCrudResource @Path("/find/{entity}") or @Path("/find/{entity}/{version}") find
-    public static final Pattern findRegex = Pattern.compile("/+find/+(\\w)/+/*");
-    public static final Pattern findVersionRegex = Pattern.compile("/+find/+(\\w)/+([-._:A-Za-z0-9]+)/*");
+    public static final Pattern findRegex = Pattern.compile("/+find/+(\\w+)/*");
+    public static final Pattern findVersionRegex = Pattern.compile("/+find/+(\\w+)/+([\\S]+)/*");
     //AbstractMetadataResource @Path("/{entity}/{version}/default") setDefaultVersion
-    public static final Pattern setDefaultVersionRegex = Pattern.compile("/+(\\w)/+([-._:A-Za-z0-9]+)/+default/*");
+    public static final Pattern setDefaultVersionRegex = Pattern.compile("/+(\\w+)/+([\\S]+)/+default/*");
 
+    //PUT
     //AbstractCrudResource @Path("/insert/{entity}") or @Path("/insert/{entity}/{version}")  insert
-    public static final Pattern insertRegex = Pattern.compile("/+insert/+(\\w)/*");
-    public static final Pattern insertVersionRegex = Pattern.compile("/+insert/+(\\w)/+([-._:A-Za-z0-9]+)/*");
+    public static final Pattern insertRegex = Pattern.compile("/+insert/+(\\w+)/*");
+    public static final Pattern insertVersionRegex = Pattern.compile("/+insert/+(\\w+)/+([\\S]+)/*");
     //AbstractCrudResource @Path("/{entity}") or @Path("/{entity}/{version}") is insertAlt
-    public static final Pattern insertAltRegex = Pattern.compile("/+(\\w)/*");
-    public static final Pattern insertAltVersionRegex = Pattern.compile("/+(\\w)/+([-._:A-Za-z0-9]+)/*");
+    public static final Pattern insertAltRegex = Pattern.compile("/+(\\w+)/*");
+    public static final Pattern insertAltVersionRegex = Pattern.compile("/+(\\w+)/+([\\S]+)/*");
     //AbstractMetadataResource @Path("/{entity}/{version}") createMetadata
-    public static final Pattern createMetadataRegex = Pattern.compile("/+(\\w)/+([-._:A-Za-z0-9]+)/*");
+    public static final Pattern createMetadataRegex = Pattern.compile("/+(\\w+)/+([\\S]+)/*");
     //AbstractMetadataResource @Path("/{entity}/schema={version}") createSchema
-    public static final Pattern createSchemaRegex = Pattern.compile("/+(\\w)/+schema=([-._:A-Za-z0-9]+)/*");
+    public static final Pattern createSchemaRegex = Pattern.compile("/+(\\w+)/+schema=([\\S]+)/*");
     //AbstractMetadataResource @Path("/{entity}") updateEntityInfo
-    public static final Pattern updateEntityInfoRegex = Pattern.compile("/+(\\w)/*");
+    public static final Pattern updateEntityInfoRegex = Pattern.compile("/+(\\w+)/*");
     //AbstractMetadataResource @Path("/{entity}/{version}/{status}") updateSchemaStatus
-    public static final Pattern updateSchemaStatusRegex = Pattern.compile("/+(\\w)/+([-._:A-Za-z0-9]+)/+(\\w)/*");
+    public static final Pattern updateSchemaStatusRegex = Pattern.compile("/+(\\w+)/+([\\S]+)/+(\\w+)/*");
 
+    //DELETE
     //AbstractMetadataResource @Path("/{entity}") removeEntity
-    public static final Pattern removeEntityRegex = Pattern.compile("/+(\\w)/*");
+    public static final Pattern removeEntityRegex = Pattern.compile("/+(\\w+)/*");
     //AbstractMetadataResource @Path("/{entity}/default") clearDefaultVersion
-    public static final Pattern clearDefaultVersionRegex = Pattern.compile("/+(\\w)/+default/*");
+    public static final Pattern clearDefaultVersionRegex = Pattern.compile("/+(\\w+)/+default/*");
 
 
     public static final Pattern metatadataRegex = Pattern.compile("/+metadata/*");
     public static final Pattern crudRegex = Pattern.compile("/+data/*");
+    public static final String YYYY_MM_DD_T_HH_MM_SS_SSSZ = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LightblueAuditServletFilter.class);
     private static final ThreadLocal<SimpleDateFormat> threadDateFormat =  new ThreadLocal<>();
@@ -117,6 +127,11 @@ public class LightblueAuditServletFilter implements Filter {
             logEntryBuilder.setResource(hReq.getContextPath());
 
             setOperationEnittyVersionStatus(hReq, isMetadata, logEntryBuilder);
+
+
+            HttpServletResponse httpServletResponse = (HttpServletResponse) res;
+            HttpServletResponse httpServletResponseWrapperBuffered = new HttpServletResponseWrapperBuffered(httpServletResponse,new ByteArrayPrintWriter());
+            res = httpServletResponseWrapperBuffered;
         }
 
         if(auditReqFlag) {
@@ -129,6 +144,11 @@ public class LightblueAuditServletFilter implements Filter {
             stopwatch.stop();
             long elapsedTime = stopwatch.elapsed(TimeUnit.NANOSECONDS); // elapsedTime in ns
             logEntryBuilder.setTimeElapsedInNs(elapsedTime);
+            HttpServletResponseWrapperBuffered httpServletResponseWrapperBuffered = (HttpServletResponseWrapperBuffered) res;
+            httpServletResponseWrapperBuffered.byteArrayPrintWriter.printWriter.flush();
+            byte[] bytes = httpServletResponseWrapperBuffered.byteArrayPrintWriter.toByteArray();
+            res.getOutputStream().write(bytes);
+            logEntryBuilder.setResponseSize(bytes.length);
             final LogEntry logEntry = logEntryBuilder.createLogEntry();
             String logEntryString = String.format(
                     "Audited lightblue rest request => " +
@@ -361,7 +381,7 @@ public class LightblueAuditServletFilter implements Filter {
                                 } else {
                                     Matcher mInsertAltV = insertAltVersionRegex.matcher(hReq.getServletPath());
                                     if (mInsertAltV.matches()) {
-                                        operation = "PUT /{entity}/{version}t";
+                                        operation = "PUT /{entity}/{version}";
                                         entity = mInsertAltV.group(1);
                                         version = mInsertAltV.group(2);
                                         break;
@@ -457,4 +477,51 @@ public class LightblueAuditServletFilter implements Filter {
         LOGGER.debug("Initializing LightblueAuditServletFilter");
     }
 
+    private static class HttpServletResponseWrapperBuffered extends HttpServletResponseWrapper {
+        private ByteArrayPrintWriter byteArrayPrintWriter;
+
+        public HttpServletResponseWrapperBuffered(HttpServletResponse httpServletResponse, ByteArrayPrintWriter byteArrayPrintWriter) {
+            super(httpServletResponse);
+            this.byteArrayPrintWriter = byteArrayPrintWriter;
+        }
+
+        public PrintWriter getWriter() {
+            return byteArrayPrintWriter.getWriter();
+        }
+
+        public ServletOutputStream getOutputStream() {
+            return byteArrayPrintWriter.getStream();
+        }
+
+    }
+
+    private static class ByteArrayPrintWriter {
+        private ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        private PrintWriter printWriter = new PrintWriter(byteArrayOutputStream);
+        private ServletOutputStream byteArrayServletStream = new ByteArrayServletStream(byteArrayOutputStream);
+
+        public PrintWriter getWriter() {
+            return printWriter;
+        }
+
+        public ServletOutputStream getStream() {
+            return byteArrayServletStream;
+        }
+
+        byte[] toByteArray() {
+            return byteArrayOutputStream.toByteArray();
+        }
+    }
+
+    private static class ByteArrayServletStream extends ServletOutputStream {
+        private ByteArrayOutputStream byteArrayOutputStream;
+
+        ByteArrayServletStream(ByteArrayOutputStream byteArrayOutputStream) {
+            this.byteArrayOutputStream = byteArrayOutputStream;
+        }
+
+        public void write(int param) throws IOException {
+            byteArrayOutputStream.write(param);
+        }
+    }
 }
