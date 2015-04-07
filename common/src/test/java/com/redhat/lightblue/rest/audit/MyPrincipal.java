@@ -13,12 +13,10 @@ public class MyPrincipal implements Principal {
         this.userName = userName;
     }
 
-    @Override
     public String getName() {
         return userName;
     }
 
-    @Override
     public boolean implies(Subject subject) {
         return false;
     }
