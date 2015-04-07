@@ -22,12 +22,12 @@
     <parent>
         <groupId>com.redhat.lightblue.rest</groupId>
         <artifactId>lightblue-rest-pom</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
+        <version>1.3.0</version>
     </parent>
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>lightblue-rest-crud</artifactId>
     <packaging>war</packaging>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.0</version>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
