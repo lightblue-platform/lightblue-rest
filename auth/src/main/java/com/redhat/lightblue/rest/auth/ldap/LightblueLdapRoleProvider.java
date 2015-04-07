@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
@@ -104,8 +103,8 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
 
     private List<String> getUserRolesFromCache(String userName) {
         LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRolesFromCache");
-        LDAPCacheKey cacheKey = new LDAPCacheKey(userName, ldapContext, ldapSearchBase, "(uid=" + userName + ")", SearchControls.SUBTREE_SCOPE);
         // Disabling due to issues with threading, maybe related to https://github.com/google/guava/issues/1715
+//        LDAPCacheKey cacheKey = new LDAPCacheKey(userName, ldapContext, ldapSearchBase, "(uid=" + userName + ")", SearchControls.SUBTREE_SCOPE);
         List<String> ifPresent = null; //LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
         return ifPresent;
     }
