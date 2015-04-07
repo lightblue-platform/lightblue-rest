@@ -105,7 +105,8 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private List<String> getUserRolesFromCache(String userName) {
         LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRolesFromCache");
         LDAPCacheKey cacheKey = new LDAPCacheKey(userName, ldapContext, ldapSearchBase, "(uid=" + userName + ")", SearchControls.SUBTREE_SCOPE);
-        List<String> ifPresent = LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
+        // Disabling due to issues with threading, maybe related to https://github.com/google/guava/issues/1715
+        List<String> ifPresent = null; //LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
         return ifPresent;
     }
 

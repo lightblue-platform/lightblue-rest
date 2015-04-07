@@ -32,9 +32,8 @@ public class LDAPCacheKey {
 
         if (!ldapContext.equals(that.ldapContext)) return false;
         if (!ldapSearchBase.equals(that.ldapSearchBase)) return false;
-        if (!uid.equals(that.uid)) return false;
-
-        return true;
+        
+        return uid.equals(that.uid);
     }
 
     @Override

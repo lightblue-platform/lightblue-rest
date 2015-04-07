@@ -14,9 +14,10 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
 
 /**
- * LDAP Hystrix command that can provide metrics for this service and fall back in case the server was unreachable as well.
+ * LDAP Hystrix command that can provide metrics for this service and fall back
+ * in case the server was unreachable as well.
  * <p/>
- * Created by nmalik  and lcestari
+ * Created by nmalik and lcestari
  */
 public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
     public static final String GROUPKEY = "ldap";
@@ -62,37 +63,42 @@ public class LdapFindUserByUidCommand extends HystrixCommand<SearchResult> {
         } catch (LDAPUserNotFoundException | LDAPMultipleUserFoundException e) {
             // Return null in case the User not found or multiple Users were found (which is inconsistent)
 
-            if (e instanceof LDAPUserNotFoundException)
+            if (e instanceof LDAPUserNotFoundException) {
                 LOGGER.error("No result found roles for user: " + cacheKey.uid, e);
-            else {
+            } else {
                 LOGGER.error("Multiples users found and only one was expected for user: " + cacheKey.uid, e);
             }
 
-            searchResult = LDAPCache.getLDAPCacheSession().getIfPresent(cacheKey);
-            if (searchResult != null) {
-                // if (not found on the server OR server state is inconsistent ) and cache hold the old value, evict the entry
-                LDAPCache.invalidateKey(cacheKey);
-            }
+        // Disabling due to issues with threading, maybe related to https://github.com/google/guava/issues/1715
+//            searchResult = LDAPCache.getLDAPCacheSession().getIfPresent(cacheKey);
+//            if (searchResult != null) {
+            // if (not found on the server OR server state is inconsistent ) and cache hold the old value, evict the entry
+//                LDAPCache.invalidateKey(cacheKey);
+//            }
         }
-        LOGGER.debug("LdapFindUserByUidCommand#run : user found! Adding it to the cache");
-        LDAPCache.getLDAPCacheSession().put(cacheKey, searchResult);
+        // Disabling due to issues with threading, maybe related to https://github.com/google/guava/issues/1715
+//        LOGGER.debug("LdapFindUserByUidCommand#run : user found! Adding it to the cache");
+//        LDAPCache.getLDAPCacheSession().put(cacheKey, searchResult);
 
         return searchResult;
     }
 
-    /*
-        This methods is executed for all types of failure such as run() failure, timeout, thread pool or semaphore rejection, and circuit-breaker short-circuiting
+    /**
+     * This methods is executed for all types of failure such as run() failure,
+     * timeout, thread pool or semaphore rejection, and circuit-breaker
+     * short-circuiting.
+     * 
+     * Disabling due to issues with threading, maybe related to https://github.com/google/guava/issues/1715
      */
-    @Override
-    protected SearchResult getFallback() {
-        LOGGER.warn("Error during the execution of the command. Falling back to the cache");
-        return new FallbackViaLDAPServerProblemCommand(cacheKey, getFailedExecutionException()).execute();
+//    @Override
+//    protected SearchResult getFallback() {
+//        LOGGER.warn("Error during the execution of the command. Falling back to the cache");
+//        return new FallbackViaLDAPServerProblemCommand(cacheKey, getFailedExecutionException()).execute();
+//    }
 
-    }
-
-
-    /*
-        Use the cache in case tje LDAP Server was not available and also to we have metrics around the fallback
+    /**
+     * Use the cache in case the LDAP Server was not available and also to we
+     * have metrics around the fallback
      */
     private static class FallbackViaLDAPServerProblemCommand extends HystrixCommand<SearchResult> {
         private static final Logger LOGGER = LoggerFactory.getLogger(FallbackViaLDAPServerProblemCommand.class);
