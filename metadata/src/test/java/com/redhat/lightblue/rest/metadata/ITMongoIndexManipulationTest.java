@@ -93,7 +93,7 @@ public class ITMongoIndexManipulationTest {
         Assert.assertNotNull(metadata);
         Assert.assertTrue(metadata.length() > 0);
 
-        // teeTo metadata without any non-default indexes
+        // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
@@ -115,7 +115,7 @@ public class ITMongoIndexManipulationTest {
         Assert.assertNotNull(metadata);
         Assert.assertTrue(metadata.length() > 0);
 
-        // teeTo metadata without any non-default indexes
+        // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
@@ -127,7 +127,7 @@ public class ITMongoIndexManipulationTest {
 
         entityCollection.createIndex(new BasicDBObject("x", 1));
 
-        // since index was forced the collection is initialized and we don't need to teeTo a dummy doc
+        // since index was forced the collection is initialized and we don't need to create a dummy doc
         Assert.assertEquals("indexes not created", 2, entityCollection.getIndexInfo().size());
     }
 
@@ -142,7 +142,7 @@ public class ITMongoIndexManipulationTest {
         Assert.assertNotNull(metadata);
         Assert.assertTrue(metadata.length() > 0);
 
-        // teeTo metadata without any non-default indexes
+        // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
@@ -171,7 +171,7 @@ public class ITMongoIndexManipulationTest {
         Assert.assertNotNull(metadata);
         Assert.assertTrue(metadata.length() > 0);
 
-        // teeTo metadata with one non-default index
+        // create metadata with one non-default index
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
@@ -199,7 +199,7 @@ public class ITMongoIndexManipulationTest {
         Assert.assertNotNull(metadata);
         Assert.assertTrue(metadata.length() > 0);
 
-        // teeTo metadata without any non-default indexes
+        // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
@@ -222,7 +222,7 @@ public class ITMongoIndexManipulationTest {
         Assert.assertNotNull(metadata);
         Assert.assertTrue(metadata.length() > 0);
 
-        // teeTo metadata without any non-default indexes
+        // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
@@ -251,7 +251,7 @@ public class ITMongoIndexManipulationTest {
         Assert.assertNotNull(metadata);
         Assert.assertTrue(metadata.length() > 0);
 
-        // teeTo metadata without any non-default indexes
+        // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
@@ -294,7 +294,7 @@ public class ITMongoIndexManipulationTest {
         Assert.assertNotNull(metadata);
         Assert.assertTrue(metadata.length() > 0);
 
-        // teeTo metadata without any non-default indexes
+        // create metadata without any non-default indexes
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
