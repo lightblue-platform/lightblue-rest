@@ -33,6 +33,7 @@ public class RequestDumper extends HttpServlet implements Servlet {
 
     private static final long serialVersionUID = 1L;
 
+    @Override
     public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
         res.setContentType("text/html");
         PrintWriter out = res.getWriter();
@@ -73,9 +74,8 @@ public class RequestDumper extends HttpServlet implements Servlet {
         buf.append("BODY: \n------\n");
 
         StringBuilder requestBuffer = new StringBuilder();
-        String line = null;
-        try {
-            BufferedReader reader = request.getReader();
+        try (BufferedReader reader = request.getReader()) {
+            String line;
             while ((line = reader.readLine()) != null) {
                 requestBuffer.append(line.trim());
             }
