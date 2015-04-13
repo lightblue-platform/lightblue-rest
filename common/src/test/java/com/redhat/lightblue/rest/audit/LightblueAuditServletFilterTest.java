@@ -87,7 +87,7 @@ public class LightblueAuditServletFilterTest {
         assertTrue(err.inMemoryConsole.toString().contains("Initializing LightblueAuditServletFilter"));
         assertFalse(err.inMemoryConsole.toString().contains("Destroying LightblueAuditServletFilter"));
         cut.destroy();
-        assertTrue(err.inMemoryConsole.toString().contains("Destroying LightblueAuditServletFilter"));
+        assertTrue(err.inMemoryConsole.toString().contains("Destroying LightblueMetadataOperationChecker"));
     }
 
     // Context path is not data or metadata, so it should not audit
@@ -139,93 +139,93 @@ public class LightblueAuditServletFilterTest {
 
         req.method = "GET";
 
-        req.servletPath ="/entity/version1.0-1:2/dependencies"; //LightblueAuditServletFilter.getDepGraphVersionRegex
+        req.servletPath ="/entity/version1.0-1:2/dependencies"; //LightblueMetadataOperationChecker.getDepGraphVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/{version}/dependencies\""));
         basicCheckAndReset();
 
-        req.servletPath ="/entity/dependencies"; //LightblueAuditServletFilter.getDepGraphEntityRegex
+        req.servletPath ="/entity/dependencies"; //LightblueMetadataOperationChecker.getDepGraphEntityRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/dependencies\""));
         basicCheckAndReset();
 
-        req.servletPath ="/dependencies"; //LightblueAuditServletFilter.getDepGraphRegex
+        req.servletPath ="/dependencies"; //LightblueMetadataOperationChecker.getDepGraphRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /dependencies\""));
         basicCheckAndReset();
 
-        req.servletPath ="/entity/version1.0-1:2/roles"; //LightblueAuditServletFilter.getEntityRolesVersionRegex
+        req.servletPath ="/entity/version1.0-1:2/roles"; //LightblueMetadataOperationChecker.getEntityRolesVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/{version}/roles\""));
         basicCheckAndReset();
 
-        req.servletPath ="/entity/roles"; //LightblueAuditServletFilter.getEntityRolesEntityRegex
+        req.servletPath ="/entity/roles"; //LightblueMetadataOperationChecker.getEntityRolesEntityRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/roles\""));
         basicCheckAndReset();
 
-        req.servletPath ="/roles"; //LightblueAuditServletFilter.getEntityRolesRegex
+        req.servletPath ="/roles"; //LightblueMetadataOperationChecker.getEntityRolesRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /roles\""));
         basicCheckAndReset();
 
-        req.servletPath ="/"; //LightblueAuditServletFilter.getEntityNamesRegex
+        req.servletPath ="/"; //LightblueMetadataOperationChecker.getEntityNamesRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /\""));
         basicCheckAndReset();
 
-        req.servletPath ="/s=asdass"; //LightblueAuditServletFilter.getEntityNamesStatusRegex
+        req.servletPath ="/s=asdass"; //LightblueMetadataOperationChecker.getEntityNamesStatusRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /s={statuses}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/newEntity"; //LightblueAuditServletFilter.getEntityVersionsRegex
+        req.servletPath ="/newEntity"; //LightblueMetadataOperationChecker.getEntityVersionsRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/newEntity/15.9q:b"; //LightblueAuditServletFilter.getMetadataRegex
+        req.servletPath ="/newEntity/15.9q:b"; //LightblueMetadataOperationChecker.getMetadataRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"GET /{entity}/{version}\""));
         basicCheckAndReset();
 
         req.method = "POST";
 
-        req.servletPath ="/newEntity/15.9q:b/default"; //LightblueAuditServletFilter.createSchemaRegex
+        req.servletPath ="/newEntity/15.9q:b/default"; //LightblueMetadataOperationChecker.createSchemaRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"POST /{entity}/{version}/default\""));
         basicCheckAndReset();
 
         req.method = "PUT";
 
-        req.servletPath ="/newEntity/15.9q:b"; //LightblueAuditServletFilter.createMetadataRegex
+        req.servletPath ="/newEntity/15.9q:b"; //LightblueMetadataOperationChecker.createMetadataRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"PUT /{entity}/{version}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/newEntity/schema=15.9q:b"; //LightblueAuditServletFilter.createSchemaRegex
+        req.servletPath ="/newEntity/schema=15.9q:b"; //LightblueMetadataOperationChecker.createSchemaRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"PUT /{entity}/schema={version}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/newEntity"; //LightblueAuditServletFilter.updateEntityInfoRegex
+        req.servletPath ="/newEntity"; //LightblueMetadataOperationChecker.updateEntityInfoRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"PUT /{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/newEntity/15.9q:b/test"; //LightblueAuditServletFilter.updateSchemaStatusRegex
+        req.servletPath ="/newEntity/15.9q:b/test"; //LightblueMetadataOperationChecker.updateSchemaStatusRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"PUT /{entity}/{version}/{status}\""));
         basicCheckAndReset();
 
         req.method = "DELETE";
 
-        req.servletPath ="/newEntity"; //LightblueAuditServletFilter.updateEntityInfoRegex
+        req.servletPath ="/newEntity"; //LightblueMetadataOperationChecker.updateEntityInfoRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"DELETE /{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/newEntity/default"; //LightblueAuditServletFilter.updateEntityInfoRegex
+        req.servletPath ="/newEntity/default"; //LightblueMetadataOperationChecker.updateEntityInfoRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/metadata\" , \"operation\":\"DELETE /{entity}/default\""));
         basicCheckAndReset();
@@ -239,86 +239,86 @@ public class LightblueAuditServletFilterTest {
 
         req.method = "GET";
 
-        req.servletPath ="/find/nEntity"; //LightblueAuditServletFilter.simpleFindVersionRegex
+        req.servletPath ="/find/nEntity"; //LightblueCrudOperationChecker.simpleFindVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"GET /find/{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/find/nEntity/15.9q:b"; //LightblueAuditServletFilter.simpleFindRegex
+        req.servletPath ="/find/nEntity/15.9q:b"; //LightblueCrudOperationChecker.simpleFindRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"GET /find/{entity}/{version}\""));
         basicCheckAndReset();
 
         req.method = "POST";
 
-        req.servletPath ="/save/newEntity"; //LightblueAuditServletFilter.saveRegex
+        req.servletPath ="/save/newEntity"; //LightblueCrudOperationChecker.saveRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /save/{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/save/newEntity/15.9q:b"; //LightblueAuditServletFilter.saveVersionRegex
+        req.servletPath ="/save/newEntity/15.9q:b"; //LightblueCrudOperationChecker.saveVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /save/{entity}/{version}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/save/newEntity"; //LightblueAuditServletFilter.saveRegex
+        req.servletPath ="/save/newEntity"; //LightblueCrudOperationChecker.saveRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /save/{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/save/newEntity/15.9q:b"; //LightblueAuditServletFilter.saveVersionRegex
+        req.servletPath ="/save/newEntity/15.9q:b"; //LightblueCrudOperationChecker.saveVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /save/{entity}/{version}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/update/newEntity"; //LightblueAuditServletFilter.updateRegex
+        req.servletPath ="/update/newEntity"; //LightblueCrudOperationChecker.updateRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /update/{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/update/newEntity/15.9q:b"; //LightblueAuditServletFilter.updateVersionRegex
+        req.servletPath ="/update/newEntity/15.9q:b"; //LightblueCrudOperationChecker.updateVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /update/{entity}/{version}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/delete/newEntity"; //LightblueAuditServletFilter.deleteRegex
+        req.servletPath ="/delete/newEntity"; //LightblueCrudOperationChecker.deleteRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /delete/{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/delete/newEntity/15.9q:b"; //LightblueAuditServletFilter.deleteVersionRegex
+        req.servletPath ="/delete/newEntity/15.9q:b"; //LightblueCrudOperationChecker.deleteVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /delete/{entity}/{version}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/find/newEntity"; //LightblueAuditServletFilter.findRegex
+        req.servletPath ="/find/newEntity"; //LightblueCrudOperationChecker.findRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /find/{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/find/newEntity/15.9q:b"; //LightblueAuditServletFilter.findVersionRegex
+        req.servletPath ="/find/newEntity/15.9q:b"; //LightblueCrudOperationChecker.findVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /find/{entity}/{version}\""));
         basicCheckAndReset();
 
         req.method = "PUT";
 
-        req.servletPath ="/insert/newEntity"; //LightblueAuditServletFilter.insertRegex
+        req.servletPath ="/insert/newEntity"; //LightblueCrudOperationChecker.insertRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"PUT /insert/{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/insert/newEntity/15.9q:b"; //LightblueAuditServletFilter.insertVersionRegex
+        req.servletPath ="/insert/newEntity/15.9q:b"; //LightblueCrudOperationChecker.insertVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"PUT /insert/{entity}/{version}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/newEntity"; //LightblueAuditServletFilter.insertAltRegex
+        req.servletPath ="/newEntity"; //LightblueCrudOperationChecker.insertAltRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"PUT /{entity}\""));
         basicCheckAndReset();
 
-        req.servletPath ="/newEntity/15.9q:b"; //LightblueAuditServletFilter.insertAltVersionRegex
+        req.servletPath ="/newEntity/15.9q:b"; //LightblueCrudOperationChecker.insertAltVersionRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"PUT /{entity}/{version}\""));
         basicCheckAndReset();

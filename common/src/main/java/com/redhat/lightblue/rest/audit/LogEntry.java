@@ -11,8 +11,8 @@ import java.security.Principal;
 public class LogEntry {
     private final String timestampText;
     private final Principal principal;
-    private final String resource; // /crud or /metadata
-    private final String operation; //operation (insert, update, find, etc)
+    private final String resource;
+    private final String operation;
     private final String entityName;
     private final String entityVersion;
     private final String entityStatus; // only for the AbstractMetadataResource @Path("/{entity}/{version}/{status}") updateSchemaStatus and AbstractMetadataResource @Path("/s={statuses}") getEntityNames
