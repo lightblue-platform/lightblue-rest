@@ -18,7 +18,7 @@ public enum LightblueCrudOperationChecker implements LightblueOperationChecker {
 
     //AbstractCrudResource @Path("/save/{entity}") or @Path("/save/{entity}/{version}") save
     saveRegex("/+save/+(\\w+)/*", "POST /save/{entity}", Info.GET_ENTITY),
-    saveVersionRegex("/+save/+(\\w+)/+([\\S]+)/*","POST /update/{entity}/{version}",Info.GET_ENTITY_VERSION),
+    saveVersionRegex("/+save/+(\\w+)/+([\\S]+)/*","POST /save/{entity}/{version}",Info.GET_ENTITY_VERSION),
     //AbstractCrudResource @Path("/update/{entity}") or @Path("/update/{entity}/{version}") update
     updateRegex("/+update/+(\\w+)/*","POST /update/{entity}", Info.GET_ENTITY),
     updateVersionRegex("/+update/+(\\w+)/+([\\S]+)/*","POST /update/{entity}/{version}",Info.GET_ENTITY_VERSION),

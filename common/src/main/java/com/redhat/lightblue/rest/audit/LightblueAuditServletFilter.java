@@ -250,10 +250,12 @@ public class LightblueAuditServletFilter implements Filter {
                     LOGGER.info("Invalid HTTP method: " + method);
                 }
         }
-        logEntryBuilder.setOperation(info.operation);
-        logEntryBuilder.setEntityName(info.entity);
-        logEntryBuilder.setEntityVersion(info.version);
-        logEntryBuilder.setEntityStatus(info.status);
+        if(info != null) {
+            logEntryBuilder.setOperation(info.operation);
+            logEntryBuilder.setEntityName(info.entity);
+            logEntryBuilder.setEntityVersion(info.version);
+            logEntryBuilder.setEntityStatus(info.status);
+        }
     }
 
     @Override

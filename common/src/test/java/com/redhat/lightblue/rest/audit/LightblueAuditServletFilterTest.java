@@ -87,7 +87,7 @@ public class LightblueAuditServletFilterTest {
         assertTrue(err.inMemoryConsole.toString().contains("Initializing LightblueAuditServletFilter"));
         assertFalse(err.inMemoryConsole.toString().contains("Destroying LightblueAuditServletFilter"));
         cut.destroy();
-        assertTrue(err.inMemoryConsole.toString().contains("Destroying LightblueMetadataOperationChecker"));
+        assertTrue(err.inMemoryConsole.toString().contains("Destroying LightblueAuditServletFilter"));
     }
 
     // Context path is not data or metadata, so it should not audit
@@ -251,7 +251,7 @@ public class LightblueAuditServletFilterTest {
 
         req.method = "POST";
 
-        req.servletPath ="/save/newEntity"; //LightblueCrudOperationChecker.saveRegex
+        req.servletPath = "/save/newEntity"; //LightblueCrudOperationChecker.saveRegex
         cut.doFilter(req, res, fChain);
         assertTrue(err.inMemoryConsole.toString().contains("\"principal\":\"UserName\" , \"resource\":\"/data\" , \"operation\":\"POST /save/{entity}\""));
         basicCheckAndReset();

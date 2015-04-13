@@ -31,7 +31,9 @@ public interface LightblueOperationChecker {
             this.found = found;
             this.matcher = matcher;
             this.otherFields = otherFields;
-            fillObject();
+            if(found) {
+                fillObject();
+            }
         }
 
         public void fillEntity(int number){
@@ -56,11 +58,14 @@ public interface LightblueOperationChecker {
             if(otherFields.equals(GET_ENTITY_DEFAULT)){
                 version = "default";
             }
-            if(otherFields.equals(GET_ENTITY_VERSION_STATUS) || otherFields.equals(GET_ONLY_STATUS)){
+            if(otherFields.equals(GET_ENTITY_VERSION_STATUS)){
                 fillStatus(3);
             }
             if(otherFields.equals(GET_ENTITY_STATUS)){
                 fillStatus(2);
+            }
+            if(otherFields.equals(GET_ONLY_STATUS)){
+                fillStatus(1);
             }
         }
     }
