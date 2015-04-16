@@ -19,9 +19,8 @@ public class LDAPSearcher {
 
         // Extension a: returns an exception as the LDAP server is down (eg.: this can be meaningful to use the cache )
         NamingEnumeration<SearchResult> results = ldapCacheKey.ldapContext.search(ldapCacheKey.ldapSearchBase, ldapCacheKey.searchFilter, ldapCacheKey.searchControls);
-        SearchResult searchResult = null;
         if (results.hasMoreElements()) {
-            searchResult = results.nextElement();
+            SearchResult searchResult = results.nextElement();
 
             //make sure there is not another item available, there should be only 1 match
             if (results.hasMoreElements()) {
