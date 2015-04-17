@@ -1,6 +1,20 @@
 {
     "entityInfo": {
         "name": "country",
+        "hooks": [
+            {
+                "name": "auditHook",
+                "configuration": {
+                    "entityName": "audit",
+                    "version": "1.0.0"
+                },
+                "actions": [
+                    "insert",
+                    "update",
+                    "delete"
+                ]
+            }
+        ],
         "indexes": [
             {
                 "unique": true,

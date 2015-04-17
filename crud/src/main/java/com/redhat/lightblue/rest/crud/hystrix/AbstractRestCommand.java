@@ -128,7 +128,7 @@ public abstract class AbstractRestCommand extends HystrixCommand<CallStatus> {
 
             @Override
             public String getPrincipal() {
-                return httpServletRequest.getUserPrincipal() != null ? httpServletRequest.getUserPrincipal().getName() : null;
+                return httpServletRequest == null ? null :( httpServletRequest.getUserPrincipal() != null ? httpServletRequest.getUserPrincipal().getName() : null );
             }
         });
     }
