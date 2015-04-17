@@ -63,9 +63,17 @@ public class LdapFindUserRolesByUidCommand extends HystrixCommand<List<String>> 
     protected List<String> run() throws Exception {
         LOGGER.debug("LdapFindUserByUidCommand#run was invoked");
 
-        List<String> roles = null;
+        List<String> roles = RolesCache.get(ldapQuery.uid);
+
+        if (roles != null) {
+            LOGGER.debug("Found roles in cache for uid="+ldapQuery.uid);
+            return roles;
+        }
+
         try {
-            SearchResult searchResult = LDAPSearcher.searchLDAPServer(ldapQuery);
+
+            LOGGER.debug("Cache missed for uid="+ldapQuery.uid+". Calling ldap.");
+            SearchResult searchResult = LDAPSearcher.getInstance().searchLDAPServer(ldapQuery);
 
             roles = getUserRolesFromLdap(searchResult);
 

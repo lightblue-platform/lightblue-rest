@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -94,10 +93,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    private List<String> getUserRolesFromCache(String userName) {
-        LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRolesFromCache");
-        return RolesCache.get(userName);
-    }
+
 
 
 }

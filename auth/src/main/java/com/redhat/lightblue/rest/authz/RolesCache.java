@@ -1,7 +1,6 @@
 package com.redhat.lightblue.rest.authz;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -21,8 +20,8 @@ import com.google.common.cache.RemovalNotification;
 public class RolesCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RolesCache.class);
-    private static final Cache<String, List<String>> rolesCache; // non-persisted cache
-    private static final Cache<String, List<String>> fallbackRolesCache; // non-persisted cache
+    private static Cache<String, List<String>> rolesCache; // non-persisted cache
+    private static Cache<String, List<String>> fallbackRolesCache; // non-persisted cache
 
     static {
         rolesCache = CacheBuilder.newBuilder()
@@ -82,5 +81,26 @@ public class RolesCache {
         LOGGER.debug("RolesCache#invalidate was invoked");
         rolesCache.invalidate(login);
         fallbackRolesCache.invalidate(login);
+    }
+
+    public static Cache<String, List<String>> getRolesCache() {
+        return rolesCache;
+    }
+
+    public static Cache<String, List<String>> getFallbackRolesCache() {
+        return fallbackRolesCache;
+    }
+
+    public static void invalidateAll() {
+        rolesCache.invalidateAll();
+        fallbackRolesCache.invalidateAll();
+    }
+
+    public static void setRolesCache(Cache<String, List<String>> rolesCache) {
+        RolesCache.rolesCache = rolesCache;
+    }
+
+    public static void setFallbackRolesCache(Cache<String, List<String>> fallbackRolesCache) {
+        RolesCache.fallbackRolesCache = fallbackRolesCache;
     }
 }
