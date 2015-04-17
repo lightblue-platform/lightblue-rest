@@ -14,7 +14,7 @@ import javax.naming.directory.SearchResult;
 public class LDAPSearcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(LDAPSearcher.class);
 
-    public static SearchResult searchLDAPServer(LDAPCacheKey ldapCacheKey) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
+    public static SearchResult searchLDAPServer(LDAPQuery ldapCacheKey) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
         LOGGER.debug("LDAPSearcher#searchLDAPServer was invoked and it will call the remote LDAP server");
 
         // Extension a: returns an exception as the LDAP server is down (eg.: this can be meaningful to use the cache )
