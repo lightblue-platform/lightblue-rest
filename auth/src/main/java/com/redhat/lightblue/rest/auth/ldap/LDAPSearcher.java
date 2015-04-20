@@ -24,17 +24,17 @@ public class LDAPSearcher {
         return instance;
     }
 
-    public SearchResult searchLDAPServer(LDAPQuery ldapCacheKey) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
+    public SearchResult searchLDAPServer(LDAPQuery ldapQuery) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
         LOGGER.debug("LDAPSearcher#searchLDAPServer was invoked and it will call the remote LDAP server");
 
         // Extension a: returns an exception as the LDAP server is down (eg.: this can be meaningful to use the cache )
-        NamingEnumeration<SearchResult> results = ldapCacheKey.ldapContext.search(ldapCacheKey.ldapSearchBase, ldapCacheKey.searchFilter, ldapCacheKey.searchControls);
+        NamingEnumeration<SearchResult> results = ldapQuery.ldapContext.search(ldapQuery.ldapSearchBase, ldapQuery.searchFilter, ldapQuery.searchControls);
         if (results.hasMoreElements()) {
             SearchResult searchResult = results.nextElement();
 
             //make sure there is not another item available, there should be only 1 match
             if (results.hasMoreElements()) {
-                String message = "Matched multiple users for the accountName: " + ldapCacheKey.uid;
+                String message = "Matched multiple users for the accountName: " + ldapQuery.uid;
                 LOGGER.error(message);
                 // Extension b: returns an exception to warn about the bad inconsistent state
                 throw new LDAPMultipleUserFoundException(message);

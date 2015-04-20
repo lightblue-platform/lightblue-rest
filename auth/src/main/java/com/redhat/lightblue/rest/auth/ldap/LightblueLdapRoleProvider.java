@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
-import com.redhat.lightblue.rest.authz.RolesCache;
 
 public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
@@ -64,7 +63,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         List<String> userRoles = new ArrayList<>();
         try {
 
-            List<String> roles = new LdapFindUserRolesByUidCommand(ldapContext, ldapSearchBase, userName).execute();
+            List<String> roles = new CachedLdapFindUserRolesByUidCommand(ldapContext, ldapSearchBase, userName).execute();
             userRoles.addAll(roles);
 
         } catch (HystrixRuntimeException ce) {

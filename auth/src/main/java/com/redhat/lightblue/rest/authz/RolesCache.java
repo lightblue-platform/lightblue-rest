@@ -13,6 +13,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 /**
+ * RolesCache contains 2 caches: rolesCache and fallbackRolesCache. Roles put in the former are evicted after few minutes,
+ * so that role membership changes in ldap are reflected reasonably quickly. Roles put in the latter are evicted after few
+ * hours. FallbackRolesCache is read only when ldap failure is identified (circuit breaker pattern).
  *
  * @author mpatercz
  *

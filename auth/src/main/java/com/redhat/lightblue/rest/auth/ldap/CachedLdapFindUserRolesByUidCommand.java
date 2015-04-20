@@ -1,9 +1,7 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -27,9 +25,9 @@ import com.redhat.lightblue.rest.authz.RolesCache;
  * LDAP Hystrix command that can provide metrics for this service and fall back
  * in case the server was unreachable as well.
  * <p/>
- * Created by nmalik and lcestari
+ * Created by nmalik and lcestari and mpatercz
  */
-public class LdapFindUserRolesByUidCommand extends HystrixCommand<List<String>> {
+public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<String>> {
     public static final String GROUPKEY = "ldap";
     private static final String INVALID_PARAM = "%s is null or empty";
     private static final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
@@ -41,9 +39,9 @@ public class LdapFindUserRolesByUidCommand extends HystrixCommand<List<String>> 
 
     private final LDAPQuery ldapQuery;
 
-    public LdapFindUserRolesByUidCommand(LdapContext ldapContext, String ldapSearchBase, String uid) {
+    public CachedLdapFindUserRolesByUidCommand(LdapContext ldapContext, String ldapSearchBase, String uid) {
         super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(GROUPKEY)).
-                andCommandKey(HystrixCommandKey.Factory.asKey(GROUPKEY + ":" + LdapFindUserRolesByUidCommand.class.getSimpleName())));
+                andCommandKey(HystrixCommandKey.Factory.asKey(GROUPKEY + ":" + CachedLdapFindUserRolesByUidCommand.class.getSimpleName())));
         LOGGER.debug("Creating LdapFindUserByUidCommand");
         //check if the informed parameters are valid
         if (Strings.isNullOrEmpty(uid)) {
