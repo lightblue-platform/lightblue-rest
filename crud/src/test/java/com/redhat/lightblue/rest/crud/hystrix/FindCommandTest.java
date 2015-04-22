@@ -25,9 +25,9 @@ import org.junit.Test;
  * @author nmalik
  */
 public class FindCommandTest extends AbstractRestCommandTest {
-    @Test
-    public void execute() {
 
+    @Test
+    public void runFindWithReturn() {
         FindCommand command = new FindCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
         String output = command.execute().toString();
@@ -35,5 +35,27 @@ public class FindCommandTest extends AbstractRestCommandTest {
         Assert.assertNotNull(output);
 
         Assert.assertEquals("find", mediator.methodCalled);
+    }
+
+    @Test
+    public void runFindWithParseProblem() {
+        FindCommand command = new FindCommand(null, mediator, "name", "version", "{\"request\":\"invalid}");
+
+        String output = command.execute().toString();
+
+        Assert.assertNotNull(output);
+
+        Assert.assertTrue(output.contains("Error during the parse of the request"));
+    }
+
+    @Test
+    public void runFindWithInvalid() {
+        FindCommand command = new FindCommand(null, mediator, null, "version", "{\"request\":\"invalid\"}");
+
+        String output = command.execute().toString();
+
+        Assert.assertNotNull(output);
+
+        Assert.assertTrue(output.contains("Request is not valid"));
     }
 }
