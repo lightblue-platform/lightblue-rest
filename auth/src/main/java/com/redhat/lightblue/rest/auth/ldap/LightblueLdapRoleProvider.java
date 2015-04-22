@@ -18,20 +18,21 @@
  */
 package com.redhat.lightblue.rest.auth.ldap;
 
-import com.netflix.hystrix.exception.HystrixRuntimeException;
-import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.List;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.ldap.InitialLdapContext;
+import javax.naming.ldap.LdapContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.SearchResult;
-import javax.naming.ldap.InitialLdapContext;
-import javax.naming.ldap.LdapContext;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import java.util.*;
+import com.netflix.hystrix.exception.HystrixRuntimeException;
+import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
 
 public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
@@ -61,20 +62,10 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRoles");
         List<String> userRoles = new ArrayList<>();
         try {
-            List<String> userRolesFromCache = getUserRolesFromCache(userName);
-            if( userRolesFromCache != null && !userRolesFromCache.isEmpty() ) {
-                userRoles.addAll(userRolesFromCache);
-            }
 
-            // Not found on cache due it expired or it wasn't search for this user yet (assuming the user exist)
-            if (userRoles.isEmpty()) {
-                SearchResult searchResult = new LdapFindUserByUidCommand(ldapContext, ldapSearchBase, userName).execute();
-                userRoles.addAll(getUserRolesFromLdap(searchResult));
-            }
+            List<String> roles = new CachedLdapFindUserRolesByUidCommand(ldapContext, ldapSearchBase, userName).execute();
+            userRoles.addAll(roles);
 
-        } catch (NamingException ne) {
-            // caught this exception because getUserRolesFromLdap() method which access the remote server
-            LOGGER.error("Naming problem with LDAP for user: " + userName, ne);
         } catch (HystrixRuntimeException ce) {
             // Not found in cache, returns an empty list
             LOGGER.error("Not found in cache, returns an empty list " + userName, ce);
@@ -101,36 +92,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    private List<String> getUserRolesFromCache(String userName) {
-        LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRolesFromCache");
-        // Disabling due to issues with threading, maybe related to https://github.com/google/guava/issues/1715
-//        LDAPCacheKey cacheKey = new LDAPCacheKey(userName, ldapContext, ldapSearchBase, "(uid=" + userName + ")", SearchControls.SUBTREE_SCOPE);
-        List<String> ifPresent = null; //LDAPCache.getUserRolesCacheSession().getIfPresent(cacheKey);
-        return ifPresent;
-    }
 
-    private List<String> getUserRolesFromLdap(SearchResult ldapUser) throws NamingException {
-        LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRolesFromLdap");
-        List<String> groups = new ArrayList<>();
 
-        //if no user found it should return an empty list (I think)
-        if (ldapUser == null || ldapUser.getAttributes() == null || ldapUser.getAttributes().get("memberOf") == null) {
-            return groups;
-        }
 
-        NamingEnumeration<?> groupAttributes = ldapUser.getAttributes().get("memberOf").getAll();
-
-        while (groupAttributes.hasMore()) {
-            LdapName name = new LdapName((String) groupAttributes.next());
-
-            for (Rdn rdn : name.getRdns()) {
-                if (rdn.getType().equalsIgnoreCase("cn")) {
-                    groups.add((String) rdn.getValue());
-                    break;
-                }
-            }
-        }
-
-        return groups;
-    }
 }

@@ -35,7 +35,7 @@ import javax.security.auth.login.LoginException;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.SimpleGroup;
-import org.jboss.security.auth.spi.CertRolesLoginModule;
+import org.jboss.security.auth.spi.BaseCertLoginModule;
 
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
 import com.redhat.lightblue.rest.auth.ldap.LightblueLdapRoleProvider;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * (authentication provided by CertRolesLoginModule 7/11/2014
  *
  */
-public class CertLdapLoginModule extends CertRolesLoginModule {
+public class CertLdapLoginModule extends BaseCertLoginModule {
     private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class);
 
     public static final String AUTH_ROLE_NAME = "authRoleName";
