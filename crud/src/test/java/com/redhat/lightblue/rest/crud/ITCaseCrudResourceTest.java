@@ -109,7 +109,7 @@ public class ITCaseCrudResourceTest {
     private static final int MONGO_PORT = 27757;
     private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
 
-    private static final String DB_NAME = "testmetadata";
+    private static final String DB_NAME = "mongo";
 
     private static MongodExecutable mongodExe;
     private static MongodProcess mongod;
@@ -167,6 +167,7 @@ public class ITCaseCrudResourceTest {
     @Before
     public void setup() throws Exception {
         db.createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
+        db.createCollection("audit", null);
         BasicDBObject index = new BasicDBObject("name", 1);
         index.put("version.value", 1);
         db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).ensureIndex(index, "name", true);
@@ -223,6 +224,14 @@ public class ITCaseCrudResourceTest {
     public void testFirstIntegrationTest() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
 
+        String auditExpectedCreated = readFile("auditExpectedCreated.json");
+        String auditMetadata = readFile("auditMetadata.json");
+        EntityMetadata aEm = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(auditMetadata));
+        RestConfiguration.getFactory().getMetadata().createNewMetadata(aEm);
+        EntityMetadata aEm2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("audit", "1.0.0");
+        String auditResultCreated = RestConfiguration.getFactory().getJSONParser().convert(aEm2).toString();
+        JSONAssert.assertEquals(auditExpectedCreated, auditResultCreated, false);
+
         String expectedCreated = readFile("expectedCreated.json");
         String metadata = readFile("metadata.json");
         EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
@@ -234,6 +243,12 @@ public class ITCaseCrudResourceTest {
         String expectedInserted = readFile("expectedInserted.json");
         String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedInserted, resultInserted, false);
+
+        String auditExpectedFound = readFile("auditExpectedFound.json");
+        String auditResultFound = cutCrudResource.find("audit", "1.0.0", readFile("auditResultFound.json")).getEntity().toString();
+        auditResultFound = auditResultFound.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
+        auditResultFound = auditResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\+\\d{4}\"", "\"lastUpdateDate\":\"\"");
+        JSONAssert.assertEquals(auditExpectedFound, auditResultFound, false);
 
         String expectedUpdated = readFile("expectedUpdated.json");
         String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
