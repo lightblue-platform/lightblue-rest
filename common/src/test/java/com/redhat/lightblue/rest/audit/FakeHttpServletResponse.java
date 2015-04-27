@@ -11,7 +11,7 @@ import java.util.Locale;
 /**
  * Created by lcestari on 4/2/15.
  */
-public class MyHttpServletResponse implements HttpServletResponse {
+public class FakeHttpServletResponse implements HttpServletResponse {
     
     public void addCookie(Cookie cookie) {}
 

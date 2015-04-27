@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Created by lcestari on 4/2/15.
  */
-public class MyHttpServletRequest implements HttpServletRequest {
+public class FakeHttpServletRequest implements HttpServletRequest {
 
     String contextPath;
     Principal principal;

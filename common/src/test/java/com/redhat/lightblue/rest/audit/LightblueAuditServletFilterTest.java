@@ -35,8 +35,8 @@ public class LightblueAuditServletFilterTest {
 
     LightblueAuditServletFilter cut;
 
-    MyHttpServletRequest req;
-    MyHttpServletResponse res;
+    FakeHttpServletRequest req;
+    FakeHttpServletResponse res;
     FilterChain fChain = new FilterChain() {
         @Override
         public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
@@ -75,8 +75,8 @@ public class LightblueAuditServletFilterTest {
     @Before
     public void setUp() throws Exception {
         cut = new LightblueAuditServletFilter();
-        req = new MyHttpServletRequest();
-        res = new MyHttpServletResponse();
+        req = new FakeHttpServletRequest();
+        res = new FakeHttpServletResponse();
         out.resetInMemoryConsole();
         err.resetInMemoryConsole();
     }
@@ -95,7 +95,7 @@ public class LightblueAuditServletFilterTest {
     public void testDoFilterNoAudit() throws Exception {
         final String wrong = "X";
         req.contextPath = "/data" + wrong;
-        req.principal = new MyPrincipal("UserName");
+        req.principal = new FakePrincipal("UserName");
         cut.doFilter(req, res, fChain);
         basicCheckAndReset();
 
@@ -106,7 +106,7 @@ public class LightblueAuditServletFilterTest {
 
 
         req.contextPath = "/metadata"+ wrong;
-        req.principal = new MyPrincipal("UserName");
+        req.principal = new FakePrincipal("UserName");
         cut.doFilter(req, res, fChain);
         basicCheckAndReset();
 
@@ -119,7 +119,7 @@ public class LightblueAuditServletFilterTest {
     @Test
     public void testDoFilterNoyValid() throws Exception {
         req.contextPath = "/metadata";
-        req.principal = new MyPrincipal("UserName");
+        req.principal = new FakePrincipal("UserName");
         req.method = "DELETE";// Not valid
         req.servletPath ="/MISTAKE/entity/version1.0-1:2/";// Not valid
         cut.doFilter(req, res, fChain);
@@ -135,7 +135,7 @@ public class LightblueAuditServletFilterTest {
     @Test
     public void testDoFilterMetadata() throws Exception {
         req.contextPath = "/metadata";
-        req.principal = new MyPrincipal("UserName");
+        req.principal = new FakePrincipal("UserName");
 
         req.method = "GET";
 
@@ -235,7 +235,7 @@ public class LightblueAuditServletFilterTest {
     @Test
     public void testDoFilterData() throws Exception {
         req.contextPath = "/data";
-        req.principal = new MyPrincipal("UserName");
+        req.principal = new FakePrincipal("UserName");
 
         req.method = "GET";
 

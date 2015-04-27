@@ -6,10 +6,10 @@ import java.security.Principal;
 /**
  * Created by lcestari on 4/2/15.
  */
-public class MyPrincipal implements Principal {
+public class FakePrincipal implements Principal {
     private final String userName;
 
-    public MyPrincipal(String userName) {
+    public FakePrincipal(String userName) {
         this.userName = userName;
     }
 
