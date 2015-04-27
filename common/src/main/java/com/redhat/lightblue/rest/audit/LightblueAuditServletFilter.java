@@ -71,9 +71,6 @@ public class LightblueAuditServletFilter implements Filter {
             HttpServletResponse httpServletResponse = (HttpServletResponse) res;
             HttpServletResponse httpServletResponseWrapperBuffered = new HttpServletResponseWrapperBuffered(httpServletResponse,new ByteArrayPrintWriter());
             res = httpServletResponseWrapperBuffered;
-        }
-
-        if(auditReqFlag) {
             stopwatch = Stopwatch.createStarted();
         }
 
