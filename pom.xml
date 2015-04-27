@@ -215,6 +215,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <version>1.4.0-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.github.mifmif</groupId>
+                <artifactId>generex</artifactId>
+                <version>0.0.3</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
