@@ -59,17 +59,28 @@ public class FindCommand extends AbstractRestCommand {
         Error.push(getClass().getSimpleName());
         Error.push(entity);
         try {
-            FindRequest ireq = getJsonTranslator().parse(FindRequest.class,JsonUtils.json(request));
+            FindRequest ireq;
+            try {
+                ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
+            } catch (Exception e) {
+                LOGGER.error("find:parse failure: {}", e);
+                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
+            }
             LOGGER.debug("Find request:{}", ireq);
-            validateReq(ireq, entity, version);
+            try{
+                validateReq(ireq, entity, version);
+            } catch (Exception e) {
+                LOGGER.error("find:validate failure: {}", e);
+                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
+            }
             addCallerId(ireq);
             Response r = getMediator().find(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            LOGGER.error("find failure: {}", e);
+            LOGGER.error("find:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            LOGGER.error("find failure: {}", e);
+            LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         }
     }
