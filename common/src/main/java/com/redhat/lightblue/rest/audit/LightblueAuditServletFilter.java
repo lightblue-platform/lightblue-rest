@@ -37,7 +37,8 @@ import com.redhat.lightblue.rest.audit.LightblueOperationChecker.Info;
 public class LightblueAuditServletFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LightblueAuditServletFilter.class);
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+    private static final String YYYY_MM_DD_T_HH_MM_SS_SSSZ = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     @Override
     public void doFilter(final ServletRequest req, ServletResponse res,
@@ -81,7 +82,7 @@ public class LightblueAuditServletFilter implements Filter {
             try {
                 logEntryBuilder.setPrincipal(p);
                 logEntryBuilder.setRequestSize(hReq.getContentLength());
-                logEntryBuilder.setTimestampText(DATE_FORMAT.format(new Date()));
+                logEntryBuilder.setTimestampText(new SimpleDateFormat(YYYY_MM_DD_T_HH_MM_SS_SSSZ).format(new Date()));
                 logEntryBuilder.setResource(hReq.getContextPath());
 
                 if (res instanceof HttpServletResponse) {
@@ -239,7 +240,7 @@ public class LightblueAuditServletFilter implements Filter {
                             "\"timeElapsedInNs\":\"%d\"  " +
                             " }",
                     logEntry.getTimestampText(),
-                    DATE_FORMAT.format(new Date()),
+                    new SimpleDateFormat(YYYY_MM_DD_T_HH_MM_SS_SSSZ).format(new Date()),
                     logEntry.getPrincipal().getName(),
                     logEntry.getResource(),
                     logEntry.getOperation(),
