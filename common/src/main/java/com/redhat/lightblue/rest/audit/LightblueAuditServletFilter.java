@@ -6,6 +6,9 @@ import java.io.PrintWriter;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
@@ -40,6 +43,8 @@ public class LightblueAuditServletFilter implements Filter {
 
     private static final String YYYY_MM_DD_T_HH_MM_SS_SSSZ = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
+    private static final ExecutorService jobExecutor = Executors.newCachedThreadPool();
+
     @Override
     public void doFilter(final ServletRequest req, ServletResponse res,
             final FilterChain fChain) throws IOException, ServletException {
@@ -48,14 +53,14 @@ public class LightblueAuditServletFilter implements Filter {
            - query parameters
            - request body
          */
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("LightblueAuditServletFilter.doFilter invoked - begin");
-        }
-
         if (!(req instanceof HttpServletRequest)) {
             LOGGER.info("Unable to audit request of type: " + req.getClass());
             fChain.doFilter(req, res);
             return;
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("LightblueAuditServletFilter.doFilter invoked - begin");
         }
 
         HttpServletRequest hReq = (HttpServletRequest) req;
@@ -109,8 +114,10 @@ public class LightblueAuditServletFilter implements Filter {
                 }
 
                 //Log Async. No reason to hold up the response for auditing purposes.
-                new Thread(new AuditLogWritter(logEntryBuilder, hReq, res, isMetadata), "AuditServlet").start();
+                jobExecutor.execute(new AuditLogWritter(logEntryBuilder, hReq, res, isMetadata));
 
+            } catch (RejectedExecutionException e) {
+                LOGGER.warn("Audit thread rejected from executor", e);
             } catch (Exception e) {
                 LOGGER.warn("Unexpected exception while attempting to finish audit log", e);
             }
@@ -123,6 +130,7 @@ public class LightblueAuditServletFilter implements Filter {
 
     @Override
     public void destroy() {
+        jobExecutor.shutdown();
         LOGGER.debug("Destroying LightblueAuditServletFilter");
     }
 
