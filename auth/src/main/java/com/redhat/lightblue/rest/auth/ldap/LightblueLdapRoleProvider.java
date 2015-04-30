@@ -19,7 +19,6 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -33,7 +32,17 @@ import org.slf4j.LoggerFactory;
 
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
+import com.redhat.lightblue.rest.authz.RolesCache;
 
+/**
+ * Fetches user roles from ldap. Results are cached (see {@link RolesCache}).
+ *
+ * Initialization of this class is quite expensive due to the cost of ldap jndi lookup (@link {@link InitialLdapContext} init).
+ * Use it as a singleton.
+ *
+ * @author mpatercz
+ *
+ */
 public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
 
