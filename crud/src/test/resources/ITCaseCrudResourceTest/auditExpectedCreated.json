@@ -1,7 +1,7 @@
 {
   "entityInfo":{
     "name":"audit",
-    "defaultVersion":"1.0.0",
+    "defaultVersion":"1.0.1",
     "indexes":[
       {
         "name":null,
@@ -23,8 +23,8 @@
   "schema":{
     "name":"audit",
     "version":{
-      "value":"1.0.0",
-      "changelog":"Initialversion"
+      "value":"1.0.1",
+      "changelog":"add CRUDOperation field"
     },
     "status":{
       "value":"active"

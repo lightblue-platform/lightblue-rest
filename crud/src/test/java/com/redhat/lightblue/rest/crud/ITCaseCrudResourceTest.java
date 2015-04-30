@@ -228,7 +228,7 @@ public class ITCaseCrudResourceTest {
         String auditMetadata = readFile("auditMetadata.json");
         EntityMetadata aEm = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(auditMetadata));
         RestConfiguration.getFactory().getMetadata().createNewMetadata(aEm);
-        EntityMetadata aEm2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("audit", "1.0.0");
+        EntityMetadata aEm2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("audit", "1.0.1");
         String auditResultCreated = RestConfiguration.getFactory().getJSONParser().convert(aEm2).toString();
         JSONAssert.assertEquals(auditExpectedCreated, auditResultCreated, false);
 
@@ -245,7 +245,7 @@ public class ITCaseCrudResourceTest {
         JSONAssert.assertEquals(expectedInserted, resultInserted, false);
 
         String auditExpectedFound = readFile("auditExpectedFound.json");
-        String auditResultFound = cutCrudResource.find("audit", "1.0.0", readFile("auditResultFound.json")).getEntity().toString();
+        String auditResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
         auditResultFound = auditResultFound.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
         auditResultFound = auditResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\+\\d{4}\"", "\"lastUpdateDate\":\"\"");
         JSONAssert.assertEquals(auditExpectedFound, auditResultFound, false);
@@ -253,6 +253,12 @@ public class ITCaseCrudResourceTest {
         String expectedUpdated = readFile("expectedUpdated.json");
         String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedUpdated, resultUpdated, false);
+
+        String audit2ExpectedFound = readFile("auditExpectedFoundUpdate.json");
+        String audit2ResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
+        audit2ResultFound = audit2ResultFound.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
+        audit2ResultFound = audit2ResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\+\\d{4}\"", "\"lastUpdateDate\":\"\"");
+        JSONAssert.assertEquals(audit2ExpectedFound, audit2ResultFound, false);
 
         String expectedFound = readFile("expectedFound.json");
         String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json")).getEntity().toString();
