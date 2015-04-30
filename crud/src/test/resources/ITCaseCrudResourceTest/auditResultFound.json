@@ -1,6 +1,6 @@
 {
     "entity": "audit",
-    "entityVersion": "1.0.0",
+    "entityVersion": "1.0.1",
     "query": {
         "field": "entityName",
         "op": "=",
