@@ -34,7 +34,7 @@ public class RolesCache {
                 .removalListener(
                         new RemovalListener<String, List<String>>() {
                             {
-                                LOGGER.info("Removal Listener created");
+                                LOGGER.debug("Removal Listener created");
                             }
 
                             @Override
@@ -52,7 +52,7 @@ public class RolesCache {
                 .removalListener(
                         new RemovalListener<String, List<String>>() {
                             {
-                                LOGGER.info("Removal Listener created");
+                                LOGGER.debug("Removal Listener created");
                             }
 
                             @Override

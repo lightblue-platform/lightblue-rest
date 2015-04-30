@@ -103,7 +103,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
                 // lazy init
                 initializeLightblueLdapRoleProvider();
 
-            LOGGER.info("Prinicipal username:" + getUsername());
+            LOGGER.debug("Prinicipal username:" + getUsername());
 
             LdapName name = new LdapName(getUsername());
             String searchName = "";
@@ -125,14 +125,14 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
                 userRoles.addMember(role);
             }
 
-            if (ACCESS_LOGGER.isInfoEnabled()) {
-                ACCESS_LOGGER.info("Principal username: " + getUsername() + ", roles: " + Arrays.toString(groupNames.toArray()));
+            if (ACCESS_LOGGER.isDebugEnabled()) {
+                ACCESS_LOGGER.debug("Principal username: " + getUsername() + ", roles: " + Arrays.toString(groupNames.toArray()));
             }
 
             LOGGER.debug("Assign principal [" + p.getName() + "] to role [" + roleName + "]");
         } catch (Exception e) {
             String principalName = p == null ? "null" : p.getName();
-            LOGGER.info("Failed to assign principal [" + principalName + "] to role [" + roleName + "]", e);
+            LOGGER.error("Failed to assign principal [" + principalName + "] to role [" + roleName + "]", e);
         }
         Group[] roleSets = {userRoles};
         return roleSets;
