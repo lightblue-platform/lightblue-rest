@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Principal;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -97,6 +98,7 @@ public class LightblueAuditServletFilter implements Filter {
             }
         }
 
+        Date beforeTimeStamp = new Date();
         fChain.doFilter(hReq, res);
 
         if (auditReqFlag) {
@@ -107,7 +109,7 @@ public class LightblueAuditServletFilter implements Filter {
                 }
 
                 //Log Async. No reason to hold up the response for auditing purposes.
-                jobExecutor.execute(new LightblueAuditLogWritter(logEntryBuilder, hReq, res, isMetadata));
+                jobExecutor.execute(new LightblueAuditLogWritter(logEntryBuilder, hReq, res, isMetadata, beforeTimeStamp));
 
             } catch (RejectedExecutionException e) {
                 LOGGER.warn("Audit thread rejected from executor", e);

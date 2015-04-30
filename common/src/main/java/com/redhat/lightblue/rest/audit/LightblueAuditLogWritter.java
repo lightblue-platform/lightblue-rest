@@ -24,19 +24,21 @@ public class LightblueAuditLogWritter implements Runnable {
     private final boolean isMetadata;
     private final HttpServletRequest req;
     private final ServletResponse res;
+    private final Date beforeTimestamp;
 
-    public LightblueAuditLogWritter(LogEntryBuilder logEntryBuilder, HttpServletRequest req, ServletResponse res, boolean isMetadata) {
+    public LightblueAuditLogWritter(LogEntryBuilder logEntryBuilder, HttpServletRequest req, ServletResponse res, boolean isMetadata, Date beforeTimestamp) {
         this.logEntryBuilder = logEntryBuilder;
         this.isMetadata = isMetadata;
         this.req = req;
         this.res = res;
+        this.beforeTimestamp = beforeTimestamp;
     }
 
     @Override
     public void run() {
         Info info = parseOperationEntityVersionStatus(req, isMetadata, logEntryBuilder);
 
-        logEntryBuilder.setTimestampText(DATE_FORMAT.format(new Date()));
+        logEntryBuilder.setTimestampText(DATE_FORMAT.format(beforeTimestamp));
 
         if (info != null) {
             logEntryBuilder.setOperation(info.operation);
@@ -73,17 +75,17 @@ public class LightblueAuditLogWritter implements Runnable {
                         "\"responseSize\":\"%d\" , " +
                         "\"timeElapsedInNs\":\"%d\"  " +
                         " }",
-                logEntry.getTimestampText(),
-                DATE_FORMAT.format(new Date()),
-                logEntry.getPrincipal().getName(),
-                logEntry.getResource(),
-                logEntry.getOperation(),
-                logEntry.getEntityName(),
-                logEntry.getEntityVersion(),
-                logEntry.getEntityStatus(),
-                logEntry.getRequestSize(),
-                logEntry.getResponseSize(),
-                logEntry.getTimeElapsedInNs()
+                        logEntry.getTimestampText(),
+                        DATE_FORMAT.format(new Date()),
+                        logEntry.getPrincipal().getName(),
+                        logEntry.getResource(),
+                        logEntry.getOperation(),
+                        logEntry.getEntityName(),
+                        logEntry.getEntityVersion(),
+                        logEntry.getEntityStatus(),
+                        logEntry.getRequestSize(),
+                        logEntry.getResponseSize(),
+                        logEntry.getTimeElapsedInNs()
                 );
 
         LightblueAuditServletFilter.LOGGER.info(logEntryString);
