@@ -124,16 +124,16 @@ public class ITCaseCrudResourceTest {
             IStreamProcessor commandsOutput = Processors.namedConsole("[console>]");
 
             IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-            .defaults(Command.MongoD)
-            .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-            .build();
+                    .defaults(Command.MongoD)
+                    .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
+                    .build();
 
             MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
             mongodExe = runtime.prepare(
                     new MongodConfigBuilder()
-                            .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
-                            .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                            .build()
+                    .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
+                    .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
+                    .build()
                     );
             try {
                 mongod = mongodExe.start();
@@ -224,10 +224,13 @@ public class ITCaseCrudResourceTest {
     public void testFirstIntegrationTest() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
 
-        String auditMetadata = FileUtil.readFile("metadata/audit.json"); //loaded from lightblue-audit-hook resources
+        String auditExpectedCreated = readFile("auditExpectedCreated.json");
+        String auditMetadata = FileUtil.readFile("metadata/audit.json");
         EntityMetadata aEm = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(auditMetadata));
         RestConfiguration.getFactory().getMetadata().createNewMetadata(aEm);
         EntityMetadata aEm2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("audit", "1.0.1");
+        String auditResultCreated = RestConfiguration.getFactory().getJSONParser().convert(aEm2).toString();
+        JSONAssert.assertEquals(auditExpectedCreated, auditResultCreated, false);
 
         String expectedCreated = readFile("expectedCreated.json");
         String metadata = readFile("metadata.json");
@@ -251,12 +254,18 @@ public class ITCaseCrudResourceTest {
         String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedUpdated, resultUpdated, false);
 
+        String audit2ExpectedFound = readFile("auditExpectedFoundUpdate.json");
+        String audit2ResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
+        audit2ResultFound = audit2ResultFound.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
+        audit2ResultFound = audit2ResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\+\\d{4}\"", "\"lastUpdateDate\":\"\"");
+        JSONAssert.assertEquals(audit2ExpectedFound, audit2ResultFound, false);
+
         String expectedFound = readFile("expectedFound.json");
         String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedFound, resultFound, false); // #TODO #FIX Not finding the right version
 
         String resultSimpleFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
-        "country",
+                "country",
                 "1.0.0",
                 "iso2code:CA,QE;iso2code:CA;iso2code:CA,EN",
                 "name:1r,iso3code:1,iso2code:0r",
