@@ -75,17 +75,17 @@ public class LightblueAuditLogWritter implements Runnable {
                         "\"responseSize\":\"%d\" , " +
                         "\"timeElapsedInNs\":\"%d\"  " +
                         " }",
-                        logEntry.getTimestampText(),
-                        DATE_FORMAT.format(new Date()),
-                        logEntry.getPrincipal().getName(),
-                        logEntry.getResource(),
-                        logEntry.getOperation(),
-                        logEntry.getEntityName(),
-                        logEntry.getEntityVersion(),
-                        logEntry.getEntityStatus(),
-                        logEntry.getRequestSize(),
-                        logEntry.getResponseSize(),
-                        logEntry.getTimeElapsedInNs()
+                logEntry.getTimestampText(),
+                DATE_FORMAT.format(new Date()),
+                logEntry.getPrincipal().getName(),
+                logEntry.getResource(),
+                logEntry.getOperation(),
+                logEntry.getEntityName(),
+                logEntry.getEntityVersion(),
+                logEntry.getEntityStatus(),
+                logEntry.getRequestSize(),
+                logEntry.getResponseSize(),
+                logEntry.getTimeElapsedInNs()
                 );
 
         LightblueAuditServletFilter.LOGGER.info(logEntryString);

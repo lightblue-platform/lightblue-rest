@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * Filter all the request which must have data or metadata as their context path
@@ -38,7 +39,10 @@ public class LightblueAuditServletFilter implements Filter {
 
     static final Logger LOGGER = LoggerFactory.getLogger(LightblueAuditServletFilter.class);
 
-    private static final ExecutorService jobExecutor = Executors.newCachedThreadPool();
+    private static final ExecutorService jobExecutor = Executors.newFixedThreadPool(10,
+            new ThreadFactoryBuilder()
+                    .setNameFormat("ServletAuditLogger")
+                    .build());
 
     @Override
     public void doFilter(final ServletRequest req, ServletResponse res,
