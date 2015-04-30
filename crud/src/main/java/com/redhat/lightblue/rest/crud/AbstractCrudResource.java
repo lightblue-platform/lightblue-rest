@@ -177,7 +177,6 @@ public abstract class AbstractCrudResource {
                          String request) {
         Error.reset();
         CallStatus st=new FindCommand(null, entity, version, request).execute();
-        LOGGER.info("Find call status:{}",st);
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
