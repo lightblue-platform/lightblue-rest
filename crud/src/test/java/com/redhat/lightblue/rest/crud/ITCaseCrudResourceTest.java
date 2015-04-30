@@ -225,7 +225,7 @@ public class ITCaseCrudResourceTest {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
 
         String auditExpectedCreated = readFile("auditExpectedCreated.json");
-        String auditMetadata = readFile("auditMetadata.json");
+        String auditMetadata = FileUtil.readFile("metadata/audit.json");
         EntityMetadata aEm = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(auditMetadata));
         RestConfiguration.getFactory().getMetadata().createNewMetadata(aEm);
         EntityMetadata aEm2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("audit", "1.0.1");
