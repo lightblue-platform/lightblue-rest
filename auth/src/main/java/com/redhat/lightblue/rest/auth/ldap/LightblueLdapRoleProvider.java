@@ -83,25 +83,4 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         return userRoles;
     }
 
-    @Override
-    public Collection<String> getUsersInGroup(String groupName) {
-        LOGGER.error("Invoking LightblueLdapRoleProvider#getUsersInGroup (not supported))");
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public void flushRoleCache(String roleName) {
-        LOGGER.error("Invoking LightblueLdapRoleProvider#flushRoleCache (not supported))");
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public void flushUserCache(String userName) {
-        LOGGER.error("Invoking LightblueLdapRoleProvider#flushUserCache (not supported))");
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-
-
-
 }
