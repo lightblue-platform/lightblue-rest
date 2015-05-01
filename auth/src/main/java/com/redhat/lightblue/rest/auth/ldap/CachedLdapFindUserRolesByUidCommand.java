@@ -42,7 +42,7 @@ public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<Str
     public CachedLdapFindUserRolesByUidCommand(LdapContext ldapContext, String ldapSearchBase, String uid) {
         super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(GROUPKEY)).
                 andCommandKey(HystrixCommandKey.Factory.asKey(GROUPKEY + ":" + CachedLdapFindUserRolesByUidCommand.class.getSimpleName())));
-        LOGGER.debug("Creating LdapFindUserByUidCommand");
+        LOGGER.debug("Creating CachedLdapFindUserRolesByUidCommand");
         //check if the informed parameters are valid
         if (Strings.isNullOrEmpty(uid)) {
             LOGGER.error("uid informed in LdapFindUserByUidCommand constructor is empty or null");
@@ -59,7 +59,7 @@ public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<Str
 
     @Override
     protected List<String> run() throws Exception {
-        LOGGER.debug("LdapFindUserByUidCommand#run was invoked");
+        LOGGER.debug("CachedLdapFindUserRolesByUidCommand#run was invoked");
 
         List<String> roles = RolesCache.get(ldapQuery.uid);
 
