@@ -22,12 +22,12 @@
     <parent>
         <groupId>com.redhat.lightblue.rest</groupId>
         <artifactId>lightblue-rest-pom</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
+        <version>1.5.0-SNAPSHOT</version>
     </parent>
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>lightblue-rest-metadata</artifactId>
     <packaging>war</packaging>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
@@ -37,7 +37,6 @@
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-common</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue</groupId>
@@ -71,6 +70,10 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.rest</groupId>
+            <artifactId>lightblue-rest-test</artifactId>
         </dependency>
     </dependencies>
     <build>

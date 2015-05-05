@@ -1,5 +1,8 @@
 {
     "type" : "com.redhat.lightblue.mongo.config.MongoMetadataConfiguration",
     "dataSource" : "mongo",
-    "collection": "metadata"
+    "collection": "metadata",
+    "hookConfigurationParsers": [
+        "com.redhat.lightblue.hook.audit.AuditHookConfigurationParser"
+    ]
 }

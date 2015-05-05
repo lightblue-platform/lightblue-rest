@@ -14,18 +14,27 @@ import javax.naming.directory.SearchResult;
 public class LDAPSearcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(LDAPSearcher.class);
 
-    public static SearchResult searchLDAPServer(LDAPCacheKey ldapCacheKey) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
+    private static LDAPSearcher instance = null;
+
+    public static LDAPSearcher getInstance() {
+        if (instance == null) {
+            instance = new LDAPSearcher();
+        }
+
+        return instance;
+    }
+
+    public SearchResult searchLDAPServer(LDAPQuery ldapQuery) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
         LOGGER.debug("LDAPSearcher#searchLDAPServer was invoked and it will call the remote LDAP server");
 
         // Extension a: returns an exception as the LDAP server is down (eg.: this can be meaningful to use the cache )
-        NamingEnumeration<SearchResult> results = ldapCacheKey.ldapContext.search(ldapCacheKey.ldapSearchBase, ldapCacheKey.searchFilter, ldapCacheKey.searchControls);
-        SearchResult searchResult = null;
+        NamingEnumeration<SearchResult> results = ldapQuery.ldapContext.search(ldapQuery.ldapSearchBase, ldapQuery.searchFilter, ldapQuery.searchControls);
         if (results.hasMoreElements()) {
-            searchResult = results.nextElement();
+            SearchResult searchResult = results.nextElement();
 
             //make sure there is not another item available, there should be only 1 match
             if (results.hasMoreElements()) {
-                String message = "Matched multiple users for the accountName: " + ldapCacheKey.uid;
+                String message = "Matched multiple users for the accountName: " + ldapQuery.uid;
                 LOGGER.error(message);
                 // Extension b: returns an exception to warn about the bad inconsistent state
                 throw new LDAPMultipleUserFoundException(message);
@@ -39,5 +48,9 @@ public class LDAPSearcher {
             LOGGER.debug("LDAPSearcher#searchLDAPServer could NOT retrieve the user from the remote LDAP Server");
             throw new LDAPUserNotFoundException();
         }
+    }
+
+    public static void setInstance(LDAPSearcher instance) {
+        LDAPSearcher.instance = instance;
     }
 }

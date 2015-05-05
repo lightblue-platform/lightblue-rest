@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.naming.NamingException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.security.auth.Subject;
@@ -35,10 +36,11 @@ import javax.security.auth.login.LoginException;
 
 import org.jboss.logging.Logger;
 import org.jboss.security.SimpleGroup;
-import org.jboss.security.auth.spi.CertRolesLoginModule;
+import org.jboss.security.auth.spi.BaseCertLoginModule;
 
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
 import com.redhat.lightblue.rest.auth.ldap.LightblueLdapRoleProvider;
+
 import org.slf4j.LoggerFactory;
 
 /**
@@ -48,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * (authentication provided by CertRolesLoginModule 7/11/2014
  *
  */
-public class CertLdapLoginModule extends CertRolesLoginModule {
+public class CertLdapLoginModule extends BaseCertLoginModule {
     private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class);
 
     public static final String AUTH_ROLE_NAME = "authRoleName";
@@ -61,6 +63,13 @@ public class CertLdapLoginModule extends CertRolesLoginModule {
     
     private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
 
+    // LightblueRoleProvider singleton
+    private static LightblueRoleProvider lbLdap = null;
+
+    public CertLdapLoginModule() {
+
+    }
+
     @Override
 	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String,?> sharedState, Map<String,?> options) {
         LOGGER.debug("CertLdapLoginModule#initialize was invoked");
@@ -68,25 +77,33 @@ public class CertLdapLoginModule extends CertRolesLoginModule {
 		super.initialize(subject, callbackHandler, sharedState, options);
 	}
     
+    public void initializeLightblueLdapRoleProvider() throws NamingException {
+        String ldapServer = (String) options.get(LDAP_SERVER);
+        String searchBase = (String) options.get(SEARCH_BASE);
+        String bindDn = (String) options.get(BIND_DN);
+        String bindPwd = (String) options.get(BIND_PWD);
+
+        lbLdap = new LightblueLdapRoleProvider(ldapServer, searchBase, bindDn, bindPwd);
+    }
+
     /* (non-Javadoc)
      * @see org.jboss.security.auth.spi.AbstractServerLoginModule#getRoleSets()
      */
     @Override
     protected Group[] getRoleSets() throws LoginException {
         LOGGER.debug("staticRoleLoginModule getRoleSets()");
+
         String roleName = (String) options.get(AUTH_ROLE_NAME);
-        String ldapServer = (String) options.get(LDAP_SERVER);
-        String searchBase = (String) options.get(SEARCH_BASE);
-        String bindDn = (String) options.get(BIND_DN);
-        String bindPwd = (String) options.get(BIND_PWD);
 
         SimpleGroup userRoles = new SimpleGroup("Roles");
 
         Principal p = null;
         try {
-            LightblueRoleProvider lbLdap = new LightblueLdapRoleProvider(ldapServer, searchBase, bindDn, bindPwd);
+            if (lbLdap == null)
+                // lazy init
+                initializeLightblueLdapRoleProvider();
 
-            LOGGER.info("Prinicipal username:" + getUsername());
+            LOGGER.debug("Prinicipal username:" + getUsername());
 
             LdapName name = new LdapName(getUsername());
             String searchName = "";
@@ -108,14 +125,14 @@ public class CertLdapLoginModule extends CertRolesLoginModule {
                 userRoles.addMember(role);
             }
 
-            if (ACCESS_LOGGER.isInfoEnabled()) {
-                ACCESS_LOGGER.info("Principal username: " + getUsername() + ", roles: " + Arrays.toString(groupNames.toArray()));
+            if (ACCESS_LOGGER.isDebugEnabled()) {
+                ACCESS_LOGGER.debug("Principal username: " + getUsername() + ", roles: " + Arrays.toString(groupNames.toArray()));
             }
 
             LOGGER.debug("Assign principal [" + p.getName() + "] to role [" + roleName + "]");
         } catch (Exception e) {
             String principalName = p == null ? "null" : p.getName();
-            LOGGER.info("Failed to assign principal [" + principalName + "] to role [" + roleName + "]", e);
+            LOGGER.error("Failed to assign principal [" + principalName + "] to role [" + roleName + "]", e);
         }
         Group[] roleSets = {userRoles};
         return roleSets;

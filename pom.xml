@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>lightblue-rest-pom</artifactId>
     <packaging>pom</packaging>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <description>REST front-ends for Lightblue</description>
     <licenses>
@@ -92,50 +92,60 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>com.redhat.lightblue.rest</groupId>
+                <artifactId>lightblue-rest-common</artifactId>
+                <version>1.5.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-api</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
+                <version>1.5.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-util</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
+                <version>1.5.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-hystrix</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
+                <version>1.5.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-config</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
+                <version>1.5.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo-metadata</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
+                <version>1.5.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo-crud</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
+                <version>1.5.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo-config</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
+                <version>1.5.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo-test</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
+                <version>1.5.0-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.hook</groupId>
                 <artifactId>lightblue-audit-hook</artifactId>
-                <version>1.3.0-SNAPSHOT</version>
+                <version>1.5.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.ldap</groupId>
+                <artifactId>lightblue-ldap-test</artifactId>
+                <version>0.9.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.ebaysf.web</groupId>
@@ -191,6 +201,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <groupId>org.apache.directory.server</groupId>
                 <artifactId>apacheds-server-integ</artifactId>
                 <version>1.5.7</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue</groupId>
+                <artifactId>lightblue-core-test</artifactId>
+                <version>1.5.0-SNAPSHOT</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue.rest</groupId>
+                <artifactId>lightblue-rest-test</artifactId>
+                <version>1.5.0-SNAPSHOT</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.mifmif</groupId>
+                <artifactId>generex</artifactId>
+                <version>0.0.3</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -253,6 +281,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
     <modules>
         <module>common</module>
         <module>auth</module>
+        <module>rest-test</module>
         <module>crud</module>
         <module>crud-basic-auth</module>
         <module>crud-cert-auth</module>
@@ -299,7 +328,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                     <maxmem>256m</maxmem>
                     <!-- aggregated reports for multi-module projects -->
                     <aggregate>true</aggregate>
-                    <check></check>
+                    <check />
                 </configuration>
             </plugin>
         </plugins>
