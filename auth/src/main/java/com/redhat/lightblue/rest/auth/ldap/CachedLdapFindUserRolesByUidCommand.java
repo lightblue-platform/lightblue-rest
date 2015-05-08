@@ -7,7 +7,6 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
-import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 
@@ -38,8 +37,9 @@ public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<Str
     }
 
     private final LDAPQuery ldapQuery;
+    private final InitialLdapContextProvider ldapContextProvider;
 
-    public CachedLdapFindUserRolesByUidCommand(LdapContext ldapContext, String ldapSearchBase, String uid) {
+    public CachedLdapFindUserRolesByUidCommand(String ldapSearchBase, String uid, InitialLdapContextProvider contextProvider) {
         super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(GROUPKEY)).
                 andCommandKey(HystrixCommandKey.Factory.asKey(GROUPKEY + ":" + CachedLdapFindUserRolesByUidCommand.class.getSimpleName())));
         LOGGER.debug("Creating CachedLdapFindUserRolesByUidCommand");
@@ -50,11 +50,12 @@ public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<Str
         } else if (Strings.isNullOrEmpty(ldapSearchBase)) {
             LOGGER.error("ldapSearchBase informed in LdapFindUserByUidCommand constructor is empty or null");
             throw new IllegalArgumentException(String.format(INVALID_PARAM, "ldapSearchBase"));
-        } else if (ldapContext == null) {
-            LOGGER.error("ldapContext informed in LdapFindUserByUidCommand constructor is null");
-            throw new IllegalArgumentException(String.format(INVALID_PARAM, "ldapContext"));
+        } else if (contextProvider == null) {
+            LOGGER.error("contextProvider cannot be null");
+            throw new IllegalArgumentException(String.format(INVALID_PARAM, "contextProvider"));
         }
-        this.ldapQuery = new LDAPQuery(uid, ldapContext, ldapSearchBase, "(uid=" + uid + ")", SearchControls.SUBTREE_SCOPE);
+        this.ldapQuery = new LDAPQuery(uid, ldapSearchBase, "(uid=" + uid + ")", SearchControls.SUBTREE_SCOPE);
+        this.ldapContextProvider = contextProvider;
     }
 
     @Override
@@ -71,7 +72,8 @@ public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<Str
         try {
 
             LOGGER.debug("Cache missed for uid="+ldapQuery.uid+". Calling ldap.");
-            SearchResult searchResult = LDAPSearcher.getInstance().searchLDAPServer(ldapQuery);
+            // LDAPSearcher does the lookup and the call only when cache is missed
+            SearchResult searchResult = LDAPSearcher.getInstance().searchLDAPServer(ldapQuery, ldapContextProvider);
 
             roles = getUserRolesFromLdap(searchResult);
 

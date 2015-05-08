@@ -1,11 +1,11 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchResult;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class si responsible to handle how to query data from LDAP server and also handle the exceptions different flows
@@ -24,11 +24,11 @@ public class LDAPSearcher {
         return instance;
     }
 
-    public SearchResult searchLDAPServer(LDAPQuery ldapQuery) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
+    public SearchResult searchLDAPServer(LDAPQuery ldapQuery, InitialLdapContextProvider contextProvider) throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
         LOGGER.debug("LDAPSearcher#searchLDAPServer was invoked and it will call the remote LDAP server");
 
         // Extension a: returns an exception as the LDAP server is down (eg.: this can be meaningful to use the cache )
-        NamingEnumeration<SearchResult> results = ldapQuery.ldapContext.search(ldapQuery.ldapSearchBase, ldapQuery.searchFilter, ldapQuery.searchControls);
+        NamingEnumeration<SearchResult> results = contextProvider.lookupLdap().search(ldapQuery.ldapSearchBase, ldapQuery.searchFilter, ldapQuery.searchControls);
         if (results.hasMoreElements()) {
             SearchResult searchResult = results.nextElement();
 
