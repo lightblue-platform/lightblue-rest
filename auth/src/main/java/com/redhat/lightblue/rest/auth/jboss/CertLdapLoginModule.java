@@ -99,9 +99,8 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
 
         Principal p = null;
         try {
-            if (lbLdap == null)
-                // lazy init
-                initializeLightblueLdapRoleProvider();
+
+            initializeLightblueLdapRoleProvider();
 
             LOGGER.debug("Prinicipal username:" + getUsername());
 

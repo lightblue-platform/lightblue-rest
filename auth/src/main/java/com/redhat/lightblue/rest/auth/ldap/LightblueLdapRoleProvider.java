@@ -19,13 +19,10 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
-import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.ldap.InitialLdapContext;
-import javax.naming.ldap.LdapContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +34,6 @@ import com.redhat.lightblue.rest.authz.RolesCache;
 /**
  * Fetches user roles from ldap. Results are cached (see {@link RolesCache}).
  *
- * Initialization of this class is quite expensive due to the cost of ldap jndi lookup (@link {@link InitialLdapContext} init).
- * Use it as a singleton.
  *
  * @author mpatercz
  *
@@ -46,24 +41,13 @@ import com.redhat.lightblue.rest.authz.RolesCache;
 public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
 
-    LdapContext ldapContext;
+    InitialLdapContextProvider ldapContextProvider;
     String ldapSearchBase;
 
     public LightblueLdapRoleProvider(String server, String searchBase, String bindDn, String bindDNPwd) throws NamingException {
         LOGGER.debug("Creating LightblueLdapRoleProvider");
-        Hashtable<String, Object> env = new Hashtable<>();
-        env.put(Context.SECURITY_AUTHENTICATION, "simple");
-        if (bindDn != null) {
-            env.put(Context.SECURITY_PRINCIPAL, bindDn);
-        }
-        if (bindDNPwd != null) {
-            env.put(Context.SECURITY_CREDENTIALS, bindDNPwd);
-        }
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, server);
         ldapSearchBase = searchBase;
-        LOGGER.debug("Creating InitialLdapContext ");
-        ldapContext = new InitialLdapContext(env, null);
+        ldapContextProvider = new InitialLdapContextProvider(server, bindDn, bindDNPwd);
     }
 
     @Override
@@ -72,7 +56,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         List<String> userRoles = new ArrayList<>();
         try {
 
-            List<String> roles = new CachedLdapFindUserRolesByUidCommand(ldapContext, ldapSearchBase, userName).execute();
+            List<String> roles = new CachedLdapFindUserRolesByUidCommand(ldapSearchBase, userName, ldapContextProvider).execute();
             userRoles.addAll(roles);
 
         } catch (HystrixRuntimeException ce) {
