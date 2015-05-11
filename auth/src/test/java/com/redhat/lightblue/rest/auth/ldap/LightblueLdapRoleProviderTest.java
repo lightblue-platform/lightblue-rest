@@ -119,7 +119,7 @@ public class LightblueLdapRoleProviderTest {
 
         // cache miss
         inOrder.verify(rolesCacheSpy).getIfPresent("derek63");
-        inOrder.verify(ldapSearcherSpy).searchLDAPServer(Mockito.any(LDAPQuery.class));
+        inOrder.verify(ldapSearcherSpy).searchLDAPServer(Mockito.any(LDAPQuery.class), Mockito.any(InitialLdapContextProvider.class));
         inOrder.verify(rolesCacheSpy).put("derek63", expectedUserRoles);
         inOrder.verify(fallbackRolesCacheSpy).put("derek63", expectedUserRoles);
 
@@ -153,7 +153,7 @@ public class LightblueLdapRoleProviderTest {
         Mockito.when(rolesCacheSpy.getIfPresent("derek63")).thenReturn(null);
         // break ldap
         Mockito.doThrow(new RuntimeException(new IOException("connection closed")))
-            .when(ldapSearcherSpy).searchLDAPServer(Mockito.any(LDAPQuery.class));
+            .when(ldapSearcherSpy).searchLDAPServer(Mockito.any(LDAPQuery.class), Mockito.any(InitialLdapContextProvider.class));
 
         // get roles when ldap server is down
         List<String> userRoles = provider.getUserRoles("derek63");
