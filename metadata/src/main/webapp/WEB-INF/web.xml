@@ -36,4 +36,8 @@
         <param-name>cors.configuration.resource</param-name>
         <param-value>lightblue-metadata-cors.json</param-value>
     </context-param>
+    <context-param>
+        <param-name>resteasy.providers</param-name>
+        <param-value>com.restcompress.provider.LZFEncodingInterceptor,com.restcompress.provider.LZFDecodingInterceptor</param-value>
+    </context-param>
 </web-app>
