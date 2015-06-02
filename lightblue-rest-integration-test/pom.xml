@@ -33,17 +33,21 @@
         <version>1.5.0-SNAPSHOT</version>
         <classifier>classes</classifier>
     </dependency>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <scope>compile</scope><!-- Yes, compile -->
+    </dependency>
     
     <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jdk-http</artifactId>
         <version>2.3.3.Final</version>
     </dependency>
-    
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <scope>compile</scope>
+    <dependency> <!-- Not directly used, but kept for ease of use in abstractions -->
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.1.0</version>
     </dependency>
   
     <!-- Test Dependencies -->
