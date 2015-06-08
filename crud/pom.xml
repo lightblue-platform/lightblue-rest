@@ -47,6 +47,10 @@
             <artifactId>lightblue-audit-hook</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.lightblue.hook</groupId>
+            <artifactId>lightblue-publish-hook</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue</groupId>
             <artifactId>lightblue-core-hystrix</artifactId>
         </dependency>
