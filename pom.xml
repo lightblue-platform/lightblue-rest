@@ -99,48 +99,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-api</artifactId>
-                <version>${lightblue.core.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-util</artifactId>
-                <version>${lightblue.core.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-hystrix</artifactId>
-                <version>${lightblue.core.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-config</artifactId>
-                <version>${lightblue.core.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo-metadata</artifactId>
-                <version>${lightblue.mongo.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo-crud</artifactId>
-                <version>${lightblue.mongo.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo-config</artifactId>
-                <version>${lightblue.mongo.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo-test</artifactId>
-                <version>${lightblue.mongo.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.hook</groupId>
                 <artifactId>lightblue-audit-hook</artifactId>
-                <version>${lightblue.audithook.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.hook</groupId>
@@ -150,7 +150,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>com.redhat.lightblue.ldap</groupId>
                 <artifactId>lightblue-ldap-test</artifactId>
-                <version>${lightblue.ldap.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.ebaysf.web</groupId>
@@ -211,7 +211,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-test</artifactId>
-                <version>${lightblue.core.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
