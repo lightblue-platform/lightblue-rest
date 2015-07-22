@@ -23,19 +23,11 @@ public abstract class AbstractCRUDControllerWithRest extends AbstractMongoCRUDTe
 
     private final static int DEFAULT_PORT = 8000;
 
-    private static HttpServer httpServer;
+    protected static HttpServer httpServer;
 
     private final int httpPort;
     private final String dataUrl;
     private final String metadataUrl;
-
-    @AfterClass
-    public static void stopHttpServer() {
-        if (httpServer != null) {
-            httpServer.stop(0);
-        }
-        httpServer = null;
-    }
 
     public int getHttpPort() {
         return httpPort;
