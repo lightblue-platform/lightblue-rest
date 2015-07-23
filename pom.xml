@@ -144,8 +144,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.hook</groupId>
-                <artifactId>lightblue-publish-hook</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <artifactId>lightblue-esb-hook</artifactId>
+                <version>0.0.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.ldap</groupId>
