@@ -34,7 +34,7 @@ import com.redhat.lightblue.extensions.synch.Locking;
 
 
 public abstract class AbstractLockCommand extends AbstractRestCommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GetLockCountCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockCommand.class);
 
     protected final String domain;
     protected final String resource;
