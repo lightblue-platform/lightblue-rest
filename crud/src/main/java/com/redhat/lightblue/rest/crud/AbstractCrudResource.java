@@ -61,29 +61,47 @@ public abstract class AbstractCrudResource {
     private static final String PARAM_ENTITY = "entity";
     private static final String PARAM_VERSION = "version";
 
-    /**
-     * @deprecated Deprecated due to inconsistent path. Use {@link #insert(String, String)} instead.
-     */
     @PUT
-    @Path("/{entity}")
-    @LZF
-    @Deprecated
-    public Response insertAlt(@PathParam(PARAM_ENTITY) String entity,
-                            String request) {
-        return insert(entity, null, request);
+    @Path("/lock/{domain}/{resourceId}/{callerId}")
+    public Response acquire(@PathParam("domain") String domain,
+                            @PathParam("callerId") String callerId,
+                            @PathParam("resourceId") String resourceId,
+                            @QueryParam("ttl") Long ttl) {
+        Error.reset();
+        CallStatus st=new AcquireCommand(null,domain,callerId,resourceId,ttl).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
-    /**
-     * @deprecated Deprecated due to inconsistent path. Use {@link #insert(String, String, String)} instead.
-     */
-    @PUT
-    @Path("/{entity}/{version}")
-    @Deprecated
-    public Response insertAlt(@PathParam(PARAM_ENTITY) String entity,
-                              @PathParam(PARAM_VERSION) String version,
-                              String request) {
-        return insert(entity, version, request);
+    @DELETE
+    @Path("/lock/{domain}/{resourceId}/{callerId}")
+    public Response release(@PathParam("domain") String domain,
+                            @PathParam("callerId") String callerId,
+                            @PathParam("resourceId") String resourceId) {
+        Error.reset();
+        CallStatus st=new ReleaseCommand(null,domain,callerId,resourceId).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
+
+    @GET
+    @Path("/lock/{domain}/{resourceId}/{callerId}")
+    public Response getLockCount(@PathParam("domain") String domain,
+                                 @PathParam("callerId") String callerId,
+                                 @PathParam("resourceId") String resourceId) {
+        Error.reset();
+        CallStatus st=new GetLockCountCommand(null,domain,callerId,resourceId).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+    
+    @PUT
+    @Path("/lock/{domain}/{resourceId}/{callerId}/ping")
+    public Response ping(@PathParam("domain") String domain,
+                         @PathParam("callerId") String callerId,
+                         @PathParam("resourceId") String resourceId) {
+        Error.reset();
+        CallStatus st=new LockPingCommand(null,domain,callerId,resourceId).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
 
     @PUT
     @LZF
