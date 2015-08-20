@@ -242,7 +242,10 @@ public abstract class AbstractCrudResource {
             } else {
                 sq = buildQueryFieldTemplate(queryList.get(0));
             }
+        } else {
+            sq = buildQueryFieldTemplate("objectType:" + entity);
         }
+        
         LOGGER.debug("query: {} -> {}", q, sq);
 
         String sp = DEFAULT_PROJECTION_TMPL;
