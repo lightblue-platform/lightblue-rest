@@ -19,6 +19,7 @@
 package com.redhat.lightblue.rest.crud;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -203,9 +204,13 @@ public class ITCaseCrudResourceTest {
                 .addAsResource(new File(PATH_BASE + RestConfiguration.DATASOURCE_FILENAME), RestConfiguration.DATASOURCE_FILENAME)
                 .addAsResource(new File(PATH_BASE + "config.properties"), "config.properties");
         for (File file : libs) {
-            archive.addAsLibrary(file);
+            if(file.toString().indexOf("lightblue-")==-1)
+                archive.addAsLibrary(file);
         }
         archive.addPackages(true, "com.redhat.lightblue");
+        for(Object x:archive.getContent().keySet()) {
+            System.out.println(x.toString());
+        }
         return archive;
     }
 
@@ -281,5 +286,12 @@ public class ITCaseCrudResourceTest {
         String expectedFound2 = readFile("expectedFound2.json");
         String resultFound2 = cutCrudResource.find("country", "1.0.0", readFile("resultFound2.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedFound2, resultFound2, false);
+    }
+
+    @Test
+    public void testLock() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
+        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+        String result=cutCrudResource.acquire("test","caller","resource",null).getEntity().toString();
+        Assert.assertEquals("{\"result\":true}",result);
     }
 }

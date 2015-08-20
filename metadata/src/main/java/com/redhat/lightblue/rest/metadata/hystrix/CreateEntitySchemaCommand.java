@@ -18,6 +18,8 @@
  */
 package com.redhat.lightblue.rest.metadata.hystrix;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import com.redhat.lightblue.metadata.EntityInfo;
 import com.redhat.lightblue.metadata.EntityMetadata;
 import com.redhat.lightblue.metadata.EntitySchema;
@@ -58,7 +60,13 @@ public class CreateEntitySchemaCommand extends AbstractRestCommand {
         Error.push(entity);
         Error.push(version);
         try {
-            EntitySchema sch = getJsonTranslator().parse(EntitySchema.class,JsonUtils.json(schema));
+            JsonNode schemaDoc=JsonUtils.json(schema);
+            EntitySchema sch;
+            if(schemaDoc.get("schema")!=null) {
+                EntityMetadata md=getJsonTranslator().parse(EntityMetadata.class,schemaDoc);
+                sch=md.getEntitySchema();
+            } else
+                sch = getJsonTranslator().parse(EntitySchema.class,schemaDoc);
             if (!sch.getName().equals(entity)) {
                 throw Error.get(RestMetadataConstants.ERR_NO_NAME_MATCH, entity);
             }

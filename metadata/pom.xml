@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.hook</groupId>
-            <artifactId>lightblue-publish-hook</artifactId>
+            <artifactId>lightblue-esb-hook</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue</groupId>
