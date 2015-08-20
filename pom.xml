@@ -313,7 +313,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <lightblue.mongo.version>1.7.0</lightblue.mongo.version>
         <lightblue.ldap.version>1.7.0</lightblue.ldap.version>
         <lightblue.audithook.version>1.7.0</lightblue.audithook.version>
-        <lightblue.esbhook.version>0.0.2</lightblue.esbhook.version>
+        <lightblue.esbhook.version>0.0.3</lightblue.esbhook.version>
     </properties>
     <build>
         <plugins>
