@@ -252,7 +252,7 @@ public class ITCaseCrudResourceTest {
         String auditExpectedFound = readFile("auditExpectedFound.json");
         String auditResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
         auditResultFound = auditResultFound.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
-        auditResultFound = auditResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\+\\d{4}\"", "\"lastUpdateDate\":\"\"");
+        auditResultFound = auditResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
         JSONAssert.assertEquals(auditExpectedFound, auditResultFound, false);
 
         String expectedUpdated = readFile("expectedUpdated.json");
@@ -262,12 +262,16 @@ public class ITCaseCrudResourceTest {
         String audit2ExpectedFound = readFile("auditExpectedFoundUpdate.json");
         String audit2ResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
         audit2ResultFound = audit2ResultFound.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
-        audit2ResultFound = audit2ResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}\\+\\d{4}\"", "\"lastUpdateDate\":\"\"");
+        audit2ResultFound = audit2ResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
         JSONAssert.assertEquals(audit2ExpectedFound, audit2ResultFound, false);
 
         String expectedFound = readFile("expectedFound.json");
         String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedFound, resultFound, false); // #TODO #FIX Not finding the right version
+
+        String expectedAll = cutCrudResource.find("country", "1.0.0", readFile("country-noq.json")).getEntity().toString();
+        System.out.println("returnVAlue:"+expectedAll);
+        JSONAssert.assertEquals(expectedFound, expectedAll, false);
 
         String resultSimpleFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
                 "country",

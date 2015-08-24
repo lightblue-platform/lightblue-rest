@@ -1,0 +1,11 @@
+{
+    "entity": "country",
+    "entityVersion": "1.0.0",
+    "projection": [{
+        "field": "name",
+        "include": true
+    }, {
+        "field": "iso3code",
+        "include": true
+    }]
+}
