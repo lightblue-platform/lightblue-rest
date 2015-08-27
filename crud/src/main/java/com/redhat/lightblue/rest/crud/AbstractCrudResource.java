@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import com.redhat.lightblue.EntityVersion;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.crud.FindRequest;
+import com.redhat.lightblue.crud.BulkRequest;
+import com.redhat.lightblue.crud.BulkResponse;
 import com.redhat.lightblue.query.Projection;
 import com.redhat.lightblue.query.QueryExpression;
 import com.redhat.lightblue.query.Sort;
@@ -196,6 +198,15 @@ public abstract class AbstractCrudResource {
         Error.reset();
         CallStatus st=new FindCommand(null, entity, version, request).execute();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
+    @POST
+    @LZF
+    @Path("/bulk")
+    public Response bulk(String request) {
+        Error.reset();
+        CallStatus st=new BulkRequestCommand(null,request).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();        
     }
 
     @GET

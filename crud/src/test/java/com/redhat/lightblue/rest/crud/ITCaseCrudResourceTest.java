@@ -255,6 +255,13 @@ public class ITCaseCrudResourceTest {
         auditResultFound = auditResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
         JSONAssert.assertEquals(auditExpectedFound, auditResultFound, false);
 
+
+        String bulkResult = cutCrudResource.bulk(readFile("bulkReq.json")).getEntity().toString();
+        bulkResult = bulkResult.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
+        bulkResult = bulkResult.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
+        JSONAssert.assertEquals(readFile("bulkResult.json"), bulkResult, false);
+
+        
         String expectedUpdated = readFile("expectedUpdated.json");
         String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedUpdated, resultUpdated, false);
