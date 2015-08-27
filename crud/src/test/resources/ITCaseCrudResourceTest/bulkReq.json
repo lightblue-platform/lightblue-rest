@@ -1,0 +1,41 @@
+{
+    "requests": [
+{
+    "seq":0,
+    "op":"find",
+    "request" :
+{
+    "entity": "audit",
+    "entityVersion": "1.0.1",
+    "query": {
+        "field": "entityName",
+        "op": "=",
+        "rvalue": "country"
+    },
+    "projection": [{
+        "field": "*",
+        "include": true
+    }]
+}
+},
+        {
+            "seq":1,
+            "op":"find",
+            "request":
+            
+{
+    "entity": "audit",
+    "entityVersion": "1.0.1",
+    "query": {
+        "field": "entityName",
+        "op": "=",
+        "rvalue": "country"
+    },
+    "projection": [{
+        "field": "*",
+        "include": true
+    }]
+}
+        }
+    ]
+}
