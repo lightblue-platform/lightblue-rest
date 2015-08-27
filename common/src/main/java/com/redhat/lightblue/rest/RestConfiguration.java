@@ -60,7 +60,7 @@ public final class RestConfiguration {
     private static DataSourcesConfiguration loadDefaultDatasources() {
         try {
             return new DataSourcesConfiguration(JsonUtils.json(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(DATASOURCE_FILENAME)));
+                                                               Thread.currentThread().getContextClassLoader().getResourceAsStream(DATASOURCE_FILENAME),true));
         } catch (Exception e) {
             throw new RuntimeException("Cannot initialize datasources.", e);
         }
