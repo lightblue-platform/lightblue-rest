@@ -18,29 +18,50 @@
  */
 package com.redhat.lightblue.rest.crud;
 
-import com.restcompress.provider.LZF;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redhat.lightblue.EntityVersion;
-import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.crud.FindRequest;
-import com.redhat.lightblue.crud.BulkRequest;
-import com.redhat.lightblue.crud.BulkResponse;
 import com.redhat.lightblue.query.Projection;
 import com.redhat.lightblue.query.QueryExpression;
 import com.redhat.lightblue.query.Sort;
-import com.redhat.lightblue.rest.crud.hystrix.*;
-import com.redhat.lightblue.util.JsonUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.text.StrSubstitutor;
+import com.redhat.lightblue.rest.CallStatus;
+import com.redhat.lightblue.rest.crud.hystrix.AcquireCommand;
+import com.redhat.lightblue.rest.crud.hystrix.BulkRequestCommand;
+import com.redhat.lightblue.rest.crud.hystrix.DeleteCommand;
+import com.redhat.lightblue.rest.crud.hystrix.FindCommand;
+import com.redhat.lightblue.rest.crud.hystrix.GetLockCountCommand;
+import com.redhat.lightblue.rest.crud.hystrix.InsertCommand;
+import com.redhat.lightblue.rest.crud.hystrix.LockPingCommand;
+import com.redhat.lightblue.rest.crud.hystrix.ReleaseCommand;
+import com.redhat.lightblue.rest.crud.hystrix.SaveCommand;
+import com.redhat.lightblue.rest.crud.hystrix.UpdateCommand;
 import com.redhat.lightblue.util.Error;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.*;
+import com.redhat.lightblue.util.JsonUtils;
+import com.restcompress.provider.LZF;
 
 /**
  *
@@ -64,7 +85,7 @@ public abstract class AbstractCrudResource {
     private static final String PARAM_VERSION = "version";
 
     @PUT
-    @Path("/lock/{domain}/{resourceId}/{callerId}")
+    @Path("/lock/{domain}/{callerId}/{resourceId}")
     public Response acquire(@PathParam("domain") String domain,
                             @PathParam("callerId") String callerId,
                             @PathParam("resourceId") String resourceId,
@@ -75,7 +96,7 @@ public abstract class AbstractCrudResource {
     }
 
     @DELETE
-    @Path("/lock/{domain}/{resourceId}/{callerId}")
+    @Path("/lock/{domain}/{callerId}/{resourceId}")
     public Response release(@PathParam("domain") String domain,
                             @PathParam("callerId") String callerId,
                             @PathParam("resourceId") String resourceId) {
@@ -85,7 +106,7 @@ public abstract class AbstractCrudResource {
     }
 
     @GET
-    @Path("/lock/{domain}/{resourceId}/{callerId}")
+    @Path("/lock/{domain}/{callerId}/{resourceId}")
     public Response getLockCount(@PathParam("domain") String domain,
                                  @PathParam("callerId") String callerId,
                                  @PathParam("resourceId") String resourceId) {
@@ -93,9 +114,9 @@ public abstract class AbstractCrudResource {
         CallStatus st=new GetLockCountCommand(null,domain,callerId,resourceId).execute();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
-    
+
     @PUT
-    @Path("/lock/{domain}/{resourceId}/{callerId}/ping")
+    @Path("/lock/{domain}/{callerId}/{resourceId}/ping")
     public Response ping(@PathParam("domain") String domain,
                          @PathParam("callerId") String callerId,
                          @PathParam("resourceId") String resourceId) {
@@ -206,7 +227,7 @@ public abstract class AbstractCrudResource {
     public Response bulk(String request) {
         Error.reset();
         CallStatus st=new BulkRequestCommand(null,request).execute();
-        return Response.status(st.getHttpStatus()).entity(st.toString()).build();        
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     @GET
