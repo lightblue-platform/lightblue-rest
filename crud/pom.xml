@@ -75,6 +75,18 @@
             <artifactId>lightblue-mongo-test</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.lightblue.ldap</groupId>
+            <artifactId>lightblue-ldap-crud</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.ldap</groupId>
+            <artifactId>lightblue-ldap-metadata</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue.ldap</groupId>
+            <artifactId>lightblue-ldap-config</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-test</artifactId>
         </dependency>
