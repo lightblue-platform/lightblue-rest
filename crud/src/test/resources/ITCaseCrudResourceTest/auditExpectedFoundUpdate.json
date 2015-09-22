@@ -4,29 +4,19 @@
   "matchCount":2,
   "processed":[
     {
-      "lastUpdatedBy":null,
       "entityName":"country",
       "lastUpdateDate":"",
-      "identity":null,
       "versionText":"1.0.0",
       "CRUDOperation":"INSERT",
-      "audits":null,
       "objectType":"audit",
-      "identity#":1,
-      "audits#":5,
       "_id":""
     },
     {
-      "lastUpdatedBy":null,
       "entityName":"country",
       "lastUpdateDate":"",
-      "identity":null,
       "versionText":"1.0.0",
       "CRUDOperation":"UPDATE",
-      "audits":null,
       "objectType":"audit",
-      "identity#":1,
-      "audits#":1,
       "_id":""
     }
   ]

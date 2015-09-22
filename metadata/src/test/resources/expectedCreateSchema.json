@@ -62,10 +62,7 @@
                 "type": "string"
             },
             "_id": {
-                "type": "string",
-                "constraints": {
-                    "identity": true
-                }
+                "type": "string"
             }
         }
     }
