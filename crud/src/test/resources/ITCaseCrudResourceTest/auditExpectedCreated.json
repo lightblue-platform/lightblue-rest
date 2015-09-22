@@ -94,10 +94,7 @@
         }
       },
       "_id":{
-        "type":"string",
-        "constraints":{
-          "identity":true
-        }
+        "type":"string"
       },
       "audits":{
         "type":"array",

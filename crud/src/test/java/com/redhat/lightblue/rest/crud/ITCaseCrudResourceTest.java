@@ -251,13 +251,13 @@ public class ITCaseCrudResourceTest {
 
         String auditExpectedFound = readFile("auditExpectedFound.json");
         String auditResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
-        auditResultFound = auditResultFound.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
+        auditResultFound = auditResultFound.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
         auditResultFound = auditResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
         JSONAssert.assertEquals(auditExpectedFound, auditResultFound, false);
 
 
         String bulkResult = cutCrudResource.bulk(readFile("bulkReq.json")).getEntity().toString();
-        bulkResult = bulkResult.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
+        bulkResult = bulkResult.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
         bulkResult = bulkResult.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
         JSONAssert.assertEquals(readFile("bulkResult.json"), bulkResult, false);
 
@@ -266,9 +266,11 @@ public class ITCaseCrudResourceTest {
         String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedUpdated, resultUpdated, false);
 
+        // TODO: once https://github.com/lightblue-platform/lightblue-core/issues/476 is fixed, restore
+        // audit# fields in auditExpectedFound.json
         String audit2ExpectedFound = readFile("auditExpectedFoundUpdate.json");
         String audit2ResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
-        audit2ResultFound = audit2ResultFound.replaceAll("\"_id\":\"[a-f0-9]{24}\"", "\"_id\":\"\"");
+        audit2ResultFound = audit2ResultFound.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
         audit2ResultFound = audit2ResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
         JSONAssert.assertEquals(audit2ExpectedFound, audit2ResultFound, false);
 
