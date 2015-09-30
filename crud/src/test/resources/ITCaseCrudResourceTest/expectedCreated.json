@@ -4,10 +4,6 @@
         "hooks": [
             {
                 "name": "auditHook",
-                "configuration": {
-                    "entityName": "audit",
-                    "version": "1.0.0"
-                },
                 "actions": [
                     "insert",
                     "update",
