@@ -126,6 +126,31 @@ public abstract class AbstractCrudResource {
     }
 
 
+    /**
+     * @deprecated Deprecated due to inconsistent path. Use {@link #insert(String, String)} instead.
+     */
+    @PUT
+    @Path("/{entity}")
+    @LZF
+    @Deprecated
+    public Response insertAlt(@PathParam(PARAM_ENTITY) String entity,
+                            String request) {
+        return insert(entity, null, request);
+    }
+
+    /**
+     * @deprecated Deprecated due to inconsistent path. Use {@link #insert(String, String, String)} instead.
+     */
+    @PUT
+    @Path("/{entity}/{version}")
+    @LZF
+    @Deprecated
+    public Response insertAlt(@PathParam(PARAM_ENTITY) String entity,
+                              @PathParam(PARAM_VERSION) String version,
+                              String request) {
+        return insert(entity, version, request);
+    }
+
     @PUT
     @LZF
     @Path("/insert/{entity}")
