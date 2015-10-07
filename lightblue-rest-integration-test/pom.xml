@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>lightblue-rest-pom</artifactId>
-    <version>1.8.1</version>
+    <version>1.8.2-SNAPSHOT</version>
   </parent>
   
   <artifactId>lightblue-rest-integration-test</artifactId>
@@ -24,13 +24,13 @@
     <dependency>
         <groupId>com.redhat.lightblue.rest</groupId>
         <artifactId>lightblue-rest-crud</artifactId>
-        <version>1.8.1</version>
+        <version>1.8.2-SNAPSHOT</version>
         <classifier>classes</classifier>
     </dependency>
     <dependency>
         <groupId>com.redhat.lightblue.rest</groupId>
         <artifactId>lightblue-rest-metadata</artifactId>
-        <version>1.8.1</version>
+        <version>1.8.2-SNAPSHOT</version>
         <classifier>classes</classifier>
     </dependency>
     <dependency>
