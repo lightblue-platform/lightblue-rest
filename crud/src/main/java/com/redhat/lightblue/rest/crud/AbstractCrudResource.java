@@ -143,6 +143,7 @@ public abstract class AbstractCrudResource {
      */
     @PUT
     @Path("/{entity}/{version}")
+    @LZF
     @Deprecated
     public Response insertAlt(@PathParam(PARAM_ENTITY) String entity,
                               @PathParam(PARAM_VERSION) String version,
