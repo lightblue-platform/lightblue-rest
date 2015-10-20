@@ -263,8 +263,8 @@ public abstract class AbstractCrudResource {
                                @QueryParam("Q") String q,
                                @QueryParam("P") String p,
                                @QueryParam("S") String s,
-                               @DefaultValue("0") @QueryParam("from") long from,
-                               @DefaultValue("-1") @QueryParam("to") long to) throws IOException {
+                               @QueryParam("from") Long from,
+                               @QueryParam("to") Long to) throws IOException {
         return simpleFind(entity, null, q, p, s, from, to);
     }
 
@@ -277,8 +277,8 @@ public abstract class AbstractCrudResource {
                                @QueryParam("Q") String q,
                                @QueryParam("P") String p,
                                @QueryParam("S") String s,
-                               @DefaultValue("0") @QueryParam("from") long from,
-                               @DefaultValue("-1") @QueryParam("to") long to) throws IOException {
+                               @QueryParam("from") Long from,
+                               @QueryParam("to") Long to) throws IOException {
         Error.reset();
         // spec -> https://github.com/lightblue-platform/lightblue/wiki/Rest-Spec-Data#get-simple-find
         String sq = null;
