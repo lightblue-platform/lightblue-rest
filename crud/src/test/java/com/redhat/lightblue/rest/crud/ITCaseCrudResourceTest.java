@@ -288,8 +288,8 @@ public class ITCaseCrudResourceTest {
                 "iso2code:CA,QE;iso2code:CA;iso2code:CA,EN",
                 "name:1r,iso3code:1,iso2code:0r",
                 "name:a,iso3code:d,iso2code:d",
-                0,
-                100).getEntity().toString();
+                0l,
+                100l).getEntity().toString();
         JSONAssert.assertEquals(expectedFound, resultSimpleFound, false);
 
         String expectedDeleted = readFile("expectedDeleted.json");
