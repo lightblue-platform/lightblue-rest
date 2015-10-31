@@ -21,6 +21,7 @@ package com.redhat.lightblue.rest.metadata.hystrix;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.metadata.EntityInfo;
 import com.redhat.lightblue.metadata.EntityMetadata;
@@ -100,6 +101,11 @@ public abstract class AbstractRestCommandTest {
 
         @Override
         public Map<MetadataRole, List<String>> getMappedRoles() {
+            return null;
+        }
+
+        @Override
+        public JsonNode getJSONSchema(String s, String s1) {
             return null;
         }
     }

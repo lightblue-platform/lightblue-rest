@@ -1,0 +1,29 @@
+{
+  "$schema":"http://json-schema.org/draft-04/schema#",
+  "type":"object",
+  "description":"JSON schema for entity 'country' version '1.0.0'",
+  "properties":{
+    "iso3code":{
+      "type":"string"
+    },
+    "name":{
+      "type":"string"
+    },
+    "iso2code":{
+      "type":"string"
+    },
+    "objectType":{
+      "type":"string",
+      "constraints":{
+        "minLength":"1"
+      }
+    },
+    "_id":{
+      "type":"string"
+    },
+    "required":[
+      "objectType",
+      "_id"
+    ]
+  }
+}

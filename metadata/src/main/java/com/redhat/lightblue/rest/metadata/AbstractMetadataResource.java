@@ -35,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
+import com.redhat.lightblue.rest.metadata.hystrix.*;
 import com.restcompress.provider.LZF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,17 +44,6 @@ import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.MetadataConstants;
 import com.redhat.lightblue.metadata.MetadataRole;
 import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.rest.metadata.hystrix.CreateEntityMetadataCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.CreateEntitySchemaCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetDependenciesCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetEntityMetadataCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetEntityNamesCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetEntityRolesCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetEntityVersionsCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.RemoveEntityCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.SetDefaultVersionCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntityInfoCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntitySchemaStatusCommand;
 import com.redhat.lightblue.util.Error;
 
 /**
@@ -192,6 +182,19 @@ public abstract class AbstractMetadataResource {
         checkPermission(sc, MetadataRole.INSERT_SCHEMA);
         return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
     }
+
+
+    @GET
+    @LZF
+    @Path("/{entity}/<version>?schema")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getJsonSchema(@Context SecurityContext sc, @PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version) {
+        Error.reset();
+
+        checkPermission(sc, MetadataRole.FIND_JSON_SCHEMA);
+        return new GetJsonSchemaCommand(null, entity, version).execute();
+    }
+
 
     @PUT
     @LZF

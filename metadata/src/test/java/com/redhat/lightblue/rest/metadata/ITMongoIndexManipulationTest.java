@@ -38,7 +38,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.redhat.lightblue.util.test.FileUtil.readFile;
+import static com.redhat.lightblue.util.test.FileUtil.readFileAndTrim;
 
 /**
  * Test to verify index creation in mongo backend through front-end API's.
@@ -85,7 +85,7 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void createWithSimpleIndex() throws Exception {
-        String metadata = readFile(getClass().getSimpleName() + "-createWithSimpleIndex-metadata.json");
+        String metadata = readFileAndTrim(getClass().getSimpleName() + "-createWithSimpleIndex-metadata.json");
         String entityName = "test";
         String entityVersion = "1.0.0";
         SecurityContext sc = new TestSecurityContext();
@@ -107,7 +107,7 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void addSimpleIndex_forced() throws Exception {
-        String metadata = readFile(getClass().getSimpleName() + "-addSimpleIndex-metadata.json");
+        String metadata = readFileAndTrim(getClass().getSimpleName() + "-addSimpleIndex-metadata.json");
         String entityName = "test";
         String entityVersion = "1.0.0";
         SecurityContext sc = new TestSecurityContext();
@@ -133,8 +133,8 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void addSimpleIndex() throws Exception {
-        String metadata = readFile(getClass().getSimpleName() + "-addSimpleIndex-metadata.json");
-        String entityInfo = readFile(getClass().getSimpleName() + "-addSimpleIndex-entityInfo.json");
+        String metadata = readFileAndTrim(getClass().getSimpleName() + "-addSimpleIndex-metadata.json");
+        String entityInfo = readFileAndTrim(getClass().getSimpleName() + "-addSimpleIndex-entityInfo.json");
         String entityName = "test";
         String entityVersion = "1.0.0";
         SecurityContext sc = new TestSecurityContext();
@@ -162,8 +162,8 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void deleteSimpleIndex() throws Exception {
-        String metadata = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-metadata.json");
-        String entityInfo = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-entityInfo.json");
+        String metadata = readFileAndTrim(getClass().getSimpleName() + "-deleteSimpleIndex-metadata.json");
+        String entityInfo = readFileAndTrim(getClass().getSimpleName() + "-deleteSimpleIndex-entityInfo.json");
         String entityName = "test";
         String entityVersion = "1.0.0";
         SecurityContext sc = new TestSecurityContext();
@@ -191,7 +191,7 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void createWithArrayIndex() throws Exception {
-        String metadata = readFile(getClass().getSimpleName() + "-createWithArrayIndex-metadata.json");
+        String metadata = readFileAndTrim(getClass().getSimpleName() + "-createWithArrayIndex-metadata.json");
         String entityName = "test";
         String entityVersion = "1.0.0";
         SecurityContext sc = new TestSecurityContext();
@@ -213,8 +213,8 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void addArrayIndex() throws Exception {
-        String metadata = readFile(getClass().getSimpleName() + "-addArrayIndex-metadata.json");
-        String entityInfo = readFile(getClass().getSimpleName() + "-addArrayIndex-entityInfo.json");
+        String metadata = readFileAndTrim(getClass().getSimpleName() + "-addArrayIndex-metadata.json");
+        String entityInfo = readFileAndTrim(getClass().getSimpleName() + "-addArrayIndex-entityInfo.json");
         String entityName = "test";
         String entityVersion = "1.0.0";
         SecurityContext sc = new TestSecurityContext();
@@ -242,8 +242,8 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void esbMessage() throws Exception {
-        String metadata = readFile(getClass().getSimpleName() + "-esbMessage-metadata.json");
-        String entityInfo = readFile(getClass().getSimpleName() + "-esbMessage-entityInfo.json");
+        String metadata = readFileAndTrim(getClass().getSimpleName() + "-esbMessage-metadata.json");
+        String entityInfo = readFileAndTrim(getClass().getSimpleName() + "-esbMessage-entityInfo.json");
         String entityName = "test";
         String entityVersion = "0.4.0-SNAPSHOT";
         SecurityContext sc = new TestSecurityContext();
@@ -285,8 +285,8 @@ public class ITMongoIndexManipulationTest {
 
     @Test
     public void deleteArrayIndex() throws Exception {
-        String metadata = readFile(getClass().getSimpleName() + "-deleteArrayIndex-metadata.json");
-        String entityInfo = readFile(getClass().getSimpleName() + "-deleteArrayIndex-entityInfo.json");
+        String metadata = readFileAndTrim(getClass().getSimpleName() + "-deleteArrayIndex-metadata.json");
+        String entityInfo = readFileAndTrim(getClass().getSimpleName() + "-deleteArrayIndex-entityInfo.json");
         String entityName = "test";
         String entityVersion = "1.0.0";
         SecurityContext sc = new TestSecurityContext();

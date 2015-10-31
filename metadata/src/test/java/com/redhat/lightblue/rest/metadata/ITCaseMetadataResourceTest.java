@@ -18,15 +18,12 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
-import static com.redhat.lightblue.util.test.FileUtil.readFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import javax.inject.Inject;
-import javax.ws.rs.core.SecurityContext;
-
+import com.mongodb.BasicDBObject;
+import com.redhat.lightblue.config.MetadataConfiguration;
+import com.redhat.lightblue.metadata.mongo.MongoMetadata;
+import com.redhat.lightblue.mongo.test.EmbeddedMongo;
+import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.test.RestConfigurationRule;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -34,20 +31,17 @@ import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.json.JSONException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import com.mongodb.BasicDBObject;
-import com.redhat.lightblue.config.MetadataConfiguration;
-import com.redhat.lightblue.metadata.mongo.MongoMetadata;
-import com.redhat.lightblue.mongo.test.EmbeddedMongo;
-import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.rest.test.RestConfigurationRule;
+import javax.inject.Inject;
+import javax.ws.rs.core.SecurityContext;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import static com.redhat.lightblue.util.test.FileUtil.readFile;
 
 /**
  * @author lcestari
@@ -158,13 +152,16 @@ public class ITCaseMetadataResourceTest {
         JSONAssert.assertEquals(expected, x, false);
 
         x = cutMetadataResource.clearDefaultVersion(sc, "country");
-        //System.out.println(x);
         expected = esc("{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]},{'name': null,'unique': true,'fields': [{'field': '_id','dir': '$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}}");
         JSONAssert.assertEquals(expected, x, false);
 
         String expectedUpdateSchemaStatus = esc("{'entityInfo':{'name':'country','indexes':[{'name':null,'unique':true,'fields':[{'field':'name','dir':'$asc'}]},{'name': null,'unique': true,'fields': [{'field': '_id','dir': '$asc'}]}],'datastore':{'backend':'mongo','datasource':'mongo','collection':'country'}},'schema':{'name':'country','version':{'value':'1.0.0','changelog':'blahblah'},'status':{'value':'deprecated'},'access':{'insert':['anyone'],'update':['anyone'],'find':['anyone'],'delete':['anyone']},'fields':{'iso3code':{'type':'string'},'name':{'type':'string'},'iso2code':{'type':'string'},'objectType':{'type':'string','access':{'find':['anyone'],'update':['noone']},'constraints':{'required':true,'minLength':1}}}}}");
         String resultUpdateSchemaStatus = cutMetadataResource.updateSchemaStatus(sc, "country", "1.0.0", "deprecated", "No comment");
         JSONAssert.assertEquals(expectedUpdateSchemaStatus, resultUpdateSchemaStatus, false);
+
+        String expectedJsonSchemaFound= readFile("expectedJsonSchema.json");
+        String resultJsonSchemaFound = cutMetadataResource.getJsonSchema(sc,  "country",  "1.0.0");
+        JSONAssert.assertEquals(expectedJsonSchemaFound, resultJsonSchemaFound, false);
 
     }
 

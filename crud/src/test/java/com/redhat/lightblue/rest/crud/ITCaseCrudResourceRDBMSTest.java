@@ -453,16 +453,22 @@ public class ITCaseCrudResourceRDBMSTest {
             Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
 
             String expectedCreated = readFile("expectedCreated.json");
+            System.err.println("!!!!!!expectedCreated.json!!!!!!!!!!!" + expectedCreated);
             String metadata = readFile("metadata.json").replaceAll("YYZ", " DELETE FROM Country WHERE ISO2CODE=:ISO2CODE;");
+            System.err.println("!!!!!!metadata.json!!!!!!!!!!!" + metadata);
             EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
             RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
             EntityMetadata em2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("country", "1.0.0");
             String resultCreated = RestConfiguration.getFactory().getJSONParser().convert(em2).toString();
             JSONAssert.assertEquals(expectedCreated, resultCreated, false);
+            System.err.println("!!!!!!resultCreated!!!!!!!!!!!" + resultCreated);
+
 
             String expectedDeleted = readFile("expectedDeleted.json");
+            System.err.println("!!!!!!expectedDeleted.json!!!!!!!!!!!" + expectedDeleted);
+            System.err.println("!!!!!!resultDeleted.json!!!!!!!!!!!" + readFile("resultDeleted.json"));
             String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json")).getEntity().toString();
-            //System.err.println("!!!!!!!!!!!!!!!!!" + resultDeleted);
+            System.err.println("!!!!!!!!resultDeleted!!!!!!!!!" + resultDeleted);
 
             ds = (DataSource) initCtx.lookup("java:/mydatasource");
             conn = ds.getConnection();
