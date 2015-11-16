@@ -4,25 +4,25 @@
     <parent>
         <groupId>com.redhat.lightblue.rest</groupId>
         <artifactId>lightblue-rest-pom</artifactId>
-        <version>1.9.0-SNAPSHOT</version>
+        <version>1.9.0</version>
     </parent>
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>lightblue-rest-metadata-cert-auth</artifactId>
-    <version>1.9.0-SNAPSHOT</version>
+    <version>1.9.0</version>
     <packaging>war</packaging>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-metadata</artifactId>
-            <version>1.9.0-SNAPSHOT</version>
+            <version>1.9.0</version>
             <type>war</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
           <groupId>com.redhat.lightblue.rest</groupId>
           <artifactId>lightblue-rest-auth</artifactId>
-          <version>1.9.0-SNAPSHOT</version>
+          <version>1.9.0</version>
         </dependency>
   </dependencies>
   <build>
