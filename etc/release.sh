@@ -13,6 +13,7 @@ fi
 
 # prepare and verify state
 git fetch --all
+rm -rf ~/.m2/repository/com/redhat/lightblue/
 
 BRANCH=`git branch | grep ^* | awk '{print $2}'`
 
@@ -27,10 +28,10 @@ fi
 MERGE_BASE=`git merge-base HEAD origin/master`
 HEAD_HASH=`git rev-parse HEAD`
 
-#if [ $MERGE_BASE != $HEAD_HASH ]; then
-#    echo "Local branch is not in sync with origin/master.  Fix and run this script again."
-##    exit 1
-#fi
+if [ $MERGE_BASE != $HEAD_HASH ]; then
+    echo "Local branch is not in sync with origin/master.  Fix and run this script again."
+    exit 1
+fi
 
 # update to non-snapshot versions of lightblue dependencies and commit
 mvn versions:update-properties -DallowSnapshots=false
@@ -44,11 +45,16 @@ mvn release:prepare -P release \
                     -Dtag=V${RELEASE_VERSION} || exit
 
 # push prepared changes (doing separate just to have control)
-git push origin --tags
+git push origin master --tags
 
 # perform release
 mvn release:perform -P release || exit
 
-mvn versions:set -DnewVersion=$DEVEL_VERSION
+# update to latest lightblue snapshot dependencies
+mvn versions:use-latest-snapshots versions:update-properties -Dincludes=*lightblue* -DallowSnapshots=true
+git commit -m "Updated to latest snapshot dependencies"
+git push origin master
 
+# deploy updated snapshots
 mvn clean deploy
+
