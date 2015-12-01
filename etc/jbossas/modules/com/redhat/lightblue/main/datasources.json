@@ -7,7 +7,7 @@
        "exists, it only talks to that server."
      ],
      "type" : "com.redhat.lightblue.mongo.config.MongoConfiguration",
-     "metadataDataStoreParser" : "com.redhat.lightblue.metadata.mongo.MongoDataStoreParser",
+     "metadataDataStoreParser" : "com.redhat.lightblue.mongo.metadata.MongoDataStoreParser",
      "ssl" : false,
      "noCertValidation" : true,
      "database" : "metadata",
@@ -25,7 +25,7 @@
        "exists, it only talks to that server."
      ],
      "type" : "com.redhat.lightblue.mongo.config.MongoConfiguration",
-     "metadataDataStoreParser" : "com.redhat.lightblue.metadata.mongo.MongoDataStoreParser",
+     "metadataDataStoreParser" : "com.redhat.lightblue.mongo.metadata.MongoDataStoreParser",
      "ssl" : false,
      "noCertValidation" : true,
      "database" : "data",
