@@ -35,11 +35,7 @@
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>lightblue-mongo-metadata</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>lightblue-mongo-crud</artifactId>
+            <artifactId>lightblue-mongo</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>

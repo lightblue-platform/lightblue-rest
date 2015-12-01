@@ -49,7 +49,7 @@ import com.mongodb.Mongo;
 import com.redhat.lightblue.config.CrudConfiguration;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.metadata.EntityMetadata;
-import com.redhat.lightblue.metadata.mongo.MongoMetadata;
+import com.redhat.lightblue.mongo.metadata.MongoMetadata;
 import com.redhat.lightblue.mongo.config.MongoConfiguration;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.test.RestConfigurationRule;

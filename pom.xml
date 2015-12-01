@@ -118,17 +118,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>lightblue-mongo-metadata</artifactId>
-                <version>${lightblue.mongo.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>lightblue-mongo-crud</artifactId>
-                <version>${lightblue.mongo.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.mongo</groupId>
-                <artifactId>lightblue-mongo-config</artifactId>
+                <artifactId>lightblue-mongo</artifactId>
                 <version>${lightblue.mongo.version}</version>
             </dependency>
             <dependency>

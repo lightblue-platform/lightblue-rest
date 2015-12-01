@@ -60,15 +60,15 @@
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>lightblue-mongo-crud</artifactId>
+            <artifactId>lightblue-mongo</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>lightblue-mongo-metadata</artifactId>
+            <artifactId>lightblue-mongo</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>lightblue-mongo-config</artifactId>
+            <artifactId>lightblue-mongo</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
