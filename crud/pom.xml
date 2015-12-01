@@ -63,10 +63,6 @@
             <artifactId>lightblue-mongo</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>lightblue-mongo</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.redhat.lightblue.ldap</groupId>
             <artifactId>lightblue-ldap-crud</artifactId>
         </dependency>
