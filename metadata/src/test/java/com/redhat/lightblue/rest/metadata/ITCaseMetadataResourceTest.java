@@ -44,7 +44,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 import com.mongodb.BasicDBObject;
 import com.redhat.lightblue.config.MetadataConfiguration;
-import com.redhat.lightblue.metadata.mongo.MongoMetadata;
+import com.redhat.lightblue.mongo.metadata.MongoMetadata;
 import com.redhat.lightblue.mongo.test.EmbeddedMongo;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.test.RestConfigurationRule;
