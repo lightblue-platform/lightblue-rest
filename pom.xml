@@ -314,11 +314,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.compiler.debuglevel>lines,vars,source</maven.compiler.debuglevel>
         <maven.compiler.verbose>true</maven.compiler.verbose>
 
-        <lightblue.core.version>1.10.0-SNAPSHOT</lightblue.core.version>
-        <lightblue.mongo.version>1.10.0-SNAPSHOT</lightblue.mongo.version>
-        <lightblue.ldap.version>1.8.0-SNAPSHOT</lightblue.ldap.version>
-        <lightblue.audithook.version>1.10.0-SNAPSHOT</lightblue.audithook.version>
-        <lightblue.esbhook.version>0.0.6-SNAPSHOT</lightblue.esbhook.version>
+        <lightblue.core.version>1.10.0</lightblue.core.version>
+        <lightblue.mongo.version>1.10.0</lightblue.mongo.version>
+        <lightblue.ldap.version>1.7.0</lightblue.ldap.version>
+        <lightblue.audithook.version>1.9.0</lightblue.audithook.version>
+        <lightblue.esbhook.version>0.0.5</lightblue.esbhook.version>
     </properties>
     <build>
         <plugins>
@@ -414,6 +414,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
+                                <configuration>
+                                    <additionalparam>-Xdoclint:none</additionalparam>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
