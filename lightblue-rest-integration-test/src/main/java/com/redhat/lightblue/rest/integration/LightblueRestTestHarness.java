@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import org.jboss.resteasy.plugins.server.sun.http.HttpContextBuilder;
 import org.junit.AfterClass;
 
-import com.redhat.lightblue.mongo.test.AbstractMongoCRUDTestController;
+import com.redhat.lightblue.mongo.test.LightblueMongoTestHarness;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.CrudResource;
 import com.redhat.lightblue.rest.metadata.MetadataResource;
@@ -19,7 +19,7 @@ import com.sun.net.httpserver.HttpServer;
  * @author mpatercz
  *
  */
-public abstract class LightblueRestTestHarness extends AbstractMongoCRUDTestController {
+public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness {
 
     private final static int DEFAULT_PORT = 8000;
 
