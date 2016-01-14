@@ -19,7 +19,7 @@ import com.sun.net.httpserver.HttpServer;
  * @author mpatercz
  *
  */
-public abstract class AbstractCRUDControllerWithRest extends AbstractMongoCRUDTestController {
+public abstract class LightblueRestTestHarness extends AbstractMongoCRUDTestController {
 
     private final static int DEFAULT_PORT = 8000;
 
@@ -49,7 +49,7 @@ public abstract class AbstractCRUDControllerWithRest extends AbstractMongoCRUDTe
         return metadataUrl;
     }
 
-    public AbstractCRUDControllerWithRest() throws Exception {
+    public LightblueRestTestHarness() throws Exception {
         this(DEFAULT_PORT);
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractCRUDControllerWithRest extends AbstractMongoCRUDTe
      *            port used for http (rest endpoints)
      * @throws Exception
      */
-    public AbstractCRUDControllerWithRest(int httpServerPort) throws Exception {
+    public LightblueRestTestHarness(int httpServerPort) throws Exception {
         super();
         httpPort = httpServerPort;
         dataUrl = "http://localhost:" + httpPort + "/rest/data";
