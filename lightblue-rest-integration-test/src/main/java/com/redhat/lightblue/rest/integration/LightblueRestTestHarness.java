@@ -14,7 +14,11 @@ import com.restcompress.provider.LZFEncodingInterceptor;
 import com.sun.net.httpserver.HttpServer;
 
 /**
- * Utility class for adding rest layer on top of mongo CRUD Controller. Extend this class when writing tests.
+ * <p>Utility class for adding rest layer on top of mongo CRUD Controller. Extend this class when writing tests.</p>
+ *
+ * <p><b>NOTE:</b> {@link com.redhat.lightblue.rest.ExternalResourceConfiguration} cannot be used with the
+ * {@link LightblueRestTestHarness} as the expectation is you should never be writing test cases for libraries
+ * not in a test scope.</p>
  *
  * @author mpatercz
  *
