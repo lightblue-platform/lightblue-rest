@@ -343,7 +343,9 @@ public final class CorsConfiguration implements Serializable {
             Objects.requireNonNull(resourcePath, "resourcePath");
             Objects.requireNonNull(classLoader, "classLoader");
 
-            return fromJson(classLoader.getResourceAsStream(resourcePath));
+            try (InputStream is = classLoader.getResourceAsStream(resourcePath)) {
+                return fromJson(is);
+            }
         }
 
         /**
@@ -355,8 +357,10 @@ public final class CorsConfiguration implements Serializable {
 
         public Builder fromJson(Path pathToJson) throws IOException {
             Objects.requireNonNull(pathToJson, "pathToJson");
-
-            return fromJson(Files.newInputStream(pathToJson));
+            
+            try (InputStream is = Files.newInputStream(pathToJson)) {
+                return fromJson(is);
+            }
         }
 
         /**

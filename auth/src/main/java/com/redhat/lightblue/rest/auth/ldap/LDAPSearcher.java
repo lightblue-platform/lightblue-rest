@@ -3,6 +3,7 @@ package com.redhat.lightblue.rest.auth.ldap;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.SearchResult;
+import javax.naming.ldap.InitialLdapContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,25 +29,34 @@ public class LDAPSearcher {
         LOGGER.debug("LDAPSearcher#searchLDAPServer was invoked and it will call the remote LDAP server");
 
         // Extension a: returns an exception as the LDAP server is down (eg.: this can be meaningful to use the cache )
-        NamingEnumeration<SearchResult> results = contextProvider.lookupLdap().search(ldapQuery.ldapSearchBase, ldapQuery.searchFilter, ldapQuery.searchControls);
-        if (results.hasMoreElements()) {
-            SearchResult searchResult = results.nextElement();
-
-            //make sure there is not another item available, there should be only 1 match
+        InitialLdapContext ilc = null;
+        try {
+            // ideally should reuse the ldap context, but we don't right now because of issues connection pooling
+            ilc = contextProvider.lookupLdap();
+            NamingEnumeration<SearchResult> results = ilc.search(ldapQuery.ldapSearchBase, ldapQuery.searchFilter, ldapQuery.searchControls);
             if (results.hasMoreElements()) {
-                String message = "Matched multiple users for the accountName: " + ldapQuery.uid;
-                LOGGER.error(message);
-                // Extension b: returns an exception to warn about the bad inconsistent state
-                throw new LDAPMultipleUserFoundException(message);
-            }
+                SearchResult searchResult = results.nextElement();
 
-            // Basic flow: returns the unique entry from LDAP server
-            LOGGER.debug("LDAPSearcher#searchLDAPServer could retrieve the values from the remote LDAP Server");
-            return searchResult;
-        } else {
-            // Extension c: returns an exception to notify that the user was not found (eg.: this can be meaningful to evict the key )
-            LOGGER.debug("LDAPSearcher#searchLDAPServer could NOT retrieve the user from the remote LDAP Server");
-            throw new LDAPUserNotFoundException();
+                //make sure there is not another item available, there should be only 1 match
+                if (results.hasMoreElements()) {
+                    String message = "Matched multiple users for the accountName: " + ldapQuery.uid;
+                    LOGGER.error(message);
+                    // Extension b: returns an exception to warn about the bad inconsistent state
+                    throw new LDAPMultipleUserFoundException(message);
+                }
+
+                // Basic flow: returns the unique entry from LDAP server
+                LOGGER.debug("LDAPSearcher#searchLDAPServer could retrieve the values from the remote LDAP Server");
+                return searchResult;
+            } else {
+                // Extension c: returns an exception to notify that the user was not found (eg.: this can be meaningful to evict the key )
+                LOGGER.debug("LDAPSearcher#searchLDAPServer could NOT retrieve the user from the remote LDAP Server");
+                throw new LDAPUserNotFoundException();
+            }
+        } finally {
+            if (ilc != null) {
+                ilc.close();
+            }
         }
     }
 
