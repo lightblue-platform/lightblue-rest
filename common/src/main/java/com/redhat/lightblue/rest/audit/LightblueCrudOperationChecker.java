@@ -64,7 +64,7 @@ public enum LightblueCrudOperationChecker implements LightblueOperationChecker {
     public Info matches(String content){
         Matcher matcher = null;
         boolean found = false;
-        if (content == null) {
+        if (content != null) {
             matcher = getPattern().matcher(content);
             found = matcher.matches();
         }
