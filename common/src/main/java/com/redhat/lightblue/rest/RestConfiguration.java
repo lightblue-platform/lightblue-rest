@@ -26,6 +26,9 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.redhat.lightblue.config.DataSourcesConfiguration;
 import com.redhat.lightblue.config.LightblueFactory;
 import com.redhat.lightblue.util.JsonUtils;
@@ -42,6 +45,8 @@ import com.redhat.lightblue.util.JsonUtils;
  * @author nmalik
  */
 public final class RestConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestConfiguration.class);
 
     public static final String DATASOURCE_FILENAME = "datasources.json";
     public static final String EXTERNAL_RESOURCE_CONFIGURATION = "lightblue-external-resources.json";
@@ -113,6 +118,7 @@ public final class RestConfiguration {
         List<URL> urls = new ArrayList<>();
         try {
             for (String path : externalResources.getExternalPaths()) {
+                LOGGER.info("Adding url to classpath: " + path);
                 urls.add(new URL(path));
             }
         } catch (MalformedURLException e) {
