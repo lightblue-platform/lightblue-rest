@@ -70,6 +70,7 @@ public enum LightblueMetadataOperationChecker implements LightblueOperationCheck
         return operation;
     }
 
+    @Override
     public Info matches(String content){
         Matcher matcher = getPattern().matcher(content);
         boolean found = matcher.matches();

@@ -21,6 +21,7 @@ package com.redhat.lightblue.rest;
 import com.redhat.lightblue.config.DataSourcesConfiguration;
 import com.redhat.lightblue.config.LightblueFactory;
 import com.redhat.lightblue.util.JsonUtils;
+import java.io.InputStream;
 
 /**
  * Moving initialization logic out of RestApplication.
@@ -58,9 +59,8 @@ public final class RestConfiguration {
     }
 
     private static DataSourcesConfiguration loadDefaultDatasources() {
-        try {
-            return new DataSourcesConfiguration(JsonUtils.json(
-                                                               Thread.currentThread().getContextClassLoader().getResourceAsStream(DATASOURCE_FILENAME),true));
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(DATASOURCE_FILENAME)) {
+            return new DataSourcesConfiguration(JsonUtils.json(is,true));
         } catch (Exception e) {
             throw new RuntimeException("Cannot initialize datasources.", e);
         }
