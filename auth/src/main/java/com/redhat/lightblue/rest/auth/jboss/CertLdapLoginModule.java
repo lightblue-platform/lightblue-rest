@@ -101,10 +101,12 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         try {
 
             initializeLightblueLdapRoleProvider();
+            
+            String username = getUsername();
 
-            LOGGER.debug("Prinicipal username:" + getUsername());
+            LOGGER.debug("Prinicipal username:" + username);
 
-            LdapName name = new LdapName(getUsername());
+            LdapName name = new LdapName(username);
             String searchName = "";
             for (Rdn rdn : name.getRdns()) {
                 if (rdn.getType().equalsIgnoreCase("cn")) {
@@ -125,7 +127,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
             }
 
             if (ACCESS_LOGGER.isDebugEnabled()) {
-                ACCESS_LOGGER.debug("Principal username: " + getUsername() + ", roles: " + Arrays.toString(groupNames.toArray()));
+                ACCESS_LOGGER.debug("Principal username: " + username + ", roles: " + Arrays.toString(groupNames.toArray()));
             }
 
             LOGGER.debug("Assign principal [" + p.getName() + "] to role [" + roleName + "]");

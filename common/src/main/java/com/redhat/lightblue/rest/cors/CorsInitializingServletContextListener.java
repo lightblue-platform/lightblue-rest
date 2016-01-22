@@ -36,19 +36,19 @@ public class CorsInitializingServletContextListener implements ServletContextLis
                 return;
             }
 
-            InputStream configJsonStream = getConfigStream(configJsonResource);
+            try (InputStream configJsonStream = getConfigStream(configJsonResource)) {
+                if (configJsonStream == null) {
+                    LOGGER.info("CORS json configuration not found at " + configJsonResource + ". CORS "
+                            + "will not be enabled.");
+                    return;
+                }
 
-            if (configJsonStream == null) {
-                LOGGER.info("CORS json configuration not found at " + configJsonResource + ". CORS "
-                        + "will not be enabled.");
-                return;
+                CorsConfiguration config = getConfig(configJsonStream);
+                corsFilter.register(context, config);
+
+                LOGGER.info("Enabled CORS with configuration found at '" + configJsonResource + "': "
+                        + config);
             }
-
-            CorsConfiguration config = getConfig(configJsonStream);
-            corsFilter.register(context, config);
-
-            LOGGER.info("Enabled CORS with configuration found at '" + configJsonResource + "': "
-                    + config);
         } catch (IOException e) {
             LOGGER.error("Error reading CORS configuration file. CORS will not be enabled.", e);
         }
