@@ -1,7 +1,6 @@
 package com.redhat.lightblue.rest;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +9,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.redhat.lightblue.util.JsonInitializable;
-import com.redhat.lightblue.util.JsonUtils;
 
 /**
  * <p>Parses a configuration file containing paths to external jar files to be loaded into memory
@@ -34,17 +32,10 @@ public class ExternalResourceConfiguration implements JsonInitializable {
         return Collections.unmodifiableSet(externalPaths);
     }
 
-    public ExternalResourceConfiguration(String resourceName) throws IOException {
-        this(Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName));
-    }
+    public ExternalResourceConfiguration() {}
 
-    public ExternalResourceConfiguration(InputStream in) throws IOException {
-        if (in == null) {
-            //There are no external resources, this is ok.
-            return;
-        }
-
-        initializeFromJson(JsonUtils.json(in));
+    public ExternalResourceConfiguration(JsonNode node) throws IOException {
+        initializeFromJson(node);
     }
 
     @Override

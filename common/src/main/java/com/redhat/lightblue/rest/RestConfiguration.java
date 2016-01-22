@@ -93,8 +93,12 @@ public final class RestConfiguration {
     }
 
     private static ExternalResourceConfiguration loadDefaultExternalResources() {
-        try {
-            return new ExternalResourceConfiguration(EXTERNAL_RESOURCE_CONFIGURATION);
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(EXTERNAL_RESOURCE_CONFIGURATION)) {
+            if (is == null) {
+                //There are no external resources, this is ok.
+                return new ExternalResourceConfiguration();
+            }
+            return new ExternalResourceConfiguration(JsonUtils.json(is));
         } catch (IOException e) {
             throw new RuntimeException("Cannot initialize external resources.", e);
         }
