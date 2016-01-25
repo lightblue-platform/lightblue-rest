@@ -29,7 +29,7 @@ public class LightblueAuditServletFilter implements Filter {
     public static final String YYYY_MM_DD_T_HH_MM_SS_SSSZ = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LightblueAuditServletFilter.class);
-    private static final ThreadLocal<SimpleDateFormat> threadDateFormat =  new ThreadLocal<>();
+    private static final ThreadLocal<SimpleDateFormat> THREAD_DATE_FORMAT =  new ThreadLocal<>();
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res,
@@ -55,13 +55,13 @@ public class LightblueAuditServletFilter implements Filter {
         boolean auditReqFlag = p != null && (isMetadata || isCrud);
 
         if(auditReqFlag){
-            if(threadDateFormat.get() == null){
-                threadDateFormat.set(new SimpleDateFormat(YYYY_MM_DD_T_HH_MM_SS_SSSZ));
+            if(THREAD_DATE_FORMAT.get() == null){
+                THREAD_DATE_FORMAT.set(new SimpleDateFormat(YYYY_MM_DD_T_HH_MM_SS_SSSZ));
             }
             logEntryBuilder = new LogEntryBuilder();
             logEntryBuilder.setPrincipal(p);
             logEntryBuilder.setRequestSize(hReq.getContentLength());
-            logEntryBuilder.setTimestampText(threadDateFormat.get().format(new Date()));
+            logEntryBuilder.setTimestampText(THREAD_DATE_FORMAT.get().format(new Date()));
             logEntryBuilder.setResource(hReq.getContextPath());
 
             setOperationEnittyVersionStatus(hReq, isMetadata, logEntryBuilder);
@@ -101,7 +101,7 @@ public class LightblueAuditServletFilter implements Filter {
                                 "\"timeElapsedInNs\":\"%d\"  " +
                             " }",
                     logEntry.getTimestampText(),
-                    threadDateFormat.get().format(new Date()),
+                    THREAD_DATE_FORMAT.get().format(new Date()),
                     logEntry.getPrincipal().getName(),
                     logEntry.getResource(),
                     logEntry.getOperation(),
@@ -272,10 +272,12 @@ public class LightblueAuditServletFilter implements Filter {
             this.byteArrayPrintWriter = byteArrayPrintWriter;
         }
 
+        @Override
         public PrintWriter getWriter() {
             return byteArrayPrintWriter.getWriter();
         }
 
+        @Override
         public ServletOutputStream getOutputStream() {
             return byteArrayPrintWriter.getStream();
         }
@@ -283,9 +285,9 @@ public class LightblueAuditServletFilter implements Filter {
     }
 
     private static class ByteArrayPrintWriter {
-        private ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         private PrintWriter printWriter = new PrintWriter(byteArrayOutputStream);
-        private ServletOutputStream byteArrayServletStream = new ByteArrayServletStream(byteArrayOutputStream);
+        private final ServletOutputStream byteArrayServletStream = new ByteArrayServletStream(byteArrayOutputStream);
 
         public PrintWriter getWriter() {
             return printWriter;
@@ -301,12 +303,13 @@ public class LightblueAuditServletFilter implements Filter {
     }
 
     private static class ByteArrayServletStream extends ServletOutputStream {
-        private ByteArrayOutputStream byteArrayOutputStream;
+        private final ByteArrayOutputStream byteArrayOutputStream;
 
         ByteArrayServletStream(ByteArrayOutputStream byteArrayOutputStream) {
             this.byteArrayOutputStream = byteArrayOutputStream;
         }
 
+        @Override
         public void write(int param) throws IOException {
             byteArrayOutputStream.write(param);
         }

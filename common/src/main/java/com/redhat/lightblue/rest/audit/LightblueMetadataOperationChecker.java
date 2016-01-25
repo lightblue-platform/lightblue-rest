@@ -72,8 +72,12 @@ public enum LightblueMetadataOperationChecker implements LightblueOperationCheck
 
     @Override
     public Info matches(String content){
-        Matcher matcher = getPattern().matcher(content);
-        boolean found = matcher.matches();
+        Matcher matcher = null;
+        boolean found = false;
+        if (content != null) {
+            matcher = getPattern().matcher(content);
+            found = matcher.matches();
+        }
         return new Info(getOperation(),found,matcher, moreInfo);
     }
 }
