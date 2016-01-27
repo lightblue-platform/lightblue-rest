@@ -117,6 +117,8 @@ public final class RestConfiguration {
 
         //TODO Check that urls are not already on class path?
 
+        LOGGER.info("Adding url to classpath: " + externalResources.toString());
+
         ClassLoader currentThreadLoader = Thread.currentThread().getContextClassLoader();
         ClassLoader cl = new URLClassLoader(externalUrls.toArray(new URL[0]), currentThreadLoader);
 

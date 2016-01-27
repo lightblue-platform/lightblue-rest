@@ -95,4 +95,14 @@ public class ExternalResourceConfiguration implements JsonInitializable {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer("ExternalResourceConfiguration [externalPaths=[");
+        for (URL u : externalPaths) {
+            sb.append(u.toString());
+        }
+        sb.append("]]");
+        return sb.toString();
+    }
+
 }
