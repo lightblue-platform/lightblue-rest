@@ -20,11 +20,9 @@ package com.redhat.lightblue.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,25 +108,17 @@ public final class RestConfiguration {
     }
 
     public static void appendToThreadClassLoader(ExternalResourceConfiguration externalResources) {
-        if (externalResources == null || externalResources.getExternalPaths().isEmpty()) {
+        Set<URL> externalUrls = externalResources.getExternalUrls();
+
+        if (externalResources == null || externalUrls.isEmpty()) {
             //No external resources provided, this is ok.
             return;
-        }
-
-        List<URL> urls = new ArrayList<>();
-        try {
-            for (String path : externalResources.getExternalPaths()) {
-                LOGGER.info("Adding url to classpath: " + path);
-                urls.add(new URL(path));
-            }
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Cannot initialize external resource.", e);
         }
 
         //TODO Check that urls are not already on class path?
 
         ClassLoader currentThreadLoader = Thread.currentThread().getContextClassLoader();
-        ClassLoader cl = new URLClassLoader(urls.toArray(new URL[0]), currentThreadLoader);
+        ClassLoader cl = new URLClassLoader(externalUrls.toArray(new URL[0]), currentThreadLoader);
 
         Thread.currentThread().setContextClassLoader(cl);
     }

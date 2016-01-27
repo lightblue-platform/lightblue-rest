@@ -1,6 +1,10 @@
 package com.redhat.lightblue.rest;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,9 +30,11 @@ import com.redhat.lightblue.util.JsonInitializable;
  */
 public class ExternalResourceConfiguration implements JsonInitializable {
 
-    private final Set<String> externalPaths = new HashSet<>();
+    public final static String PROTOCOL_FILE = "file://";
 
-    public Set<String> getExternalPaths() {
+    private final Set<URL> externalPaths = new HashSet<>();
+
+    public Set<URL> getExternalUrls() {
         return Collections.unmodifiableSet(externalPaths);
     }
 
@@ -48,10 +54,44 @@ public class ExternalResourceConfiguration implements JsonInitializable {
         // Node must be an array node
         if (node instanceof ArrayNode) {
             for (JsonNode child : node) {
-                externalPaths.add(child.textValue());
+                String urlPath = child.textValue();
+                try {
+                    URL url = new URL(urlPath);
+                    switch (url.getProtocol().toLowerCase()) {
+                        case PROTOCOL_FILE:
+                            collectJarPaths(new File(url.getFile()), externalPaths, true);
+                            break;
+                        default:
+                            externalPaths.add(url);
+                    }
+                } catch (MalformedURLException e) {
+                    throw new IllegalArgumentException("Not a valid url: " + urlPath, e);
+                }
             }
         } else {
             throw new IllegalArgumentException("node must be instanceof ArrayNode: " + node.toString());
+        }
+    }
+
+    private static void collectJarPaths(File file, Set<URL> paths, final boolean recursiveDirSearch) throws MalformedURLException {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles(new FilenameFilter() {
+
+                @Override
+                public boolean accept(File dir, String name) {
+                    if (name.endsWith(".jar")
+                            || (recursiveDirSearch && dir.isDirectory())) {
+                        return true;
+                    }
+                    return false;
+                }
+
+            });
+            for (File f : files) {
+                collectJarPaths(f, paths, recursiveDirSearch);
+            }
+        } else {
+            paths.add(new URL(PROTOCOL_FILE, null, file.getAbsolutePath()));
         }
     }
 
