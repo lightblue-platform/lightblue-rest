@@ -30,7 +30,7 @@ import com.redhat.lightblue.util.JsonInitializable;
  */
 public class ExternalResourceConfiguration implements JsonInitializable {
 
-    public final static String PROTOCOL_FILE = "file://";
+    public final static String PROTOCOL_FILE = "file";
 
     private final Set<URL> externalPaths = new HashSet<>();
 
@@ -59,7 +59,7 @@ public class ExternalResourceConfiguration implements JsonInitializable {
                     URL url = new URL(urlPath);
                     switch (url.getProtocol().toLowerCase()) {
                         case PROTOCOL_FILE:
-                            collectJarPaths(new File(url.getFile()), externalPaths, true);
+                            collectJarPaths(new File(url.getPath()), externalPaths, true);
                             break;
                         default:
                             externalPaths.add(url);
@@ -74,6 +74,10 @@ public class ExternalResourceConfiguration implements JsonInitializable {
     }
 
     private static void collectJarPaths(File file, Set<URL> paths, final boolean recursiveDirSearch) throws MalformedURLException {
+        if (!file.exists()) {
+            throw new IllegalArgumentException("File does not exist: " + file.getAbsolutePath());
+        }
+
         if (file.isDirectory()) {
             File[] files = file.listFiles(new FilenameFilter() {
 
