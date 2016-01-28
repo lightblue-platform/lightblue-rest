@@ -18,6 +18,7 @@
  */
 package com.redhat.lightblue.rest;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -89,6 +90,9 @@ public final class RestConfiguration {
 
     private static DataSourcesConfiguration loadDefaultDatasources() {
         try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(DATASOURCE_FILENAME)) {
+            if (null == is) {
+                throw new FileNotFoundException(DATASOURCE_FILENAME);
+            }
             return new DataSourcesConfiguration(JsonUtils.json(is,true));
         } catch (Exception e) {
             throw new RuntimeException("Cannot initialize datasources.", e);
