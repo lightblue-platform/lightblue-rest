@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -102,9 +104,7 @@ public class ExternalResourceConfiguration implements JsonInitializable {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer("ExternalResourceConfiguration [externalPaths=[");
-        for (URL u : externalPaths) {
-            sb.append(u.toString());
-        }
+        sb.append(StringUtils.join(externalPaths, ", "));
         sb.append("]]");
         return sb.toString();
     }
