@@ -139,23 +139,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.ldap</groupId>
-                <artifactId>lightblue-ldap-metadata</artifactId>
-                <version>${lightblue.ldap.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.ldap</groupId>
-                <artifactId>lightblue-ldap-crud</artifactId>
-                <version>${lightblue.ldap.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.ldap</groupId>
-                <artifactId>lightblue-ldap-config</artifactId>
-                <version>${lightblue.ldap.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.ldap</groupId>
                 <artifactId>lightblue-ldap-test</artifactId>
                 <version>${lightblue.ldap.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.ebaysf.web</groupId>
