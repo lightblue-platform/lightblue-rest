@@ -30,19 +30,19 @@ import com.redhat.lightblue.util.JsonInitializable;
  *
  * @author dcrissman
  */
-public class ExternalResourceConfiguration implements JsonInitializable {
+public class PluginConfiguration implements JsonInitializable {
 
     public final static String PROTOCOL_FILE = "file";
 
     private final Set<URL> externalPaths = new HashSet<>();
 
-    public Set<URL> getExternalUrls() {
+    public Set<URL> getPluginUrls() {
         return Collections.unmodifiableSet(externalPaths);
     }
 
-    public ExternalResourceConfiguration() {}
+    public PluginConfiguration() {}
 
-    public ExternalResourceConfiguration(JsonNode node) throws IOException {
+    public PluginConfiguration(JsonNode node) throws IOException {
         initializeFromJson(node);
     }
 

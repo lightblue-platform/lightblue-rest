@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import com.redhat.lightblue.util.JsonUtils;
 
-public class TestExternalResourceConfiguration {
+public class TestPluginConfiguration {
 
     private void assertUrlEquals(URL url, String fileName, String protocol) {
         assertNotNull(url);
@@ -25,10 +25,10 @@ public class TestExternalResourceConfiguration {
 
     @Test
     public void testHttpURL() throws Exception {
-        ExternalResourceConfiguration config = new ExternalResourceConfiguration(JsonUtils.json(
+        PluginConfiguration config = new PluginConfiguration(JsonUtils.json(
                 "[\"http://www.somesite.com/my.jar\"]"));
 
-        Set<URL> urls = config.getExternalUrls();
+        Set<URL> urls = config.getPluginUrls();
         assertNotNull(urls);
         assertEquals(1, urls.size());
 
@@ -40,10 +40,10 @@ public class TestExternalResourceConfiguration {
         URL dirUrl = getClass().getResource(
                 "/externalResourcesConfiguration");
 
-        ExternalResourceConfiguration config = new ExternalResourceConfiguration(JsonUtils.json(
+        PluginConfiguration config = new PluginConfiguration(JsonUtils.json(
                 "[\"file:///" + dirUrl.getPath() + "\"]"));
 
-        Set<URL> urls = config.getExternalUrls();
+        Set<URL> urls = config.getPluginUrls();
         assertNotNull(urls);
         assertEquals(2, urls.size());
 

@@ -36,8 +36,8 @@ import com.redhat.lightblue.util.JsonUtils;
  * <p>Initialization logic for RestApplication.</p>
  *
  * <p><b>NOTE:</b> In order to guarentee consistent behavior, if it is desirable to specify both the
- * {@link ExternalResourceConfiguration} and {@link DataSourcesConfiguration},
- * then call {@link #appendToThreadClassLoader(ExternalResourceConfiguration)} prior to
+ * {@link PluginConfiguration} and {@link DataSourcesConfiguration},
+ * then call {@link #appendToThreadClassLoader(PluginConfiguration)} prior to
  * instantiating an instance of {@link DataSourcesConfiguration} and passing it into
  * {@link #getFactory(DataSourcesConfiguration)}.</p>
  *
@@ -48,7 +48,7 @@ public final class RestConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestConfiguration.class);
 
     public static final String DATASOURCE_FILENAME = "datasources.json";
-    public static final String EXTERNAL_RESOURCE_CONFIGURATION = "lightblue-external-resources.json";
+    public static final String PLUGIN_CONFIGURATION = "lightblue-plugins.json";
 
     private static DataSourcesConfiguration datasources;
     private static LightblueFactory factory;
@@ -66,12 +66,12 @@ public final class RestConfiguration {
     }
 
     public static LightblueFactory getFactory() {
-        return getFactory(loadDefaultExternalResources());
+        return getFactory(loadDefaultPlugins());
     }
 
     public static LightblueFactory getFactory(
-            final ExternalResourceConfiguration externalResources) {
-        appendToThreadClassLoader(externalResources);
+            final PluginConfiguration pluginConfiguration) {
+        appendToThreadClassLoader(pluginConfiguration);
 
         return getFactory(loadDefaultDatasources());
     }
@@ -99,29 +99,29 @@ public final class RestConfiguration {
         }
     }
 
-    private static ExternalResourceConfiguration loadDefaultExternalResources() {
-        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(EXTERNAL_RESOURCE_CONFIGURATION)) {
+    private static PluginConfiguration loadDefaultPlugins() {
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(PLUGIN_CONFIGURATION)) {
             if (is == null) {
-                //There are no external resources, this is ok.
-                return new ExternalResourceConfiguration();
+                //There are no external plugins, this is ok.
+                return new PluginConfiguration();
             }
-            return new ExternalResourceConfiguration(JsonUtils.json(is));
+            return new PluginConfiguration(JsonUtils.json(is));
         } catch (IOException e) {
-            throw new RuntimeException("Cannot initialize external resources.", e);
+            throw new RuntimeException("Cannot initialize lightblue plugins.", e);
         }
     }
 
-    public static void appendToThreadClassLoader(ExternalResourceConfiguration externalResources) {
-        Set<URL> externalUrls = externalResources.getExternalUrls();
+    public static void appendToThreadClassLoader(PluginConfiguration pluginConfiguration) {
+        Set<URL> externalUrls = pluginConfiguration.getPluginUrls();
 
-        if (externalResources == null || externalUrls.isEmpty()) {
+        if (pluginConfiguration == null || externalUrls.isEmpty()) {
             //No external resources provided, this is ok.
             return;
         }
 
         //TODO Check that urls are not already on class path?
 
-        LOGGER.info("Adding url to classpath: " + externalResources.toString());
+        LOGGER.info("Adding url to classpath: " + pluginConfiguration.toString());
 
         ClassLoader currentThreadLoader = Thread.currentThread().getContextClassLoader();
         ClassLoader cl = new URLClassLoader(externalUrls.toArray(new URL[0]), currentThreadLoader);
