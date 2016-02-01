@@ -42,13 +42,10 @@
             <groupId>com.redhat.lightblue</groupId>
             <artifactId>lightblue-core-config</artifactId>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>com.redhat.lightblue.hook</groupId>
             <artifactId>lightblue-audit-hook</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.hook</groupId>
-            <artifactId>lightblue-esb-hook</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue</groupId>
