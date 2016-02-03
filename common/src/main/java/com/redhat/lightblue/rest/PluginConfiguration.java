@@ -93,8 +93,10 @@ public class PluginConfiguration implements JsonInitializable {
                 }
 
             });
-            for (File f : files) {
-                collectJarPaths(f, paths, recursiveDirSearch);
+            if (files != null) {
+                for (File f : files) {
+                    collectJarPaths(f, paths, recursiveDirSearch);
+                }
             }
         } else {
             paths.add(new URL(PROTOCOL_FILE, null, file.getAbsolutePath()));
