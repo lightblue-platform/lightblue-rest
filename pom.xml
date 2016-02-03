@@ -132,7 +132,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <artifactId>lightblue-audit-hook</artifactId>
                 <version>${lightblue.audithook.version}</version>
                 <scope>test</scope>
-                <!-- TODO: Testing the audit hook should be done in the lightblue-rest project -->
+                <!-- TODO: Testing the audit hook should not be done in the lightblue-rest project -->
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.ldap</groupId>
