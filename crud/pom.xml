@@ -46,6 +46,7 @@
             <groupId>com.redhat.lightblue.hook</groupId>
             <artifactId>lightblue-audit-hook</artifactId>
             <scope>test</scope>
+            <!-- TODO: Testing the audit hook should be done in the lightblue-rest project -->
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue</groupId>
