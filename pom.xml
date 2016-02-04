@@ -120,6 +120,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo</artifactId>
                 <version>${lightblue.mongo.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
