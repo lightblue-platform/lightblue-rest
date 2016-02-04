@@ -131,11 +131,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <groupId>com.redhat.lightblue.hook</groupId>
                 <artifactId>lightblue-audit-hook</artifactId>
                 <version>${lightblue.audithook.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.hook</groupId>
-                <artifactId>lightblue-esb-hook</artifactId>
-                <version>${lightblue.esbhook.version}</version>
+                <scope>test</scope>
+                <!-- TODO: Testing the audit hook should not be done in the lightblue-rest project -->
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.ldap</groupId>
@@ -309,7 +306,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <lightblue.mongo.version>1.11.0-SNAPSHOT</lightblue.mongo.version>
         <lightblue.ldap.version>1.8.0-SNAPSHOT</lightblue.ldap.version>
         <lightblue.audithook.version>1.10.0-SNAPSHOT</lightblue.audithook.version>
-        <lightblue.esbhook.version>0.0.6-SNAPSHOT</lightblue.esbhook.version>
     </properties>
     <build>
         <plugins>
