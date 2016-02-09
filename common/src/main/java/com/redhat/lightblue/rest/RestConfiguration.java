@@ -119,7 +119,14 @@ public final class RestConfiguration {
         }
     }
 
-    public static void appendToThreadClassLoader(PluginConfiguration pluginConfiguration) {
+    private synchronized static void appendToThreadClassLoader(PluginConfiguration pluginConfiguration) {
+        if(factory != null){
+            LOGGER.warn(
+                    "Plugins can only be loaded once and must be done prior to the LightblueFactory being instantiated."
+                    + " It is too late to load additional plugins.");
+            return;
+        }
+
         Set<URL> externalUrls = pluginConfiguration.getPluginUrls();
 
         if (pluginConfiguration == null || externalUrls.isEmpty()) {
