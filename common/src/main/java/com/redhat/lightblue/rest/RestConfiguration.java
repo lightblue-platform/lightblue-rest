@@ -74,7 +74,7 @@ public final class RestConfiguration {
         return factory;
     }
 
-    public static LightblueFactory getFactory(
+    public synchronized static LightblueFactory getFactory(
             final PluginConfiguration pluginConfiguration) {
         if (factory == null) {
             appendToThreadClassLoader(pluginConfiguration);
