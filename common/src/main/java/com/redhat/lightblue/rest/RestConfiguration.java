@@ -51,7 +51,7 @@ public final class RestConfiguration {
     public static final String PLUGIN_CONFIGURATION = "lightblue-plugins.json";
 
     private static DataSourcesConfiguration datasources;
-    private static LightblueFactory factory;
+    private static volatile LightblueFactory factory;
 
     private RestConfiguration() {}
 
