@@ -105,7 +105,7 @@ public class PluginConfiguration implements JsonInitializable {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer("ExternalResourceConfiguration [externalPaths=[");
+        StringBuffer sb = new StringBuffer("PluginConfiguration [externalPaths=[");
         sb.append(StringUtils.join(externalPaths, ", "));
         sb.append("]]");
         return sb.toString();
