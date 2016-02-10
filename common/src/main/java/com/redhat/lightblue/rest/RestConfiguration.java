@@ -60,36 +60,40 @@ public final class RestConfiguration {
     }
 
     private synchronized static LightblueFactory createFactory(final DataSourcesConfiguration ds) {
-        if (factory == null) {
+        LightblueFactory f = factory;
+        if (f == null) {
             datasources = ds;
             factory = new LightblueFactory(ds);
         }
-        return factory;
+        return f;
     }
 
     public static LightblueFactory getFactory() {
-        if (factory == null) {
+        LightblueFactory f = factory;
+        if (f == null) {
             return getFactory(loadDefaultPlugins());
         }
-        return factory;
+        return f;
     }
 
     public synchronized static LightblueFactory getFactory(
             final PluginConfiguration pluginConfiguration) {
-        if (factory == null) {
+        LightblueFactory f = factory;
+        if (f == null) {
             appendToThreadClassLoader(pluginConfiguration);
 
             return getFactory(loadDefaultDatasources());
         }
-        return factory;
+        return f;
     }
 
     public static LightblueFactory getFactory(
             final DataSourcesConfiguration ds) {
-        if (factory == null) {
+        LightblueFactory f = factory;
+        if (f == null) {
             return createFactory(ds);
         }
-        return factory;
+        return f;
     }
 
     public static void setFactory(LightblueFactory f) {
