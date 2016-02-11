@@ -59,11 +59,16 @@ public final class RestConfiguration {
         return datasources;
     }
 
-    private synchronized static LightblueFactory createFactory(final DataSourcesConfiguration ds) {
+    public static LightblueFactory getFactory(final DataSourcesConfiguration ds) {
         LightblueFactory f = factory;
         if (f == null) {
-            datasources = ds;
-            factory = new LightblueFactory(ds);
+            synchronized (RestConfiguration.class) {
+                if (factory == null) {
+                    datasources = ds;
+                    f = new LightblueFactory(ds);
+                    factory = f;
+                }
+            }
         }
         return f;
     }
@@ -76,22 +81,17 @@ public final class RestConfiguration {
         return f;
     }
 
-    public synchronized static LightblueFactory getFactory(
+    public static LightblueFactory getFactory(
             final PluginConfiguration pluginConfiguration) {
         LightblueFactory f = factory;
         if (f == null) {
-            appendToThreadClassLoader(pluginConfiguration);
-
-            return getFactory(loadDefaultDatasources());
-        }
-        return f;
-    }
-
-    public static LightblueFactory getFactory(
-            final DataSourcesConfiguration ds) {
-        LightblueFactory f = factory;
-        if (f == null) {
-            return createFactory(ds);
+            synchronized (RestConfiguration.class) {
+                f = factory;
+                if (f == null) {
+                    appendToThreadClassLoader(pluginConfiguration);
+                    return getFactory(loadDefaultDatasources());
+                }
+            }
         }
         return f;
     }
@@ -123,14 +123,7 @@ public final class RestConfiguration {
         }
     }
 
-    private synchronized static void appendToThreadClassLoader(PluginConfiguration pluginConfiguration) {
-        if(factory != null){
-            LOGGER.warn(
-                    "Plugins can only be loaded once and must be done prior to the LightblueFactory being instantiated."
-                    + " It is too late to load additional plugins.");
-            return;
-        }
-
+    private static void appendToThreadClassLoader(PluginConfiguration pluginConfiguration) {
         Set<URL> externalUrls = pluginConfiguration.getPluginUrls();
 
         if (pluginConfiguration == null || externalUrls.isEmpty()) {
