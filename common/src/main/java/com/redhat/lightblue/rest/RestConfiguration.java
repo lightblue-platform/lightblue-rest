@@ -51,7 +51,7 @@ public final class RestConfiguration {
     public static final String PLUGIN_CONFIGURATION = "lightblue-plugins.json";
 
     private static DataSourcesConfiguration datasources;
-    private static LightblueFactory factory;
+    private static volatile LightblueFactory factory;
 
     private RestConfiguration() {}
 
@@ -59,37 +59,41 @@ public final class RestConfiguration {
         return datasources;
     }
 
-    private synchronized static LightblueFactory createFactory(final DataSourcesConfiguration ds) {
-        if (factory == null) {
-            datasources = ds;
-            factory = new LightblueFactory(ds);
+    public static LightblueFactory getFactory(final DataSourcesConfiguration ds) {
+        LightblueFactory f = factory;
+        if (f == null) {
+            synchronized (RestConfiguration.class) {
+                if (factory == null) {
+                    datasources = ds;
+                    f = new LightblueFactory(ds);
+                    factory = f;
+                }
+            }
         }
-        return factory;
+        return f;
     }
 
     public static LightblueFactory getFactory() {
-        if (factory == null) {
+        LightblueFactory f = factory;
+        if (f == null) {
             return getFactory(loadDefaultPlugins());
         }
-        return factory;
+        return f;
     }
 
     public static LightblueFactory getFactory(
             final PluginConfiguration pluginConfiguration) {
-        if (factory == null) {
-            appendToThreadClassLoader(pluginConfiguration);
-
-            return getFactory(loadDefaultDatasources());
+        LightblueFactory f = factory;
+        if (f == null) {
+            synchronized (RestConfiguration.class) {
+                f = factory;
+                if (f == null) {
+                    appendToThreadClassLoader(pluginConfiguration);
+                    return getFactory(loadDefaultDatasources());
+                }
+            }
         }
-        return factory;
-    }
-
-    public static LightblueFactory getFactory(
-            final DataSourcesConfiguration ds) {
-        if (factory == null) {
-            return createFactory(ds);
-        }
-        return factory;
+        return f;
     }
 
     public static void setFactory(LightblueFactory f) {
@@ -119,7 +123,7 @@ public final class RestConfiguration {
         }
     }
 
-    public static void appendToThreadClassLoader(PluginConfiguration pluginConfiguration) {
+    private static void appendToThreadClassLoader(PluginConfiguration pluginConfiguration) {
         Set<URL> externalUrls = pluginConfiguration.getPluginUrls();
 
         if (pluginConfiguration == null || externalUrls.isEmpty()) {
