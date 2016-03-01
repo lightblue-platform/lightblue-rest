@@ -171,7 +171,7 @@ public class ITCaseCrudResourceTest {
         db.createCollection("audit", null);
         BasicDBObject index = new BasicDBObject("name", 1);
         index.put("version.value", 1);
-        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).ensureIndex(index, "name", true);
+        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).createIndex(index, "name", true);
     }
 
     @After
