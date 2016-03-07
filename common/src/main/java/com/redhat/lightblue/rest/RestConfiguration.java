@@ -124,9 +124,14 @@ public final class RestConfiguration {
     }
 
     private static void appendToThreadClassLoader(PluginConfiguration pluginConfiguration) {
+        if (pluginConfiguration == null) {
+            //No plugin config provided, this is ok.
+            return;
+        }
+        
         Set<URL> externalUrls = pluginConfiguration.getPluginUrls();
 
-        if (pluginConfiguration == null || externalUrls.isEmpty()) {
+        if (externalUrls.isEmpty()) {
             //No external resources provided, this is ok.
             return;
         }
