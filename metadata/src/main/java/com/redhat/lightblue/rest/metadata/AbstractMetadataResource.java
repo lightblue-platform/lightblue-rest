@@ -75,6 +75,9 @@ public abstract class AbstractMetadataResource {
             LOGGER.error(e.getMessage(), e);
             throw Error.get(RestMetadataConstants.ERR_CANT_GET_METADATA, e.getMessage());
         }
+        
+        // by default JVM caches DNS forever.  hard code an override to refresh DNS cache every 30 seconds
+        java.security.Security.setProperty("networkaddress.cache.ttl" , "30");
     }
 
     @GET

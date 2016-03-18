@@ -27,7 +27,6 @@ import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -84,6 +83,11 @@ public abstract class AbstractCrudResource {
     private static final String PARAM_ENTITY = "entity";
     private static final String PARAM_VERSION = "version";
 
+    static {
+        // by default JVM caches DNS forever.  hard code an override to refresh DNS cache every 30 seconds
+        java.security.Security.setProperty("networkaddress.cache.ttl" , "30");
+    }
+    
     @PUT
     @Path("/lock/{domain}/{callerId}/{resourceId}")
     public Response acquire(@PathParam("domain") String domain,
