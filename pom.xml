@@ -304,8 +304,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
 
         <lightblue.core.version>1.13.0-SNAPSHOT</lightblue.core.version>
         <lightblue.mongo.version>1.13.0-SNAPSHOT</lightblue.mongo.version>
-        <lightblue.ldap.version>1.9.0-SNAPSHOT</lightblue.ldap.version>
-        <lightblue.audithook.version>1.11.0-SNAPSHOT</lightblue.audithook.version>
+        <lightblue.ldap.version>1.8.0</lightblue.ldap.version>
+        <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
     </properties>
     <build>
         <plugins>
