@@ -302,8 +302,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.compiler.debuglevel>lines,vars,source</maven.compiler.debuglevel>
         <maven.compiler.verbose>true</maven.compiler.verbose>
 
-        <lightblue.core.version>1.14.0</lightblue.core.version>
-        <lightblue.mongo.version>1.15.0</lightblue.mongo.version>
+        <lightblue.core.version>1.15.0-SNAPSHOT</lightblue.core.version>
+        <lightblue.mongo.version>1.16.0-SNAPSHOT</lightblue.mongo.version>
         <lightblue.ldap.version>1.8.0</lightblue.ldap.version>
         <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
     </properties>
