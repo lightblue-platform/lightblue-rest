@@ -50,6 +50,7 @@ import com.redhat.lightblue.rest.metadata.hystrix.GetEntityMetadataCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.GetEntityNamesCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.GetEntityRolesCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.GetEntityVersionsCommand;
+import com.redhat.lightblue.rest.metadata.hystrix.ReIndexCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.RemoveEntityCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.SetDefaultVersionCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntityInfoCommand;
@@ -75,7 +76,7 @@ public abstract class AbstractMetadataResource {
             LOGGER.error(e.getMessage(), e);
             throw Error.get(RestMetadataConstants.ERR_CANT_GET_METADATA, e.getMessage());
         }
-        
+
         // by default JVM caches DNS forever.  hard code an override to refresh DNS cache every 30 seconds
         java.security.Security.setProperty("networkaddress.cache.ttl" , "30");
     }
@@ -276,6 +277,13 @@ public abstract class AbstractMetadataResource {
         }
 
         throw new SecurityException("Unauthorized Request. One of the following roles is required: " + roles);
+    }
+
+    @POST
+    @LZF
+    @Path("/{entity}/reindex")
+    public String reindex(@PathParam(PARAM_ENTITY) String entity) {
+        return new ReIndexCommand(null, metadata, entity).execute();
     }
 
 }
