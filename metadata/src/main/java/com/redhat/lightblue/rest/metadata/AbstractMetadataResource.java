@@ -281,7 +281,7 @@ public abstract class AbstractMetadataResource {
 
     @POST
     @LZF
-    @Path("/{entity}/reindex")
+    @Path("/reindex/{entity}")
     public String reindex(@PathParam(PARAM_ENTITY) String entity) {
         return new ReIndexCommand(null, metadata, entity).execute();
     }
