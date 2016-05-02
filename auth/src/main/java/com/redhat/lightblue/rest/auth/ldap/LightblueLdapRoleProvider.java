@@ -57,7 +57,9 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         try {
 
             List<String> roles = new CachedLdapFindUserRolesByUidCommand(ldapSearchBase, userName, ldapContextProvider).execute();
-            userRoles.addAll(roles);
+            if (roles != null) {
+                userRoles.addAll(roles);
+            }
 
         } catch (HystrixRuntimeException ce) {
             // Not found in cache, returns an empty list
