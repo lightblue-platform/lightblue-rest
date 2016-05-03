@@ -57,13 +57,13 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         try {
 
             List<String> roles = new CachedLdapFindUserRolesByUidCommand(ldapSearchBase, userName, ldapContextProvider).execute();
-            if (roles != null) {
+            if(roles!=null)
                 userRoles.addAll(roles);
-            }
 
-        } catch (HystrixRuntimeException ce) {
-            // Not found in cache, returns an empty list
-            LOGGER.error("Not found in cache, returns an empty list " + userName, ce);
+        } catch (Exception ce) {
+            // Some exception
+            LOGGER.error("Naming error " + userName, ce);
+            throw new RuntimeException(ce);
         }
 
         return userRoles;
