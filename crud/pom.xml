@@ -29,6 +29,10 @@
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
+            <groupId>org.esbtools.lightblue-notification-hook</groupId>
+            <artifactId>lightblue-notification-hook</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.codeablereason.restcompress.provider</groupId>
             <artifactId>rest-compress-lib</artifactId>
         </dependency>
