@@ -261,7 +261,7 @@ public abstract class AbstractCrudResource {
     }
 
     /**
-     * GET /generate/<entity>/<version>/<field>?n=<n>
+     * GET /generate/<entity>/<version>/<path>?n=<n>
      *
      * @param entity name of the entity
      * @param version Entity version
@@ -272,7 +272,7 @@ public abstract class AbstractCrudResource {
      */
     @GET
     @LZF
-    @Path("/generate/{entity}/{version}/{field}")
+    @Path("/generate/{entity}/{version}/{path}")
     public Response generate(@PathParam("entity") String entity,
                              @PathParam("version") String version,
                              @PathParam("path") String path,
