@@ -49,6 +49,7 @@ import com.redhat.lightblue.query.QueryExpression;
 import com.redhat.lightblue.query.Sort;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.hystrix.AcquireCommand;
+import com.redhat.lightblue.rest.crud.hystrix.GenerateCommand;
 import com.redhat.lightblue.rest.crud.hystrix.BulkRequestCommand;
 import com.redhat.lightblue.rest.crud.hystrix.DeleteCommand;
 import com.redhat.lightblue.rest.crud.hystrix.FindCommand;
@@ -257,6 +258,36 @@ public abstract class AbstractCrudResource {
         Error.reset();
         CallStatus st=new BulkRequestCommand(null,request).execute();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
+    /**
+     * GET /generate/<entity>/<version>/<field>?n=<n>
+     *
+     * @param entity name of the entity
+     * @param version Entity version
+     * @param field Name of the field in the entity containing the generator
+     * @param n Number of values to be generated
+     *
+     * @return A lightblue response, with "processed" containing an array of generated values.
+     */
+    @GET
+    @LZF
+    @Path("/generate/{entity}/{version}/{field}")
+    public Response generate(@PathParam("entity") String entity,
+                             @PathParam("version") String version,
+                             @PathParam("field") String field,
+                             @QueryParam("n") Integer n) {
+        CallStatus st=new GenerateCommand(null,entity,version,field,n==null?1:n).execute();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
+    @GET
+    @LZF
+    @Path("/generate/{entity}/{field}")
+    public Response generate(@PathParam("entity") String entity,
+                             @PathParam("field") String field,
+                             @QueryParam("n") Integer n) {
+        return generate(entity,null,field,n);
     }
 
     @GET

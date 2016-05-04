@@ -317,4 +317,20 @@ public class ITCaseCrudResourceTest {
         String result=cutCrudResource.acquire("test","caller","resource",null).getEntity().toString();
         Assert.assertEquals("{\"result\":true}",result);
     }
+
+    @Test
+    public void testGenerate() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
+        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+        String metadata = readFile("generator-md.json");
+        EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
+        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+
+        String result=cutCrudResource.generate("generate","1.0.0","number",1).getEntity().toString();
+        System.out.println("Generated:"+result);
+        JSONAssert.assertEquals("{\"processed\":[\"50000000\"]}",result,false);
+
+        result=cutCrudResource.generate("generate","1.0.0","number",3).getEntity().toString();
+        System.out.println("Generated:"+result);
+        JSONAssert.assertEquals("{\"processed\":[\"50000001\",\"50000002\",\"50000003\"]}",result,false);
+    }
 }
