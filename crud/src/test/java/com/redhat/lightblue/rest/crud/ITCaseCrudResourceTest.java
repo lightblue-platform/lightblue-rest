@@ -329,7 +329,7 @@ public class ITCaseCrudResourceTest {
         System.out.println("Generated:"+result);
         JSONAssert.assertEquals("{\"processed\":[\"50000000\"]}",result,false);
 
-        result=cutCrudResource.generate("generate","1.0.0","number",3).getEntity().toString();
+        result=cutCrudResource.generate("generate","number",3).getEntity().toString();
         System.out.println("Generated:"+result);
         JSONAssert.assertEquals("{\"processed\":[\"50000001\",\"50000002\",\"50000003\"]}",result,false);
     }

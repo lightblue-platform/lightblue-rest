@@ -265,7 +265,7 @@ public abstract class AbstractCrudResource {
      *
      * @param entity name of the entity
      * @param version Entity version
-     * @param field Name of the field in the entity containing the generator
+     * @param path Path of the field in the entity containing the generator
      * @param n Number of values to be generated
      *
      * @return A lightblue response, with "processed" containing an array of generated values.
@@ -275,19 +275,19 @@ public abstract class AbstractCrudResource {
     @Path("/generate/{entity}/{version}/{field}")
     public Response generate(@PathParam("entity") String entity,
                              @PathParam("version") String version,
-                             @PathParam("field") String field,
+                             @PathParam("path") String path,
                              @QueryParam("n") Integer n) {
-        CallStatus st=new GenerateCommand(null,entity,version,field,n==null?1:n).execute();
+        CallStatus st=new GenerateCommand(null,entity,version,path,n==null?1:n).execute();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     @GET
     @LZF
-    @Path("/generate/{entity}/{field}")
+    @Path("/generate/{entity}/{path}")
     public Response generate(@PathParam("entity") String entity,
-                             @PathParam("field") String field,
+                             @PathParam("path") String path,
                              @QueryParam("n") Integer n) {
-        return generate(entity,null,field,n);
+        return generate(entity,null,path,n);
     }
 
     @GET

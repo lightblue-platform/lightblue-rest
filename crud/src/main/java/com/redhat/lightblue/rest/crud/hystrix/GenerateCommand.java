@@ -96,8 +96,7 @@ public class GenerateCommand extends AbstractRestCommand {
             }
             LOGGER.debug("user roles:{}",userRoles);
             EntityMetadata emd=mdResolver.getCompositeMetadata();
-            if(emd.getAccess().getFind().hasAccess(userRoles)||
-               emd.getAccess().getInsert().hasAccess(userRoles)||
+            if(emd.getAccess().getInsert().hasAccess(userRoles)||
                emd.getAccess().getUpdate().hasAccess(userRoles)) {
                 LOGGER.debug("User has access, looking up {}",fieldPath);
                 FieldTreeNode ftn=emd.resolve(fieldPath);
@@ -117,7 +116,7 @@ public class GenerateCommand extends AbstractRestCommand {
                     return new CallStatus(r);
                 }
             } else {
-                throw Error.get(CrudConstants.ERR_NO_ACCESS, "insert " + mdResolver.getTopLevelEntityName());
+                throw Error.get(CrudConstants.ERR_NO_ACCESS, "generate " + mdResolver.getTopLevelEntityName());
             }
         } catch(Error e) {
             return new CallStatus(e);

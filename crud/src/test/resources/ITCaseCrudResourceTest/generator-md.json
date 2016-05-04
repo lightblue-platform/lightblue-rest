@@ -12,6 +12,7 @@
                 ]
             }
         ],
+        "defaultVersion":"1.0.0",
         "datastore": {
             "backend": "mongo",
             "datasource": "mongo",
