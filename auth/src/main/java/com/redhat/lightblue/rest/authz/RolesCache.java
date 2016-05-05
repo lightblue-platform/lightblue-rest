@@ -48,19 +48,7 @@ public class RolesCache {
         fallbackRolesCache = CacheBuilder.newBuilder()
                 .concurrencyLevel(10) // handle 10 concurrent request without a problem
                 .maximumSize(500) // Hold 500 sessions before remove them
-                .expireAfterWrite(5, TimeUnit.HOURS) // If the session is inactive for more than 5 hours, remove it
-                .removalListener(
-                        new RemovalListener<String, List<String>>() {
-                            {
-                                LOGGER.debug("Removal Listener created");
-                            }
-
-                            @Override
-                            public void onRemoval(@ParametersAreNonnullByDefault RemovalNotification notification) {
-                                LOGGER.debug("This data from " + notification.getKey() + " evacuated due:" + notification.getCause());
-                            }
-                        }
-                ).build();
+                .build();
         LOGGER.debug("RolesCache: fallbackRolesCache was created on a static block");
     }
 
