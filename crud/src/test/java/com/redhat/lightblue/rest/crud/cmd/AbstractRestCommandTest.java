@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
 import com.netflix.hystrix.util.ExceptionThreadingUtility;
 import com.redhat.lightblue.Response;

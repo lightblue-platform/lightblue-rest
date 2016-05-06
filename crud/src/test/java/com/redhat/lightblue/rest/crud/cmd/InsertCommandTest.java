@@ -16,24 +16,29 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
+import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * @author nmalik
  */
-public class SaveCommandTest extends AbstractRestCommandTest {
+@RunWith(Arquillian.class)
+public class InsertCommandTest extends AbstractRestCommandTest {
 
     @Test
     public void execute() {
-        SaveCommand command = new SaveCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute().toString();
+        InsertCommand command = new InsertCommand(mediator, "name", "version", "{\"request\":\"data\"}");
+
+        String output = command.run().toString();
 
         Assert.assertNotNull(output);
 
-        Assert.assertEquals("save", mediator.methodCalled);
+        Assert.assertEquals("insert", mediator.methodCalled);
+
     }
 }

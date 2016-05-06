@@ -16,21 +16,22 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.redhat.lightblue.extensions.synch.Locking;
 
-public class GetLockCountCommand extends AbstractLockCommand {
+public class LockPingCommand extends AbstractLockCommand {
 
-    public GetLockCountCommand(String clientKey, String domain,String caller,String resource) {
-        super(GetLockCountCommand.class,clientKey,domain,caller,resource);
+    public LockPingCommand(String domain,String caller,String resource) {
+        super(domain,caller,resource);
     }
 
     @Override
     protected JsonNode runLockCommand(Locking locking) {
-        int ret=locking.getLockCount(caller,resource);
-        return NODE_FACTORY.numberNode(ret);
+        locking.ping(caller,resource);
+        return NODE_FACTORY.booleanNode(true);
     }
 }
+

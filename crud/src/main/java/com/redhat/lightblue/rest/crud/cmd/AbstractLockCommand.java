@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,15 +40,14 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
     protected final String resource;
     protected final String caller;
 
-    public AbstractLockCommand(Class commandClass,String clientKey, String domain,String caller,String resource) {
-        super(commandClass,clientKey,null);
+    public AbstractLockCommand(String domain,String caller,String resource) {
         this.domain=domain;
         this.resource=resource;
         this.caller=caller;
     }
 
     @Override
-    protected CallStatus run() {
+    public CallStatus run() {
         LOGGER.debug("run: domain={}, resource={}, caller={}",domain,resource,caller);
         Error.reset();
         Error.push("rest");

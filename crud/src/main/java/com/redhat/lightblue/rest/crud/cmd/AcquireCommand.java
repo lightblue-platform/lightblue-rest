@@ -16,29 +16,25 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
-import org.jboss.arquillian.junit.Arquillian;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.fasterxml.jackson.databind.JsonNode;
 
-/**
- * @author nmalik
- */
-@RunWith(Arquillian.class)
-public class InsertCommandTest extends AbstractRestCommandTest {
+import com.redhat.lightblue.extensions.synch.Locking;
 
-    @Test
-    public void execute() {
+public class AcquireCommand extends AbstractLockCommand {
 
-        InsertCommand command = new InsertCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
+    private final Long ttl;
+    
+    public AcquireCommand(String domain,String caller,String resource,Long ttl) {
+        super(domain,caller,resource);
+        this.ttl=ttl;
+    }
 
-        String output = command.execute().toString();
-
-        Assert.assertNotNull(output);
-
-        Assert.assertEquals("insert", mediator.methodCalled);
-
+    @Override
+    protected JsonNode runLockCommand(Locking locking) {
+        boolean ret=locking.acquire(caller,resource,ttl);
+        return NODE_FACTORY.booleanNode(ret);
     }
 }
+

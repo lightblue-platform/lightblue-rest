@@ -16,22 +16,23 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import org.junit.Assert;
+import org.junit.Test;
 
-import com.redhat.lightblue.extensions.synch.Locking;
+/**
+ * @author nmalik
+ */
+public class DeleteCommandTest extends AbstractRestCommandTest {
+    @Test
+    public void execute() {
+        DeleteCommand command = new DeleteCommand(mediator, "name", "version", "{\"request\":\"data\"}");
 
-public class LockPingCommand extends AbstractLockCommand {
+        String output = command.run().toString();
 
-    public LockPingCommand(String clientKey, String domain,String caller,String resource) {
-        super(LockPingCommand.class,clientKey,domain,caller,resource);
-    }
+        Assert.assertNotNull(output);
 
-    @Override
-    protected JsonNode runLockCommand(Locking locking) {
-        locking.ping(caller,resource);
-        return NODE_FACTORY.booleanNode(true);
+        Assert.assertEquals("delete", mediator.methodCalled);
     }
 }
-

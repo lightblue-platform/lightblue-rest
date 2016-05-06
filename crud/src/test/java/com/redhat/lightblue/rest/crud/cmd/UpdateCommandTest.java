@@ -16,22 +16,24 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import org.junit.Assert;
+import org.junit.Test;
 
-import com.redhat.lightblue.extensions.synch.Locking;
+/**
+ *
+ * @author nmalik
+ */
+public class UpdateCommandTest extends AbstractRestCommandTest {
+    @Test
+    public void execute() {
+        UpdateCommand command = new UpdateCommand(mediator, "name", "version", "{\"request\":\"data\"}");
 
-public class ReleaseCommand extends AbstractLockCommand {
+        String output = command.run().toString();
 
-    public ReleaseCommand(String clientKey, String domain,String caller,String resource) {
-        super(ReleaseCommand.class,clientKey,domain,caller,resource);
-    }
+        Assert.assertNotNull(output);
 
-    @Override
-    protected JsonNode runLockCommand(Locking locking) {
-        boolean ret=locking.release(caller,resource);
-        return NODE_FACTORY.booleanNode(ret);
+        Assert.assertEquals("update", mediator.methodCalled);
     }
 }
-    

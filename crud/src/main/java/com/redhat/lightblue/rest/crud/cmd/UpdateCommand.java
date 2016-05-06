@@ -16,12 +16,12 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
-import com.redhat.lightblue.crud.FindRequest;
+import com.redhat.lightblue.crud.UpdateRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
@@ -33,55 +33,43 @@ import org.slf4j.LoggerFactory;
  *
  * @author nmalik
  */
-public class FindCommand extends AbstractRestCommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FindCommand.class);
+public class UpdateCommand extends AbstractRestCommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateCommand.class);
 
     private final String entity;
     private final String version;
     private final String request;
 
-    public FindCommand(String clientKey, String entity, String version, String request) {
-        this(clientKey, null, entity, version, request);
+    public UpdateCommand(String entity, String version, String request) {
+        this(null, entity, version, request);
     }
 
-    public FindCommand(String clientKey, Mediator mediator, String entity, String version, String request) {
-        super(FindCommand.class, clientKey, mediator);
+    public UpdateCommand(Mediator mediator, String entity, String version, String request) {
+        super(mediator);
         this.entity = entity;
         this.version = version;
         this.request = request;
     }
 
     @Override
-    protected CallStatus run() {
+    public CallStatus run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
         try {
-            FindRequest ireq;
-            try {
-                ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
-            } catch (Exception e) {
-                LOGGER.error("find:parse failure: {}", e);
-                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
-            }
-            LOGGER.debug("Find request:{}", ireq);
-            try{
-                validateReq(ireq, entity, version);
-            } catch (Exception e) {
-                LOGGER.error("find:validate failure: {}", e);
-                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
-            }
+            UpdateRequest ireq = getJsonTranslator().parse(UpdateRequest.class, JsonUtils.json(request));
+            validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().find(ireq);
+            Response r = getMediator().update(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            LOGGER.error("find:generic_error failure: {}", e);
+            LOGGER.error("update failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            LOGGER.error("find:generic_exception failure: {}", e);
-            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+            LOGGER.error("update failure: {}", e);
+            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_UPDATE, e.toString()));
         }
     }
 }

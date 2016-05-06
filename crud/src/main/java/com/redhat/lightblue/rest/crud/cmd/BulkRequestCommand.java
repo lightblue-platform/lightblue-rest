@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.util.Error;
@@ -35,13 +35,12 @@ public class BulkRequestCommand extends AbstractRestCommand {
 
     private final String request;
 
-    public BulkRequestCommand(String clientKey, String request) {
-        super(BulkRequestCommand.class,clientKey, null);
+    public BulkRequestCommand(String request) {
         this.request=request;
     }
 
     @Override
-    protected CallStatus run() {
+    public CallStatus run() {
         LOGGER.debug("bulk request");
         Error.reset();
         Error.push("rest");

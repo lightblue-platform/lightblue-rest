@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,15 +24,16 @@ import org.junit.Test;
 /**
  * @author nmalik
  */
-public class DeleteCommandTest extends AbstractRestCommandTest {
+public class SaveCommandTest extends AbstractRestCommandTest {
+
     @Test
     public void execute() {
-        DeleteCommand command = new DeleteCommand(null, mediator, "name", "version", "{\"request\":\"data\"}");
+        SaveCommand command = new SaveCommand(mediator, "name", "version", "{\"request\":\"data\"}");
 
-        String output = command.execute().toString();
+        String output = command.run().toString();
 
         Assert.assertNotNull(output);
 
-        Assert.assertEquals("delete", mediator.methodCalled);
+        Assert.assertEquals("save", mediator.methodCalled);
     }
 }

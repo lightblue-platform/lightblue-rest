@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.util.Error;
@@ -40,19 +40,19 @@ public class SaveCommand extends AbstractRestCommand {
     private final String version;
     private final String request;
 
-    public SaveCommand(String clientKey, String entity, String version, String request) {
-        this(clientKey, null, entity, version, request);
+    public SaveCommand(String entity, String version, String request) {
+        this(null, entity, version, request);
     }
 
-    public SaveCommand(String clientKey, Mediator mediator, String entity, String version, String request) {
-        super(SaveCommand.class, clientKey, mediator);
+    public SaveCommand(Mediator mediator, String entity, String version, String request) {
+        super(mediator);
         this.entity = entity;
         this.version = version;
         this.request = request;
     }
 
     @Override
-    protected CallStatus run() {
+    public CallStatus run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

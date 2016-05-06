@@ -16,16 +16,13 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.netflix.hystrix.HystrixCommand;
-import com.netflix.hystrix.HystrixCommandGroupKey;
-import com.netflix.hystrix.HystrixCommandKey;
 import com.redhat.lightblue.ClientIdentification;
 import com.redhat.lightblue.EntityVersion;
 import com.redhat.lightblue.Request;
@@ -44,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author nmalik
  */
-public abstract class AbstractRestCommand extends HystrixCommand<CallStatus> {
+public abstract class AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRestCommand.class);
 
     protected static final JsonNodeFactory NODE_FACTORY = JsonNodeFactory.withExactBigDecimals(true);
@@ -52,17 +49,13 @@ public abstract class AbstractRestCommand extends HystrixCommand<CallStatus> {
     private final Mediator mediator;
     private final HttpServletRequest httpServletRequest;
 
-    /**
-     *
-     * @param groupKey REQUIRED
-     * @param commandKey OPTIONAL defaults to groupKey value
-     * @param threadPoolKey OPTIONAL defaults to groupKey value
-     */
-    public AbstractRestCommand(Class commandClass, String clientKey, Mediator mediator) {
-        super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(commandClass.getSimpleName()))
-                .andCommandKey(HystrixCommandKey.Factory.asKey(clientKey == null ? commandClass.getSimpleName() : clientKey)));
+    public AbstractRestCommand(Mediator mediator) {
         this.mediator = mediator;
         this.httpServletRequest = ResteasyProviderFactory.getContextData(HttpServletRequest.class);
+    }
+
+    public AbstractRestCommand() {
+        this(null);
     }
 
     /**
@@ -133,4 +126,6 @@ public abstract class AbstractRestCommand extends HystrixCommand<CallStatus> {
             }
         });
     }
+
+    public abstract CallStatus run();
 }

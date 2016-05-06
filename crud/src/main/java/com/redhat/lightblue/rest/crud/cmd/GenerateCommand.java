@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.hystrix;
+package com.redhat.lightblue.rest.crud.cmd;
 
 import java.util.Set;
 import java.util.HashSet;
@@ -64,8 +64,8 @@ public class GenerateCommand extends AbstractRestCommand {
     private final String field;
     private final int n;
 
-    public GenerateCommand(String clientKey, String entity, String version, String field,int n) {
-        super(GenerateCommand.class, clientKey,null);
+    public GenerateCommand(String entity, String version, String field,int n) {
+        super(null);
         this.entity = entity;
         this.version = version;
         this.field = field;
@@ -73,7 +73,7 @@ public class GenerateCommand extends AbstractRestCommand {
     }
     
     @Override
-    protected CallStatus run() {
+    public CallStatus run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
