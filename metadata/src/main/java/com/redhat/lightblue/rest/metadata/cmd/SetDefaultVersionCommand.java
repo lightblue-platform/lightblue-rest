@@ -16,50 +16,55 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata.hystrix;
+package com.redhat.lightblue.rest.metadata.cmd;
 
-import com.redhat.lightblue.util.Error;
-import com.redhat.lightblue.Response;
 import com.redhat.lightblue.metadata.Metadata;
+import com.redhat.lightblue.metadata.EntityInfo;
 import com.redhat.lightblue.rest.metadata.RestMetadataConstants;
+import com.redhat.lightblue.util.Error;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author nmalik
- */
-public class GetDependenciesCommand extends AbstractRestCommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GetDependenciesCommand.class);
-
+public class SetDefaultVersionCommand extends AbstractRestCommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SetDefaultVersionCommand.class);
     private final String entity;
     private final String version;
 
-    public GetDependenciesCommand(String clientKey, String entity, String version) {
-        this(clientKey, null, entity, version);
+    public SetDefaultVersionCommand(String entity, String version) {
+        this(null, entity, version);
     }
 
-    public GetDependenciesCommand(String clientKey, Metadata metadata, String entity, String version) {
-        super(GetDependenciesCommand.class, clientKey, metadata);
+    public SetDefaultVersionCommand(Metadata metadata, String entity, String version) {
+        super(metadata);
         this.entity = entity;
         this.version = version;
     }
 
     @Override
-    protected String run() {
+    public String run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push(getClass().getSimpleName());
-        if (entity != null) {
-            Error.push(entity);
-        }
+        Error.push(entity);
         if (version != null) {
             Error.push(version);
         }
         try {
-            Response r = getMetadata().getDependencies(entity, version);
-            return r.toJson().toString();
+            Metadata md = getMetadata();
+            EntityInfo ei = md.getEntityInfo(entity);
+            if (ei != null) {
+                ei.setDefaultVersion(version);
+                md.updateEntityInfo(ei);
+            } else {
+                throw Error.get(RestMetadataConstants.ERR_NO_ENTITY_VERSION, entity + ":" + version);
+            }
+            if (version == null) {
+                return getJSONParser().convert(md.getEntityInfo(entity)).toString();
+            } else {
+                return getJSONParser().convert(md.getEntityMetadata(entity, version)).toString();
+            }
         } catch (Error e) {
+            LOGGER.error("Cannot set version", e);
             return e.toString();
         } catch (Exception e) {
             LOGGER.error("Failure: {}", e);

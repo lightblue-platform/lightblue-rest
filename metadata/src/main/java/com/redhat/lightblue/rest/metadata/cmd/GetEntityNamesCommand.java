@@ -16,13 +16,16 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata.hystrix;
+package com.redhat.lightblue.rest.metadata.cmd;
 
+import java.util.HashSet;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.MetadataStatus;
 import com.redhat.lightblue.metadata.parser.MetadataParser;
-import com.redhat.lightblue.rest.metadata.RestMetadataConstants;
 import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.rest.metadata.RestMetadataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,37 +33,38 @@ import org.slf4j.LoggerFactory;
  *
  * @author nmalik
  */
-public class UpdateEntitySchemaStatusCommand extends AbstractRestCommand {
+public class GetEntityNamesCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetEntityRolesCommand.class);
-    private final String entity;
-    private final String version;
-    private final String status;
-    private final String comment;
 
-    public UpdateEntitySchemaStatusCommand(String clientKey, String entity, String version, String status, String comment) {
-        this(clientKey, null, entity, version, status, comment);
+    private final String[] statuses;
+
+    public GetEntityNamesCommand(String[] statuses) {
+        this(null, statuses);
     }
 
-    public UpdateEntitySchemaStatusCommand(String clientKey, Metadata metadata, String entity, String version, String status, String comment) {
-        super(UpdateEntitySchemaStatusCommand.class, clientKey, metadata);
-        this.entity = entity;
-        this.version = version;
-        this.status = status;
-        this.comment = comment;
+    public GetEntityNamesCommand(Metadata metadata, String[] statuses) {
+        super(metadata);
+        this.statuses = statuses;
     }
 
     @Override
-    protected String run() {
-        LOGGER.debug("run: enitty={}, version={}, status={}", entity, version, status);
+    public String run() {
+        LOGGER.debug("run:");
         Error.reset();
         Error.push(getClass().getSimpleName());
-        Error.push(entity);
-        Error.push(version);
         try {
-            MetadataStatus st = MetadataParser.statusFromString(status);
-            Metadata md = getMetadata();
-            md.setMetadataStatus(entity, version, st, comment);
-            return getJSONParser().convert(md.getEntityMetadata(entity, version)).toString();
+            HashSet<MetadataStatus> statusSet = new HashSet<>();
+            for (String x : statuses) {
+                statusSet.add(MetadataParser.statusFromString(x));
+            }
+            String[] names = getMetadata().getEntityNames(statusSet.toArray(new MetadataStatus[statusSet.size()]));
+            ObjectNode node = NODE_FACTORY.objectNode();
+            ArrayNode arr = NODE_FACTORY.arrayNode();
+            node.put("entities", arr);
+            for (String x : names) {
+                arr.add(NODE_FACTORY.textNode(x));
+            }
+            return node.toString();
         } catch (Error e) {
             return e.toString();
         } catch (Exception e) {

@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata.hystrix;
+package com.redhat.lightblue.rest.metadata.cmd;
 
 import com.redhat.lightblue.metadata.EntityMetadata;
 import com.redhat.lightblue.metadata.Metadata;
@@ -39,19 +39,19 @@ public class CreateEntityMetadataCommand extends AbstractRestCommand {
     private final String version;
     private final String data;
 
-    public CreateEntityMetadataCommand(String clientKey, String entity, String version, String data) {
-        this(clientKey, null, entity, version, data);
+    public CreateEntityMetadataCommand(String entity, String version, String data) {
+        this(null, entity, version, data);
     }
 
-    public CreateEntityMetadataCommand(String clientKey, Metadata metadata, String entity, String version, String data) {
-        super(CreateEntityMetadataCommand.class, clientKey, metadata);
+    public CreateEntityMetadataCommand(Metadata metadata, String entity, String version, String data) {
+        super(metadata);
         this.entity = entity;
         this.version = version;
         this.data = data;
     }
 
     @Override
-    protected String run() {
+    public String run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push(getClass().getSimpleName());

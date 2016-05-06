@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata.hystrix;
+package com.redhat.lightblue.rest.metadata.cmd;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,12 +25,12 @@ import org.junit.Test;
  *
  * @author nmalik
  */
-public class SetDefaultVersionCommandTest extends AbstractRestCommandTest {
+public class CreateEntityMetadataCommandTest extends AbstractRestCommandTest {
     @Test
     public void execute() {
-        SetDefaultVersionCommand command = new SetDefaultVersionCommand(null, metadata, null, null);
+        CreateEntityMetadataCommand command = new CreateEntityMetadataCommand(metadata, null, null, null);
 
-        String output = command.execute();
+        String output = command.run();
 
         Assert.assertNotNull(output);
     }

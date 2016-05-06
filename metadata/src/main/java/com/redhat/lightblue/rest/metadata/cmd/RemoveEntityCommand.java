@@ -16,13 +16,11 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata.hystrix;
+package com.redhat.lightblue.rest.metadata.cmd;
 
-import com.redhat.lightblue.metadata.EntityInfo;
 import com.redhat.lightblue.metadata.Metadata;
-import com.redhat.lightblue.rest.metadata.RestMetadataConstants;
 import com.redhat.lightblue.util.Error;
-import com.redhat.lightblue.util.JsonUtils;
+import com.redhat.lightblue.rest.metadata.RestMetadataConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,37 +28,28 @@ import org.slf4j.LoggerFactory;
  *
  * @author nmalik
  */
-public class UpdateEntityInfoCommand extends AbstractRestCommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GetEntityRolesCommand.class);
-    private final String entity;
-    private final String info;
+public class RemoveEntityCommand extends AbstractRestCommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoveEntityCommand.class);
 
-    public UpdateEntityInfoCommand(String clientKey, String entity, String info) {
-        this(clientKey, null, entity, info);
+    private final String entity;
+
+    public RemoveEntityCommand(String entity) {
+        this(null, entity);
     }
 
-    public UpdateEntityInfoCommand(String clientKey, Metadata metadata, String entity, String info) {
-        super(UpdateEntityInfoCommand.class, clientKey, metadata);
+    public RemoveEntityCommand(Metadata metadata, String entity) {
+        super(metadata);
         this.entity = entity;
-        this.info = info;
     }
 
     @Override
-    protected String run() {
-        LOGGER.debug("updateEntityInfo {}", entity);
+    public String run() {
+        LOGGER.debug("run:");
         Error.reset();
         Error.push(getClass().getSimpleName());
-        Error.push(entity);
         try {
-            EntityInfo ei = getJsonTranslator().parse(EntityInfo.class,JsonUtils.json(info));
-            if (!ei.getName().equals(entity)) {
-                throw Error.get(RestMetadataConstants.ERR_NO_NAME_MATCH, entity);
-            }
-
-            Metadata md = getMetadata();
-            md.updateEntityInfo(ei);
-            ei = md.getEntityInfo(entity);
-            return getJSONParser().convert(ei).toString();
+            getMetadata().removeEntity(entity);
+            return "";
         } catch (Error e) {
             return e.toString();
         } catch (Exception e) {

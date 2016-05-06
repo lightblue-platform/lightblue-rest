@@ -16,12 +16,13 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata.hystrix;
+package com.redhat.lightblue.rest.metadata.cmd;
 
-import com.redhat.lightblue.Response;
+import com.redhat.lightblue.metadata.EntityInfo;
 import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.rest.metadata.RestMetadataConstants;
 import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,36 +30,37 @@ import org.slf4j.LoggerFactory;
  *
  * @author nmalik
  */
-public class GetEntityRolesCommand extends AbstractRestCommand {
+public class UpdateEntityInfoCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetEntityRolesCommand.class);
-
     private final String entity;
-    private final String version;
+    private final String info;
 
-    public GetEntityRolesCommand(String clientKey, String entity, String version) {
-        this(clientKey, null, entity, version);
+    public UpdateEntityInfoCommand(String entity, String info) {
+        this(null, entity, info);
     }
 
-    public GetEntityRolesCommand(String clientKey, Metadata metadata, String entity, String version) {
-        super(GetEntityRolesCommand.class, clientKey, metadata);
+    public UpdateEntityInfoCommand(Metadata metadata, String entity, String info) {
+        super(metadata);
         this.entity = entity;
-        this.version = version;
+        this.info = info;
     }
 
     @Override
-    protected String run() {
-        LOGGER.debug("run: entity={}, version={}", entity, version);
+    public String run() {
+        LOGGER.debug("updateEntityInfo {}", entity);
         Error.reset();
         Error.push(getClass().getSimpleName());
-        if (entity != null) {
-            Error.push(entity);
-        }
-        if (version != null) {
-            Error.push(version);
-        }
+        Error.push(entity);
         try {
-            Response r = getMetadata().getAccess(entity, version);
-            return r.toJson().toString();
+            EntityInfo ei = getJsonTranslator().parse(EntityInfo.class,JsonUtils.json(info));
+            if (!ei.getName().equals(entity)) {
+                throw Error.get(RestMetadataConstants.ERR_NO_NAME_MATCH, entity);
+            }
+
+            Metadata md = getMetadata();
+            md.updateEntityInfo(ei);
+            ei = md.getEntityInfo(entity);
+            return getJSONParser().convert(ei).toString();
         } catch (Error e) {
             return e.toString();
         } catch (Exception e) {

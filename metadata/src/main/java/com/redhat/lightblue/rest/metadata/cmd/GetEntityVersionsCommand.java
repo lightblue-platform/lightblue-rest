@@ -16,16 +16,15 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata.hystrix;
+package com.redhat.lightblue.rest.metadata.cmd;
 
-import java.util.HashSet;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.metadata.Metadata;
-import com.redhat.lightblue.metadata.MetadataStatus;
+import com.redhat.lightblue.metadata.VersionInfo;
 import com.redhat.lightblue.metadata.parser.MetadataParser;
-import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.rest.metadata.RestMetadataConstants;
+import com.redhat.lightblue.util.Error;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,38 +32,45 @@ import org.slf4j.LoggerFactory;
  *
  * @author nmalik
  */
-public class GetEntityNamesCommand extends AbstractRestCommand {
+public class GetEntityVersionsCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(GetEntityRolesCommand.class);
 
-    private final String[] statuses;
+    private final String entity;
 
-    public GetEntityNamesCommand(String clientKey, String[] statuses) {
-        this(clientKey, null, statuses);
+    public GetEntityVersionsCommand(String entity) {
+        this(null, entity);
     }
 
-    public GetEntityNamesCommand(String clientKey, Metadata metadata, String[] statuses) {
-        super(GetEntityNamesCommand.class, clientKey, metadata);
-        this.statuses = statuses;
+    public GetEntityVersionsCommand(Metadata metadata, String entity) {
+        super(metadata);
+        this.entity = entity;
     }
 
     @Override
-    protected String run() {
-        LOGGER.debug("run:");
+    public String run() {
+        LOGGER.debug("run: entity={}", entity);
         Error.reset();
         Error.push(getClass().getSimpleName());
         try {
-            HashSet<MetadataStatus> statusSet = new HashSet<>();
-            for (String x : statuses) {
-                statusSet.add(MetadataParser.statusFromString(x));
-            }
-            String[] names = getMetadata().getEntityNames(statusSet.toArray(new MetadataStatus[statusSet.size()]));
-            ObjectNode node = NODE_FACTORY.objectNode();
+            VersionInfo[] versions = getMetadata().getEntityVersions(entity);
             ArrayNode arr = NODE_FACTORY.arrayNode();
-            node.put("entities", arr);
-            for (String x : names) {
-                arr.add(NODE_FACTORY.textNode(x));
+
+            for (VersionInfo x : versions) {
+                ObjectNode obj = NODE_FACTORY.objectNode();
+                obj.put("version", x.getValue());
+                obj.put("changelog", x.getChangelog());
+                ArrayNode ev = NODE_FACTORY.arrayNode();
+                if (x.getExtendsVersions() != null) {
+                    for (String v : x.getExtendsVersions()) {
+                        ev.add(NODE_FACTORY.textNode(v));
+                    }
+                }
+                obj.set("extendsVersions", ev);
+                obj.put("status", MetadataParser.toString(x.getStatus()));
+                obj.put("defaultVersion", x.isDefault());
+                arr.add(obj);
             }
-            return node.toString();
+            return arr.toString();
         } catch (Error e) {
             return e.toString();
         } catch (Exception e) {

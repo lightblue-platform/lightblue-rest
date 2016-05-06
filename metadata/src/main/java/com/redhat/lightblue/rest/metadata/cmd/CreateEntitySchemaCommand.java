@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata.hystrix;
+package com.redhat.lightblue.rest.metadata.cmd;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -41,19 +41,19 @@ public class CreateEntitySchemaCommand extends AbstractRestCommand {
     private final String version;
     private final String schema;
 
-    public CreateEntitySchemaCommand(String clientKey, String entity, String version, String schema) {
-        this(clientKey, null, entity, version, schema);
+    public CreateEntitySchemaCommand(String  entity, String version, String schema) {
+        this(null, entity, version, schema);
     }
 
-    public CreateEntitySchemaCommand(String clientKey, Metadata metadata, String entity, String version, String schema) {
-        super(CreateEntitySchemaCommand.class, clientKey, metadata);
+    public CreateEntitySchemaCommand(Metadata metadata, String entity, String version, String schema) {
+        super(metadata);
         this.entity = entity;
         this.version = version;
         this.schema = schema;
     }
 
     @Override
-    protected String run() {
+    public String run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push(getClass().getSimpleName());

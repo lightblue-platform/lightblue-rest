@@ -18,7 +18,6 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
-import com.redhat.lightblue.hystrix.ServoGraphiteSetup;
 import javax.ws.rs.Path;
 
 /**
@@ -27,7 +26,4 @@ import javax.ws.rs.Path;
  */
 @Path("/")
 public class MetadataResource extends AbstractMetadataResource {
-    static {
-        ServoGraphiteSetup.initialize();
-    }
 }
