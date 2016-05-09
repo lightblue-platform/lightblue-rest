@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
-import com.redhat.lightblue.hystrix.ServoGraphiteSetup;
 import com.redhat.lightblue.rest.authz.RolesCache;
 
 /**
@@ -29,10 +28,6 @@ public class CachedLdapFindUserRolesByUidCommand {
     private static final String INVALID_PARAM = "%s is null or empty";
     private static final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
 
-    static {
-        LOGGER.debug("Invoking ServoGraphiteSetup#initialize on a static block");
-        ServoGraphiteSetup.initialize();
-    }
 
     private final LDAPQuery ldapQuery;
     private final InitialLdapContextProvider ldapContextProvider;

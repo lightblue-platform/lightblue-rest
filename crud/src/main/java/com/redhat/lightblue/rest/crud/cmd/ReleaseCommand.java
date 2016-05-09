@@ -16,14 +16,22 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata;
+package com.redhat.lightblue.rest.crud.cmd;
 
-import javax.ws.rs.Path;
+import com.fasterxml.jackson.databind.JsonNode;
 
-/**
- *
- * @author nmalik
- */
-@Path("/")
-public class MetadataResource extends AbstractMetadataResource {
+import com.redhat.lightblue.extensions.synch.Locking;
+
+public class ReleaseCommand extends AbstractLockCommand {
+
+    public ReleaseCommand(String domain,String caller,String resource) {
+        super(domain,caller,resource);
+    }
+
+    @Override
+    protected JsonNode runLockCommand(Locking locking) {
+        boolean ret=locking.release(caller,resource);
+        return NODE_FACTORY.booleanNode(ret);
+    }
 }
+    

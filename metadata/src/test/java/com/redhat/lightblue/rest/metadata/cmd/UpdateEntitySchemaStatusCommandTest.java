@@ -16,14 +16,22 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata;
+package com.redhat.lightblue.rest.metadata.cmd;
 
-import javax.ws.rs.Path;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *
  * @author nmalik
  */
-@Path("/")
-public class MetadataResource extends AbstractMetadataResource {
+public class UpdateEntitySchemaStatusCommandTest extends AbstractRestCommandTest {
+    @Test
+    public void execute() {
+        UpdateEntitySchemaStatusCommand command = new UpdateEntitySchemaStatusCommand(metadata, null, null, null, null);
+
+        String output = command.run();
+
+        Assert.assertNotNull(output);
+    }
 }

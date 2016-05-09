@@ -51,10 +51,6 @@
             <!-- TODO: Testing the audit hook should not be done in the lightblue-rest project -->
         </dependency>
         <dependency>
-            <groupId>com.redhat.lightblue</groupId>
-            <artifactId>lightblue-core-hystrix</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-common</artifactId>
         </dependency>

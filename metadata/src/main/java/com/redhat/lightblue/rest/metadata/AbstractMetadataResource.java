@@ -43,18 +43,18 @@ import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.MetadataConstants;
 import com.redhat.lightblue.metadata.MetadataRole;
 import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.rest.metadata.hystrix.CreateEntityMetadataCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.CreateEntitySchemaCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetDependenciesCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetEntityMetadataCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetEntityNamesCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetEntityRolesCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.GetEntityVersionsCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.ReIndexCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.RemoveEntityCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.SetDefaultVersionCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntityInfoCommand;
-import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntitySchemaStatusCommand;
+import com.redhat.lightblue.rest.metadata.cmd.CreateEntityMetadataCommand;
+import com.redhat.lightblue.rest.metadata.cmd.CreateEntitySchemaCommand;
+import com.redhat.lightblue.rest.metadata.cmd.GetDependenciesCommand;
+import com.redhat.lightblue.rest.metadata.cmd.GetEntityMetadataCommand;
+import com.redhat.lightblue.rest.metadata.cmd.GetEntityNamesCommand;
+import com.redhat.lightblue.rest.metadata.cmd.GetEntityRolesCommand;
+import com.redhat.lightblue.rest.metadata.cmd.GetEntityVersionsCommand;
+import com.redhat.lightblue.rest.metadata.cmd.ReIndexCommand;
+import com.redhat.lightblue.rest.metadata.cmd.RemoveEntityCommand;
+import com.redhat.lightblue.rest.metadata.cmd.SetDefaultVersionCommand;
+import com.redhat.lightblue.rest.metadata.cmd.UpdateEntityInfoCommand;
+import com.redhat.lightblue.rest.metadata.cmd.UpdateEntitySchemaStatusCommand;
 import com.redhat.lightblue.util.Error;
 
 /**
@@ -102,7 +102,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.FIND_DEPENDENCIES);
-        return new GetDependenciesCommand(null, entity, version).execute();
+        return new GetDependenciesCommand(entity, version).run();
     }
 
     @GET
@@ -126,7 +126,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.FIND_ROLES);
-        return new GetEntityRolesCommand(null, entity, version).execute();
+        return new GetEntityRolesCommand(entity, version).run();
     }
 
     @GET
@@ -136,7 +136,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.FIND_ENTITY_NAMES);
-        return new GetEntityNamesCommand(null, new String[0]).execute();
+        return new GetEntityNamesCommand(new String[0]).run();
     }
 
     @GET
@@ -152,7 +152,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.FIND_ENTITY_NAMES);
-        return new GetEntityNamesCommand(null, s).execute();
+        return new GetEntityNamesCommand(s).run();
     }
 
     @GET
@@ -162,7 +162,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.FIND_ENTITY_VERSIONS);
-        return new GetEntityVersionsCommand(null, entity).execute();
+        return new GetEntityVersionsCommand(entity).run();
     }
 
     @GET
@@ -172,7 +172,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.FIND_ENTITY_METADATA);
-        return new GetEntityMetadataCommand(null, entity, version).execute();
+        return new GetEntityMetadataCommand(entity, version).run();
     }
 
     @PUT
@@ -183,7 +183,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.INSERT);
-        return new CreateEntityMetadataCommand(null, entity, version, data).execute();
+        return new CreateEntityMetadataCommand(entity, version, data).run();
     }
 
     @PUT
@@ -194,7 +194,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.INSERT_SCHEMA);
-        return new CreateEntitySchemaCommand(null, entity, version, schema).execute();
+        return new CreateEntitySchemaCommand(entity, version, schema).run();
     }
 
     @PUT
@@ -205,7 +205,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.UPDATE_ENTITYINFO);
-        return new UpdateEntityInfoCommand(null, entity, info).execute();
+        return new UpdateEntityInfoCommand(entity, info).run();
     }
 
     @PUT
@@ -219,7 +219,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.UPDATE_ENTITY_SCHEMASTATUS);
-        return new UpdateEntitySchemaStatusCommand(null, entity, version, status, comment).execute();
+        return new UpdateEntitySchemaStatusCommand(entity, version, status, comment).run();
     }
 
     @POST
@@ -231,7 +231,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.UPDATE_DEFAULTVERSION);
-        return new SetDefaultVersionCommand(null, entity, version).execute();
+        return new SetDefaultVersionCommand(entity, version).run();
     }
 
     @DELETE
@@ -241,7 +241,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.DELETE_ENTITY);
-        return new RemoveEntityCommand(null, entity).execute();
+        return new RemoveEntityCommand(entity).run();
     }
 
     @DELETE
@@ -251,7 +251,7 @@ public abstract class AbstractMetadataResource {
         Error.reset();
 
         checkPermission(sc, MetadataRole.UPDATE_DEFAULTVERSION);
-        return new SetDefaultVersionCommand(null, entity, null).execute();
+        return new SetDefaultVersionCommand(entity, null).run();
     }
 
     private void checkPermission(SecurityContext sc, MetadataRole roleAllowed){
@@ -283,7 +283,7 @@ public abstract class AbstractMetadataResource {
     @LZF
     @Path("/{entity}/reindex")
     public String reindex(@PathParam(PARAM_ENTITY) String entity) {
-        return new ReIndexCommand(null, metadata, entity).execute();
+        return new ReIndexCommand(metadata, entity).run();
     }
 
 }

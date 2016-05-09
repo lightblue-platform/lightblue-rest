@@ -27,7 +27,6 @@ import javax.naming.ldap.InitialLdapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
 import com.redhat.lightblue.rest.authz.RolesCache;
 

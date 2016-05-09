@@ -18,7 +18,6 @@
  */
 package com.redhat.lightblue.rest.crud;
 
-import com.redhat.lightblue.hystrix.ServoGraphiteSetup;
 import javax.ws.rs.*;
 
 /**
@@ -27,7 +26,4 @@ import javax.ws.rs.*;
  */
 @Path("/")
 public class CrudResource extends AbstractCrudResource {
-    static {
-        ServoGraphiteSetup.initialize();
-    }
 }

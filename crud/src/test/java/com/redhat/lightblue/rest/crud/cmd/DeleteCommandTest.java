@@ -16,14 +16,23 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.metadata;
+package com.redhat.lightblue.rest.crud.cmd;
 
-import javax.ws.rs.Path;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
- *
  * @author nmalik
  */
-@Path("/")
-public class MetadataResource extends AbstractMetadataResource {
+public class DeleteCommandTest extends AbstractRestCommandTest {
+    @Test
+    public void execute() {
+        DeleteCommand command = new DeleteCommand(mediator, "name", "version", "{\"request\":\"data\"}");
+
+        String output = command.run().toString();
+
+        Assert.assertNotNull(output);
+
+        Assert.assertEquals("delete", mediator.methodCalled);
+    }
 }
