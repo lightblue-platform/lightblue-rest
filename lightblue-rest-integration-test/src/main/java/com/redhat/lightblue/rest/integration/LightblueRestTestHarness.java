@@ -1,5 +1,6 @@
 package com.redhat.lightblue.rest.integration;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.jboss.resteasy.plugins.server.sun.http.HttpContextBuilder;
@@ -70,6 +71,10 @@ public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness
         dataUrl = "http://localhost:" + httpPort + "/rest/data";
         metadataUrl = "http://localhost:" + httpPort + "/rest/metadata";
 
+        ensureHttpServerIsRunning();
+    }
+
+    public void ensureHttpServerIsRunning() throws IOException {
         if (httpServer == null) {
             RestConfiguration.setFactory(getLightblueFactory());
 

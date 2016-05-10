@@ -27,7 +27,6 @@ import javax.naming.ldap.InitialLdapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.netflix.hystrix.exception.HystrixRuntimeException;
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
 import com.redhat.lightblue.rest.authz.RolesCache;
 
@@ -57,11 +56,13 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         try {
 
             List<String> roles = new CachedLdapFindUserRolesByUidCommand(ldapSearchBase, userName, ldapContextProvider).execute();
-            userRoles.addAll(roles);
+            if(roles!=null)
+                userRoles.addAll(roles);
 
-        } catch (HystrixRuntimeException ce) {
-            // Not found in cache, returns an empty list
-            LOGGER.error("Not found in cache, returns an empty list " + userName, ce);
+        } catch (Exception ce) {
+            // Some exception
+            LOGGER.error("Naming error " + userName, ce);
+            throw new RuntimeException(ce);
         }
 
         return userRoles;

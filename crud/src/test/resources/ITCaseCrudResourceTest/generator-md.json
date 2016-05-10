@@ -1,0 +1,61 @@
+{
+    "entityInfo": {
+        "name": "generate",
+        "indexes": [
+            {
+                "unique": true,
+                "fields": [
+                    {
+                        "field": "name",
+                        "dir": "$asc"
+                    }
+                ]
+            }
+        ],
+        "defaultVersion":"1.0.0",
+        "datastore": {
+            "backend": "mongo",
+            "datasource": "mongo",
+            "collection": "generate"
+
+        }
+    },
+    "schema": {
+        "name": "generate",
+        "version": {
+            "value": "1.0.0",
+            "changelog": "blahblah"
+        },
+        "status": {
+            "value": "active"
+        },
+        "access": {
+            "insert": ["anyone"],
+            "update": ["anyone"],
+            "delete": [ "anyone" ],
+            "find": [ "anyone" ]
+        },
+        "fields": {
+            "_id":{"type":"string"},
+            "number" :{
+                "type":"string",
+                "valueGenerator": {
+                    "configuration": {
+                        "initialValue": "50000000",
+                        "name": "seq"
+                    },
+                    "type": "IntSequence"
+                }                
+            },
+            "name": {
+                "type": "string"
+            },
+            "iso2code": {
+                "type": "string"
+            },
+            "iso3code": {
+                "type": "string"
+            }
+        }
+    }
+}

@@ -29,6 +29,10 @@
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <dependencies>
         <dependency>
+            <groupId>org.esbtools.lightblue-notification-hook</groupId>
+            <artifactId>lightblue-notification-hook</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.codeablereason.restcompress.provider</groupId>
             <artifactId>rest-compress-lib</artifactId>
         </dependency>
@@ -45,10 +49,6 @@
             <artifactId>lightblue-audit-hook</artifactId>
             <scope>test</scope>
             <!-- TODO: Testing the audit hook should not be done in the lightblue-rest project -->
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue</groupId>
-            <artifactId>lightblue-core-hystrix</artifactId>
         </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>

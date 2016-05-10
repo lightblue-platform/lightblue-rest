@@ -19,6 +19,7 @@
 package com.redhat.lightblue.rest.crud;
 
 import java.io.IOException;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -40,16 +41,17 @@ import com.redhat.lightblue.query.Projection;
 import com.redhat.lightblue.query.QueryExpression;
 import com.redhat.lightblue.query.Sort;
 import com.redhat.lightblue.rest.CallStatus;
-import com.redhat.lightblue.rest.crud.hystrix.AcquireCommand;
-import com.redhat.lightblue.rest.crud.hystrix.BulkRequestCommand;
-import com.redhat.lightblue.rest.crud.hystrix.DeleteCommand;
-import com.redhat.lightblue.rest.crud.hystrix.FindCommand;
-import com.redhat.lightblue.rest.crud.hystrix.GetLockCountCommand;
-import com.redhat.lightblue.rest.crud.hystrix.InsertCommand;
-import com.redhat.lightblue.rest.crud.hystrix.LockPingCommand;
-import com.redhat.lightblue.rest.crud.hystrix.ReleaseCommand;
-import com.redhat.lightblue.rest.crud.hystrix.SaveCommand;
-import com.redhat.lightblue.rest.crud.hystrix.UpdateCommand;
+import com.redhat.lightblue.rest.crud.cmd.AcquireCommand;
+import com.redhat.lightblue.rest.crud.cmd.BulkRequestCommand;
+import com.redhat.lightblue.rest.crud.cmd.DeleteCommand;
+import com.redhat.lightblue.rest.crud.cmd.FindCommand;
+import com.redhat.lightblue.rest.crud.cmd.GenerateCommand;
+import com.redhat.lightblue.rest.crud.cmd.GetLockCountCommand;
+import com.redhat.lightblue.rest.crud.cmd.InsertCommand;
+import com.redhat.lightblue.rest.crud.cmd.LockPingCommand;
+import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
+import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
+import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
 import com.redhat.lightblue.rest.util.QueryTemplateUtils;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
@@ -82,7 +84,7 @@ public abstract class AbstractCrudResource {
                             @PathParam("resourceId") String resourceId,
                             @QueryParam("ttl") Long ttl) {
         Error.reset();
-        CallStatus st=new AcquireCommand(null,domain,callerId,resourceId,ttl).execute();
+        CallStatus st=new AcquireCommand(domain,callerId,resourceId,ttl).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -92,7 +94,7 @@ public abstract class AbstractCrudResource {
                             @PathParam("callerId") String callerId,
                             @PathParam("resourceId") String resourceId) {
         Error.reset();
-        CallStatus st=new ReleaseCommand(null,domain,callerId,resourceId).execute();
+        CallStatus st=new ReleaseCommand(domain,callerId,resourceId).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -102,7 +104,7 @@ public abstract class AbstractCrudResource {
                                  @PathParam("callerId") String callerId,
                                  @PathParam("resourceId") String resourceId) {
         Error.reset();
-        CallStatus st=new GetLockCountCommand(null,domain,callerId,resourceId).execute();
+        CallStatus st=new GetLockCountCommand(domain,callerId,resourceId).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -112,7 +114,7 @@ public abstract class AbstractCrudResource {
                          @PathParam("callerId") String callerId,
                          @PathParam("resourceId") String resourceId) {
         Error.reset();
-        CallStatus st=new LockPingCommand(null,domain,callerId,resourceId).execute();
+        CallStatus st=new LockPingCommand(domain,callerId,resourceId).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -157,7 +159,7 @@ public abstract class AbstractCrudResource {
                            @PathParam(PARAM_VERSION) String version,
                            String request) {
         Error.reset();
-        CallStatus st=new InsertCommand(null, entity, version, request).execute();
+        CallStatus st=new InsertCommand(entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -176,7 +178,7 @@ public abstract class AbstractCrudResource {
                          @PathParam(PARAM_VERSION) String version,
                          String request) {
         Error.reset();
-        CallStatus st=new SaveCommand(null, entity, version, request).execute();
+        CallStatus st=new SaveCommand(entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -195,7 +197,7 @@ public abstract class AbstractCrudResource {
                            @PathParam(PARAM_VERSION) String version,
                            String request) {
         Error.reset();
-        CallStatus st=new UpdateCommand(null, entity, version, request).execute();
+        CallStatus st=new UpdateCommand(entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -214,7 +216,7 @@ public abstract class AbstractCrudResource {
                            @PathParam(PARAM_VERSION) String version,
                            String req) {
         Error.reset();
-        CallStatus st=new DeleteCommand(null, entity, version, req).execute();
+        CallStatus st=new DeleteCommand(entity, version, req).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -233,7 +235,7 @@ public abstract class AbstractCrudResource {
                          @PathParam(PARAM_VERSION) String version,
                          String request) {
         Error.reset();
-        CallStatus st=new FindCommand(null, entity, version, request).execute();
+        CallStatus st=new FindCommand(entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -242,8 +244,38 @@ public abstract class AbstractCrudResource {
     @Path("/bulk")
     public Response bulk(String request) {
         Error.reset();
-        CallStatus st=new BulkRequestCommand(null,request).execute();
+        CallStatus st=new BulkRequestCommand(request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
+    /**
+     * GET /generate/<entity>/<version>/<path>?n=<n>
+     *
+     * @param entity name of the entity
+     * @param version Entity version
+     * @param path Path of the field in the entity containing the generator
+     * @param n Number of values to be generated
+     *
+     * @return A lightblue response, with "processed" containing an array of generated values.
+     */
+    @GET
+    @LZF
+    @Path("/generate/{entity}/{version}/{path}")
+    public Response generate(@PathParam("entity") String entity,
+                             @PathParam("version") String version,
+                             @PathParam("path") String path,
+                             @QueryParam("n") Integer n) {
+        CallStatus st=new GenerateCommand(entity,version,path,n==null?1:n).run();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
+    @GET
+    @LZF
+    @Path("/generate/{entity}/{path}")
+    public Response generate(@PathParam("entity") String entity,
+                             @PathParam("path") String path,
+                             @QueryParam("n") Integer n) {
+        return generate(entity,null,path,n);
     }
 
     @GET
@@ -290,7 +322,7 @@ public abstract class AbstractCrudResource {
         findRequest.setTo(to);
         String request = findRequest.toString();
 
-        CallStatus st=new FindCommand(null, entity, version, request).execute();
+        CallStatus st=new FindCommand(null, entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 }

@@ -45,10 +45,6 @@
             <artifactId>lightblue-core-util</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.redhat.lightblue</groupId>
-            <artifactId>lightblue-core-hystrix</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.redhat.lightblue.mongo</groupId>
             <artifactId>lightblue-mongo</artifactId>
         </dependency>

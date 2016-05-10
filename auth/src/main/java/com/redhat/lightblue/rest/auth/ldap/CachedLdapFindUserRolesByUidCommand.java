@@ -14,10 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
-import com.netflix.hystrix.HystrixCommand;
-import com.netflix.hystrix.HystrixCommandGroupKey;
-import com.netflix.hystrix.HystrixCommandKey;
-import com.redhat.lightblue.hystrix.ServoGraphiteSetup;
 import com.redhat.lightblue.rest.authz.RolesCache;
 
 /**
@@ -26,22 +22,17 @@ import com.redhat.lightblue.rest.authz.RolesCache;
  * <p/>
  * Created by nmalik and lcestari and mpatercz
  */
-public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<String>> {
+public class CachedLdapFindUserRolesByUidCommand {
+
     public static final String GROUPKEY = "ldap";
     private static final String INVALID_PARAM = "%s is null or empty";
     private static final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
 
-    static {
-        LOGGER.debug("Invoking ServoGraphiteSetup#initialize on a static block");
-        ServoGraphiteSetup.initialize();
-    }
 
     private final LDAPQuery ldapQuery;
     private final InitialLdapContextProvider ldapContextProvider;
 
     public CachedLdapFindUserRolesByUidCommand(String ldapSearchBase, String uid, InitialLdapContextProvider contextProvider) {
-        super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(GROUPKEY)).
-                andCommandKey(HystrixCommandKey.Factory.asKey(GROUPKEY + ":" + CachedLdapFindUserRolesByUidCommand.class.getSimpleName())));
         LOGGER.debug("Creating CachedLdapFindUserRolesByUidCommand");
         //check if the informed parameters are valid
         if (Strings.isNullOrEmpty(uid)) {
@@ -58,8 +49,7 @@ public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<Str
         this.ldapContextProvider = contextProvider;
     }
 
-    @Override
-    protected List<String> run() throws Exception {
+    public List<String> execute() throws Exception {
         LOGGER.debug("CachedLdapFindUserRolesByUidCommand#run was invoked");
 
         List<String> roles = RolesCache.get(ldapQuery.uid);
@@ -82,11 +72,6 @@ public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<Str
             }
 
             return roles;
-
-        } catch (NamingException e) {
-            LOGGER.error("Naming problem with LDAP for user: " + ldapQuery.uid, e);
-            //propagate the exception
-            throw e;
         } catch (LDAPUserNotFoundException | LDAPMultipleUserFoundException e) {
             // Return null in case the User not found or multiple Users were found (which is inconsistent)
 
@@ -97,8 +82,10 @@ public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<Str
             }
 
             return null;
+        } catch (Exception e) {
+            LOGGER.error("Naming problem with LDAP for user: " + ldapQuery.uid, e);
+            return getFallback(ldapQuery);
         }
-
     }
 
     private List<String> getUserRolesFromLdap(SearchResult ldapUser) throws NamingException {
@@ -127,49 +114,18 @@ public class CachedLdapFindUserRolesByUidCommand extends HystrixCommand<List<Str
     }
 
     /**
-     * This methods is executed for all types of failure such as run() failure,
-     * timeout, thread pool or semaphore rejection, and circuit-breaker
-     * short-circuiting.
-     *
+     * This methods is executed for all types of failure such as run() failure.
      */
-    @Override
-    protected List<String> getFallback() {
+    protected List<String> getFallback(LDAPQuery cacheKey) throws CachedLDAPUserNotFoundException {
         LOGGER.warn("Error during the execution of the command. Falling back to the cache");
-        return new FallbackViaLDAPServerProblemCommand(ldapQuery, getFailedExecutionException()).execute();
-    }
-
-    /**
-     * Use the cache in case the LDAP Server was not available and also to we
-     * have metrics around the fallback
-     */
-    private static class FallbackViaLDAPServerProblemCommand extends HystrixCommand<List<String>> {
-        private static final Logger LOGGER = LoggerFactory.getLogger(FallbackViaLDAPServerProblemCommand.class);
-
-        private final LDAPQuery cacheKey;
-        private final Throwable failedExecutionThrowable;
-
-        public FallbackViaLDAPServerProblemCommand(LDAPQuery cacheKey, Throwable failedExecutionThrowable) {
-            super(HystrixCommand.Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey(GROUPKEY)).
-                    andCommandKey(HystrixCommandKey.Factory.asKey(GROUPKEY + ":" + FallbackViaLDAPServerProblemCommand.class.getSimpleName())));
-            LOGGER.debug("FallbackViaLDAPServerProblemCommand constructor");
-            this.cacheKey = cacheKey;
-            this.failedExecutionThrowable = failedExecutionThrowable;
+        List<String> roles = RolesCache.getFromFallback(cacheKey.uid);
+        if (roles == null) {
+            CachedLDAPUserNotFoundException e = new CachedLDAPUserNotFoundException();
+            LOGGER.error("Failed to connect to the server and no result found roles for user: " + cacheKey.uid, e);
+            throw e;
         }
-
-        @Override
-        protected List<String> run() throws Exception {
-            LOGGER.debug("FallbackViaLDAPServerProblemCommand#run was invoked and the following Exception caused the fallback", failedExecutionThrowable);
-            List<String> roles = RolesCache.getFromFallback(cacheKey.uid);
-            if (roles == null) {
-                CachedLDAPUserNotFoundException e = new CachedLDAPUserNotFoundException();
-                LOGGER.error("Failed to connect to the server and no result found roles for user: " + cacheKey.uid, e);
-                throw e;
-            }
-            // was able to use the cache or use the LDAP server on the second retry
-            LOGGER.debug("FallbackViaLDAPServerProblemCommand#run : user found!");
-            return roles;
-        }
-
+        // was able to use the cache or use the LDAP server on the second retry
+        LOGGER.debug("FallbackViaLDAPServerProblemCommand#run : user found!");
+        return roles;
     }
-
 }

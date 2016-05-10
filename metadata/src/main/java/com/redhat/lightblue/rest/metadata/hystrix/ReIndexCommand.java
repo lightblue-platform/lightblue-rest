@@ -9,6 +9,7 @@ import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.mongo.crud.MongoCRUDController;
 import com.redhat.lightblue.query.QueryExpression;
 import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.metadata.cmd.AbstractRestCommand;
 
 /**
  * @author bvulaj
@@ -25,7 +26,7 @@ public class ReIndexCommand extends AbstractRestCommand {
     }
 
     public ReIndexCommand(String clientKey, Metadata metadata, String entity, String version, QueryExpression qe) {
-        super(ReIndexCommand.class, clientKey, metadata);
+        super(metadata);
         this.entity = entity;
         this.version = version;
         this.query = qe;
@@ -36,7 +37,7 @@ public class ReIndexCommand extends AbstractRestCommand {
      * @see com.netflix.hystrix.HystrixCommand#run()
      */
     @Override
-    protected String run() throws Exception {
+    public String run() {
         EntityInfo entityInfo = getMetadata().getEntityInfo(entity);
         CRUDController crudController = RestConfiguration.getFactory().getFactory().getCRUDController(entityInfo.getDataStore().getBackend());
         if (crudController instanceof MongoCRUDController) {

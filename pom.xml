@@ -53,6 +53,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.esbtools.lightblue-notification-hook</groupId>
+                <artifactId>lightblue-notification-hook</artifactId>
+                <version>0.1.0</version>
+            </dependency>
+            <dependency>
                 <groupId>org.jboss.arquillian</groupId>
                 <artifactId>arquillian-bom</artifactId>
                 <version>1.1.7.Final</version>
@@ -104,11 +109,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-util</artifactId>
-                <version>${lightblue.core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue</groupId>
-                <artifactId>lightblue-core-hystrix</artifactId>
                 <version>${lightblue.core.version}</version>
             </dependency>
             <dependency>
@@ -302,8 +302,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.compiler.debuglevel>lines,vars,source</maven.compiler.debuglevel>
         <maven.compiler.verbose>true</maven.compiler.verbose>
 
-        <lightblue.core.version>1.15.0-SNAPSHOT</lightblue.core.version>
-        <lightblue.mongo.version>1.16.0-SNAPSHOT</lightblue.mongo.version>
+        <lightblue.core.version>1.15.0</lightblue.core.version>
+        <lightblue.mongo.version>1.17.0-SNAPSHOT</lightblue.mongo.version>
         <lightblue.ldap.version>1.8.0</lightblue.ldap.version>
         <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
     </properties>
