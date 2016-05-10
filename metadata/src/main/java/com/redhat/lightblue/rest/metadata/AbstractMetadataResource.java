@@ -18,6 +18,7 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.MetadataConstants;
 import com.redhat.lightblue.metadata.MetadataRole;
+import com.redhat.lightblue.query.QueryExpression;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.metadata.hystrix.CreateEntityMetadataCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.CreateEntitySchemaCommand;
@@ -55,7 +57,9 @@ import com.redhat.lightblue.rest.metadata.hystrix.RemoveEntityCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.SetDefaultVersionCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntityInfoCommand;
 import com.redhat.lightblue.rest.metadata.hystrix.UpdateEntitySchemaStatusCommand;
+import com.redhat.lightblue.rest.util.QueryTemplateUtils;
 import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.JsonUtils;
 
 /**
  * @author nmalik
@@ -282,8 +286,16 @@ public abstract class AbstractMetadataResource {
     @POST
     @LZF
     @Path("/{entity}/reindex")
-    public String reindex(@PathParam(PARAM_ENTITY) String entity) {
+    public String reindex(@PathParam(PARAM_ENTITY) String entity) throws IOException {
         return new ReIndexCommand(null, metadata, entity).execute();
     }
 
+    @POST
+    @LZF
+    @Path("/{entity}/{version}/reindex")
+    public String reindex(@PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, @QueryParam("Q") String query) throws IOException {
+        String sq = QueryTemplateUtils.buildQueryFieldsTemplate(query);
+        QueryExpression qe = QueryExpression.fromJson(JsonUtils.json(sq));
+        return new ReIndexCommand(null, metadata, entity, version, qe).execute();
+    }
 }
