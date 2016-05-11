@@ -19,11 +19,6 @@
 package com.redhat.lightblue.rest.crud;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -37,8 +32,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.text.StrSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,16 +42,17 @@ import com.redhat.lightblue.query.QueryExpression;
 import com.redhat.lightblue.query.Sort;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.cmd.AcquireCommand;
-import com.redhat.lightblue.rest.crud.cmd.GenerateCommand;
 import com.redhat.lightblue.rest.crud.cmd.BulkRequestCommand;
 import com.redhat.lightblue.rest.crud.cmd.DeleteCommand;
 import com.redhat.lightblue.rest.crud.cmd.FindCommand;
+import com.redhat.lightblue.rest.crud.cmd.GenerateCommand;
 import com.redhat.lightblue.rest.crud.cmd.GetLockCountCommand;
 import com.redhat.lightblue.rest.crud.cmd.InsertCommand;
 import com.redhat.lightblue.rest.crud.cmd.LockPingCommand;
 import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
 import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
 import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
+import com.redhat.lightblue.rest.util.QueryTemplateUtils;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
 import com.restcompress.provider.LZF;
@@ -75,12 +69,6 @@ public abstract class AbstractCrudResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCrudResource.class);
 
-    private static final String FIELD_Q_EQ_TMPL = "{\"field\": \"${field}\", \"op\": \"=\",\"rvalue\": \"${value}\"}";
-    private static final String FIELD_Q_IN_TMPL = "{\"field\":\"${field}\", \"op\":\"$in\", \"values\":[${value}]}";
-    private static final String PROJECTION_TMPL = "{\"field\":\"${field}\",\"include\": ${include}, \"recursive\": ${recursive}}";
-    private static final String SORT_TMPL = "{\"${field}\":\"${order}\"}";
-    private static final String DEFAULT_PROJECTION_TMPL = "{\"field\":\"*\",\"recursive\":true}";
-
     private static final String PARAM_ENTITY = "entity";
     private static final String PARAM_VERSION = "version";
 
@@ -88,7 +76,7 @@ public abstract class AbstractCrudResource {
         // by default JVM caches DNS forever.  hard code an override to refresh DNS cache every 30 seconds
         java.security.Security.setProperty("networkaddress.cache.ttl" , "30");
     }
-    
+
     @PUT
     @Path("/lock/{domain}/{callerId}/{resourceId}")
     public Response acquire(@PathParam("domain") String domain,
@@ -316,67 +304,13 @@ public abstract class AbstractCrudResource {
                                @QueryParam("to") Long to) throws IOException {
         Error.reset();
         // spec -> https://github.com/lightblue-platform/lightblue/wiki/Rest-Spec-Data#get-simple-find
-        String sq = null;
-        if (q != null && !"".equals(q.trim())) {
-            List<String> queryList = Arrays.asList(q.split(";"));
-            if (queryList.size() > 1) {
-                StringBuilder sbq = new StringBuilder("{ \"$and\" : [");
-                Iterator<String> itr = queryList.iterator();
-                while (itr.hasNext()) {
-                    sbq.append(buildQueryFieldTemplate(itr.next()));
-                    if (itr.hasNext()) {
-                        sbq.append(',');
-                    }
-                }
-                sbq.append("]}");
-                sq = sbq.toString();
-
-            } else {
-                sq = buildQueryFieldTemplate(queryList.get(0));
-            }
-        }
+        String sq = QueryTemplateUtils.buildQueryFieldsTemplate(q);
         LOGGER.debug("query: {} -> {}", q, sq);
 
-        String sp = DEFAULT_PROJECTION_TMPL;
-        if (p != null && !"".equals(p.trim())) {
-            List<String> projectionList = Arrays.asList(p.split(","));
-            if (projectionList.size() > 1) {
-                StringBuilder sbp = new StringBuilder("[");
-                Iterator<String> itr = projectionList.iterator();
-                while (itr.hasNext()) {
-                    sbp.append(buildProjectionTemplate(itr.next()));
-                    if (itr.hasNext()) {
-                        sbp.append(',');
-                    }
-                }
-                sbp.append("]");
-                sp = sbp.toString();
-
-            } else {
-                sp = buildProjectionTemplate(projectionList.get(0));
-            }
-        }
+        String sp = QueryTemplateUtils.buildProjectionsTemplate(p);
         LOGGER.debug("projection: {} -> {}", p, sp);
 
-        String ss = null;
-        if (s != null && !"".equals(s.trim())) {
-            List<String> sortList = Arrays.asList(s.split(","));
-            if (sortList.size() > 1) {
-                StringBuilder sbs = new StringBuilder("[");
-                Iterator<String> itr = sortList.iterator();
-                while (itr.hasNext()) {
-                    sbs.append(buildSortTemplate(itr.next()));
-                    if (itr.hasNext()) {
-                        sbs.append(',');
-                    }
-                }
-                sbs.append("]");
-                ss = sbs.toString();
-
-            } else {
-                ss = buildSortTemplate(sortList.get(0));
-            }
-        }
+        String ss = QueryTemplateUtils.buildSortsTemplate(s);
         LOGGER.debug("sort:{} -> {}", s, ss);
 
         FindRequest findRequest = new FindRequest();
@@ -390,61 +324,5 @@ public abstract class AbstractCrudResource {
 
         CallStatus st=new FindCommand(null, entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
-    }
-
-    private String buildQueryFieldTemplate(String s1) {
-        String sq;
-        String template = null;
-
-        String[] split = s1.split(":");
-
-        Map<String, String> map = new HashMap<>();
-        map.put("field", split[0]);
-        String value = null;
-
-        String[] comma = split[1].split(",");
-        if (comma.length > 1) {
-            template = FIELD_Q_IN_TMPL;
-            value = "\"" + StringUtils.join(comma, "\",\"") + "\"";
-        } else {
-            template = FIELD_Q_EQ_TMPL;
-            value = split[1];
-        }
-        map.put("value", value);
-
-        StrSubstitutor sub = new StrSubstitutor(map);
-
-        sq = sub.replace(template);
-        return sq;
-    }
-
-    private String buildProjectionTemplate(String s1) {
-        String sp;
-        String[] split = s1.split(":");
-
-        Map<String, String> map = new HashMap<>();
-        map.put("field", split[0]);
-        map.put("include", split[1].charAt(0) == '1' ? "true" : "false");
-        map.put("recursive", split[1].length() < 2 ? "false" : (split[1].charAt(1) == 'r' ? "true" : "false"));
-
-        StrSubstitutor sub = new StrSubstitutor(map);
-
-        sp = sub.replace(PROJECTION_TMPL);
-        return sp;
-    }
-
-    private String buildSortTemplate(String s1) {
-        String ss;
-
-        String[] split = s1.split(":");
-
-        Map<String, String> map = new HashMap<>();
-        map.put("field", split[0]);
-        map.put("order", split[1].charAt(0) == 'd' ? "$desc" : "$asc");
-
-        StrSubstitutor sub = new StrSubstitutor(map);
-
-        ss = sub.replace(SORT_TMPL);
-        return ss;
     }
 }

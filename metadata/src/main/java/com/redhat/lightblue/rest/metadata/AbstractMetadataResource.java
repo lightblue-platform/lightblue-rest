@@ -18,6 +18,7 @@
  */
 package com.redhat.lightblue.rest.metadata;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -35,13 +36,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
-import com.restcompress.provider.LZF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.MetadataConstants;
 import com.redhat.lightblue.metadata.MetadataRole;
+import com.redhat.lightblue.query.QueryExpression;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.metadata.cmd.CreateEntityMetadataCommand;
 import com.redhat.lightblue.rest.metadata.cmd.CreateEntitySchemaCommand;
@@ -55,7 +56,10 @@ import com.redhat.lightblue.rest.metadata.cmd.RemoveEntityCommand;
 import com.redhat.lightblue.rest.metadata.cmd.SetDefaultVersionCommand;
 import com.redhat.lightblue.rest.metadata.cmd.UpdateEntityInfoCommand;
 import com.redhat.lightblue.rest.metadata.cmd.UpdateEntitySchemaStatusCommand;
+import com.redhat.lightblue.rest.util.QueryTemplateUtils;
 import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.JsonUtils;
+import com.restcompress.provider.LZF;
 
 /**
  * @author nmalik
@@ -282,8 +286,16 @@ public abstract class AbstractMetadataResource {
     @POST
     @LZF
     @Path("/{entity}/reindex")
-    public String reindex(@PathParam(PARAM_ENTITY) String entity) {
-        return new ReIndexCommand(metadata, entity).run();
+    public String reindex(@PathParam(PARAM_ENTITY) String entity) throws IOException {
+        return new ReIndexCommand(null, metadata, entity).run();
     }
 
+    @POST
+    @LZF
+    @Path("/{entity}/{version}/reindex")
+    public String reindex(@PathParam(PARAM_ENTITY) String entity, @PathParam(PARAM_VERSION) String version, @QueryParam("Q") String query) throws IOException {
+        String sq = QueryTemplateUtils.buildQueryFieldsTemplate(query);
+        QueryExpression qe = QueryExpression.fromJson(JsonUtils.json(sq));
+        return new ReIndexCommand(null, metadata, entity, version, qe).run();
+    }
 }
