@@ -223,6 +223,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
     </dependencyManagement>
     <dependencies>
         <dependency>
+            <groupId>org.esbtools.lightblue-notification-hook</groupId>
+            <artifactId>lightblue-notification-hook</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
