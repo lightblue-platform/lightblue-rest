@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>lightblue-rest-pom</artifactId>
-    <version>2.6.0</version>
+    <version>2.6.1</version>
   </parent>
   
   <artifactId>lightblue-rest-integration-test</artifactId>
