@@ -18,7 +18,6 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import com.netflix.hystrix.util.ExceptionThreadingUtility;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.config.CrudConfiguration;
 import com.redhat.lightblue.config.MetadataConfiguration;
@@ -52,8 +51,6 @@ public abstract class AbstractRestCommandTest {
 
     @Deployment
     public static WebArchive createDeployment() {
-        ExceptionThreadingUtility.assignCallingThread(Thread.currentThread());
-
         File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeDependencies().resolve().withTransitivity().asFile();
 
         final String PATH = "src/test/resources/it/it-";
