@@ -24,14 +24,13 @@ import com.redhat.lightblue.extensions.synch.Locking;
 
 public class ReleaseCommand extends AbstractLockCommand {
 
-    public ReleaseCommand(String domain,String caller,String resource) {
-        super(domain,caller,resource);
+    public ReleaseCommand(String domain, String caller, String resource) {
+        super(domain, caller, resource);
     }
 
     @Override
     protected JsonNode runLockCommand(Locking locking) {
-        boolean ret=locking.release(caller,resource);
+        boolean ret = locking.release(caller, resource);
         return NODE_FACTORY.booleanNode(ret);
     }
 }
-    

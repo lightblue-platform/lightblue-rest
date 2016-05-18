@@ -28,7 +28,6 @@ public class CachedLdapFindUserRolesByUidCommand {
     private static final String INVALID_PARAM = "%s is null or empty";
     private static final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
 
-
     private final LDAPQuery ldapQuery;
     private final InitialLdapContextProvider ldapContextProvider;
 
@@ -55,13 +54,13 @@ public class CachedLdapFindUserRolesByUidCommand {
         List<String> roles = RolesCache.get(ldapQuery.uid);
 
         if (roles != null) {
-            LOGGER.debug("Found roles in cache for uid="+ldapQuery.uid);
+            LOGGER.debug("Found roles in cache for uid=" + ldapQuery.uid);
             return roles;
         }
 
         try {
 
-            LOGGER.debug("Cache missed for uid="+ldapQuery.uid+". Calling ldap.");
+            LOGGER.debug("Cache missed for uid=" + ldapQuery.uid + ". Calling ldap.");
             // LDAPSearcher does the lookup and the call only when cache is missed
             SearchResult searchResult = LDAPSearcher.getInstance().searchLDAPServer(ldapQuery, ldapContextProvider);
 

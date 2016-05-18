@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class si responsible to handle how to query data from LDAP server and also handle the exceptions different flows
- * Created by lcestari on 2/23/15.
+ * This class si responsible to handle how to query data from LDAP server and
+ * also handle the exceptions different flows Created by lcestari on 2/23/15.
  */
 public class LDAPSearcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(LDAPSearcher.class);

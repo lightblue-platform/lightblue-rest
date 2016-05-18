@@ -60,7 +60,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String BIND_PWD = "bindPassword";
 
     private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, LDAP_SERVER, SEARCH_BASE, BIND_DN, BIND_PWD};
-    
+
     private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
 
     // LightblueRoleProvider singleton
@@ -71,12 +71,12 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     }
 
     @Override
-	public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String,?> sharedState, Map<String,?> options) {
+    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
         LOGGER.debug("CertLdapLoginModule#initialize was invoked");
         addValidOptions(ALL_VALID_OPTIONS);
-		super.initialize(subject, callbackHandler, sharedState, options);
-	}
-    
+        super.initialize(subject, callbackHandler, sharedState, options);
+    }
+
     public void initializeLightblueLdapRoleProvider() throws NamingException {
         String ldapServer = (String) options.get(LDAP_SERVER);
         String searchBase = (String) options.get(SEARCH_BASE);
@@ -101,7 +101,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         try {
 
             initializeLightblueLdapRoleProvider();
-            
+
             String username = getUsername();
 
             LOGGER.debug("Prinicipal username:" + username);

@@ -25,16 +25,15 @@ import com.redhat.lightblue.extensions.synch.Locking;
 public class AcquireCommand extends AbstractLockCommand {
 
     private final Long ttl;
-    
-    public AcquireCommand(String domain,String caller,String resource,Long ttl) {
-        super(domain,caller,resource);
-        this.ttl=ttl;
+
+    public AcquireCommand(String domain, String caller, String resource, Long ttl) {
+        super(domain, caller, resource);
+        this.ttl = ttl;
     }
 
     @Override
     protected JsonNode runLockCommand(Locking locking) {
-        boolean ret=locking.acquire(caller,resource,ttl);
+        boolean ret = locking.acquire(caller, resource, ttl);
         return NODE_FACTORY.booleanNode(ret);
     }
 }
-

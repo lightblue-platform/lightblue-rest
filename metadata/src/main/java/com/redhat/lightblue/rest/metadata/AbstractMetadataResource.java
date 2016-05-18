@@ -73,6 +73,7 @@ public abstract class AbstractMetadataResource {
     private static final String PARAM_VERSION = "version";
 
     private static final Metadata metadata;
+
     static {
         try {
             metadata = RestConfiguration.getFactory().getMetadata();
@@ -82,7 +83,7 @@ public abstract class AbstractMetadataResource {
         }
 
         // by default JVM caches DNS forever.  hard code an override to refresh DNS cache every 30 seconds
-        java.security.Security.setProperty("networkaddress.cache.ttl" , "30");
+        java.security.Security.setProperty("networkaddress.cache.ttl", "30");
     }
 
     @GET
@@ -112,7 +113,7 @@ public abstract class AbstractMetadataResource {
     @GET
     @LZF
     @Path("/roles")
-    public String getEntityRoles(@Context SecurityContext sc ) {
+    public String getEntityRoles(@Context SecurityContext sc) {
         return getEntityRoles(sc, null, null);
     }
 
@@ -216,10 +217,10 @@ public abstract class AbstractMetadataResource {
     @LZF
     @Path("/{entity}/{version}/{status}")
     public String updateSchemaStatus(@Context SecurityContext sc,
-            @PathParam(PARAM_ENTITY) String entity,
-            @PathParam(PARAM_VERSION) String version,
-            @PathParam("status") String status,
-            @QueryParam("comment") String comment) {
+                                     @PathParam(PARAM_ENTITY) String entity,
+                                     @PathParam(PARAM_VERSION) String version,
+                                     @PathParam("status") String status,
+                                     @QueryParam("comment") String comment) {
         Error.reset();
 
         checkPermission(sc, MetadataRole.UPDATE_ENTITY_SCHEMASTATUS);
@@ -230,8 +231,8 @@ public abstract class AbstractMetadataResource {
     @LZF
     @Path("/{entity}/{version}/default")
     public String setDefaultVersion(@Context SecurityContext sc,
-            @PathParam(PARAM_ENTITY) String entity,
-            @PathParam(PARAM_VERSION) String version) {
+                                    @PathParam(PARAM_ENTITY) String entity,
+                                    @PathParam(PARAM_VERSION) String version) {
         Error.reset();
 
         checkPermission(sc, MetadataRole.UPDATE_DEFAULTVERSION);
@@ -258,24 +259,23 @@ public abstract class AbstractMetadataResource {
         return new SetDefaultVersionCommand(entity, null).run();
     }
 
-    private void checkPermission(SecurityContext sc, MetadataRole roleAllowed){
+    private void checkPermission(SecurityContext sc, MetadataRole roleAllowed) {
         final Map<MetadataRole, List<String>> mappedRoles = metadata.getMappedRoles();
-        if(mappedRoles == null || mappedRoles.size() == 0){
+        if (mappedRoles == null || mappedRoles.size() == 0) {
             // No authorization was configured
             return;
         }
 
         List<String> roles = mappedRoles.get(roleAllowed);
 
-        if(roles.contains(MetadataConstants.ROLE_NOONE)){
+        if (roles.contains(MetadataConstants.ROLE_NOONE)) {
             throw new SecurityException("Unauthorized Request");
-        }
-        else if(roles.contains(MetadataConstants.ROLE_ANYONE)){
+        } else if (roles.contains(MetadataConstants.ROLE_ANYONE)) {
             return;
         }
 
-        for(String role : roles){
-            if (sc.isUserInRole(role)){
+        for (String role : roles) {
+            if (sc.isUserInRole(role)) {
                 return;
             }
         }

@@ -20,7 +20,7 @@ public class LogEntry {
     private final int responseSize;
     private final long timeElapsedInNs;
 
-    public LogEntry(String timestampText, Principal principal, String resource, String operation, String entityName, String entityVersion,String entityStatus, int requestSize, int responseSize, long timeElapsedInNs) {
+    public LogEntry(String timestampText, Principal principal, String resource, String operation, String entityName, String entityVersion, String entityStatus, int requestSize, int responseSize, long timeElapsedInNs) {
         this.timestampText = timestampText;
         this.principal = principal;
         this.resource = resource;

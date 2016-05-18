@@ -36,7 +36,7 @@ public class BulkRequestCommand extends AbstractRestCommand {
     private final String request;
 
     public BulkRequestCommand(String request) {
-        this.request=request;
+        this.request = request;
     }
 
     @Override
@@ -48,13 +48,13 @@ public class BulkRequestCommand extends AbstractRestCommand {
         try {
             BulkRequest req;
             try {
-                req=getJsonTranslator().parse(BulkRequest.class,JsonUtils.json(request));
+                req = getJsonTranslator().parse(BulkRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                LOGGER.error("bulk:parse failure: {}",e);
+                LOGGER.error("bulk:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, "Error parsing request"));
             }
-            try{
-                for(Request r:req.getEntries()) {
+            try {
+                for (Request r : req.getEntries()) {
                     validateReq(r, r.getEntityVersion().getEntity(), r.getEntityVersion().getVersion());
                     addCallerId(r);
                 }

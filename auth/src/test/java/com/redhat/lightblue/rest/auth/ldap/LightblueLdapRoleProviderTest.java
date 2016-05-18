@@ -49,7 +49,7 @@ public class LightblueLdapRoleProviderTest {
 
     @ClassRule
     public static LdapServerExternalResource ldapServer = LdapServerExternalResource.createDefaultInstance();
-    
+
     private static final String BASEDB_USERS = "ou=Users,dc=example,dc=com";
     private static final String USER_WITH_ROLES = "uid=derek63,ou=Users,dc=example,dc=com";
     private static final String USER_WITH_NO_ROLES = "uid=lcestari,ou=Users,dc=example,dc=com";
@@ -65,16 +65,16 @@ public class LightblueLdapRoleProviderTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        ldapServer.add(BASEDB_USERS, new Attribute[] { new Attribute("objectClass", "top"), new Attribute("objectClass", "organizationalUnit"),
-                new Attribute("ou", "Users") });
-        ldapServer.add(BASEDB_GROUPS, new Attribute[] { new Attribute("objectClass", "top"), new Attribute("objectClass", "organizationalUnit"),
-                new Attribute("ou", "Groups") });
-        ldapServer.add(USER_WITH_NO_ROLES, new Attribute[] { new Attribute("cn", "lcestari"), new Attribute("uid", "lcestari"),
-                new Attribute("objectClass", "person") });
-        ldapServer.add(USER_WITH_ROLES, new Attribute[] { new Attribute("cn", "derek63"), new Attribute("uid", "derek63"),
-                new Attribute("memberOf", "cn=lightblue-contributors,ou=Groups,dc=example,dc=com"),
-                new Attribute("memberOf", "cn=lightblue-developers,ou=Groups,dc=example,dc=com"), new Attribute("objectClass", "person") });
-        
+        ldapServer.add(BASEDB_USERS, new Attribute[]{new Attribute("objectClass", "top"), new Attribute("objectClass", "organizationalUnit"),
+            new Attribute("ou", "Users")});
+        ldapServer.add(BASEDB_GROUPS, new Attribute[]{new Attribute("objectClass", "top"), new Attribute("objectClass", "organizationalUnit"),
+            new Attribute("ou", "Groups")});
+        ldapServer.add(USER_WITH_NO_ROLES, new Attribute[]{new Attribute("cn", "lcestari"), new Attribute("uid", "lcestari"),
+            new Attribute("objectClass", "person")});
+        ldapServer.add(USER_WITH_ROLES, new Attribute[]{new Attribute("cn", "derek63"), new Attribute("uid", "derek63"),
+            new Attribute("memberOf", "cn=lightblue-contributors,ou=Groups,dc=example,dc=com"),
+            new Attribute("memberOf", "cn=lightblue-developers,ou=Groups,dc=example,dc=com"), new Attribute("objectClass", "person")});
+
         System.setProperty("ldap.host", "localhost");
         System.setProperty("ldap.port", String.valueOf(LdapServerExternalResource.DEFAULT_PORT));
         System.setProperty("ldap.database", "test");
@@ -82,9 +82,9 @@ public class LightblueLdapRoleProviderTest {
         System.setProperty("ldap.department.basedn", BASEDB_GROUPS);
 
         provider = new LightblueLdapRoleProvider(
-                "ldap://localhost:" + LdapServerExternalResource.DEFAULT_PORT, 
+                "ldap://localhost:" + LdapServerExternalResource.DEFAULT_PORT,
                 LdapServerExternalResource.DEFAULT_BASE_DN,
-                LdapServerExternalResource.DEFAULT_BINDABLE_DN, 
+                LdapServerExternalResource.DEFAULT_BINDABLE_DN,
                 LdapServerExternalResource.DEFAULT_PASSWORD);
 
         RolesCache.setRolesCache(rolesCacheSpy);
@@ -153,7 +153,7 @@ public class LightblueLdapRoleProviderTest {
         Mockito.when(rolesCacheSpy.getIfPresent("derek63")).thenReturn(null);
         // break ldap
         Mockito.doThrow(new RuntimeException(new IOException("connection closed")))
-            .when(ldapSearcherSpy).searchLDAPServer(Mockito.any(LDAPQuery.class), Mockito.any(InitialLdapContextProvider.class));
+                .when(ldapSearcherSpy).searchLDAPServer(Mockito.any(LDAPQuery.class), Mockito.any(InitialLdapContextProvider.class));
 
         // get roles when ldap server is down
         List<String> userRoles = provider.getUserRoles("derek63");

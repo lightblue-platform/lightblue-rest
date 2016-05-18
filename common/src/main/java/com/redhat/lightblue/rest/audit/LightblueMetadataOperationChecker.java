@@ -18,39 +18,32 @@ public enum LightblueMetadataOperationChecker implements LightblueOperationCheck
     getEntityRolesEntityRegex("/+(\\w+)/+roles/*", "GET /{entity}/roles", Info.GET_ENTITY),
     getEntityRolesRegex("/+roles/*", "GET /roles", Info.GET_NONE),
     //AbstractMetadataResource @Path("/") or @Path("/s={statuses}") getEntityNames
-    getEntityNamesRegex("/*", "GET /",Info.GET_NONE),
-    getEntityNamesStatusRegex ("/+s=(\\w+)/*","GET /s={statuses}",Info.GET_ONLY_STATUS),
+    getEntityNamesRegex("/*", "GET /", Info.GET_NONE),
+    getEntityNamesStatusRegex("/+s=(\\w+)/*", "GET /s={statuses}", Info.GET_ONLY_STATUS),
     //AbstractMetadataResource @Path("/{entity}") getEntityVersions
-    getEntityVersionsRegex("/+(\\w+)/*","GET /{entity}",Info.GET_ENTITY),
+    getEntityVersionsRegex("/+(\\w+)/*", "GET /{entity}", Info.GET_ENTITY),
     //AbstractMetadataResource @Path("/{entity}/{version}") getMetadata
-    getMetadataRegex("/+(\\w+)/+([\\S]+)/*","GET /{entity}/{version}",Info.GET_ENTITY_VERSION),
-
-
+    getMetadataRegex("/+(\\w+)/+([\\S]+)/*", "GET /{entity}/{version}", Info.GET_ENTITY_VERSION),
     //POST
 
     //AbstractMetadataResource @Path("/{entity}/{version}/default") setDefaultVersion
-    setDefaultVersionRegex("/+(\\w+)/+([\\S]+)/+default/*", "POST /{entity}/{version}/default", Info.GET_ENTITY_VERSION ),
-
-
+    setDefaultVersionRegex("/+(\\w+)/+([\\S]+)/+default/*", "POST /{entity}/{version}/default", Info.GET_ENTITY_VERSION),
     //PUT
 
     //AbstractMetadataResource @Path("/{entity}/{version}") createMetadata
-    createMetadataRegex("/+(\\w+)/+([\\S]+)/*","PUT /{entity}/{version}",Info.GET_ENTITY_VERSION),
+    createMetadataRegex("/+(\\w+)/+([\\S]+)/*", "PUT /{entity}/{version}", Info.GET_ENTITY_VERSION),
     //AbstractMetadataResource @Path("/{entity}/schema={version}") createSchema
-    createSchemaRegex("/+(\\w+)/+schema=([\\S]+)/*","PUT /{entity}/schema={version}",Info.GET_ENTITY_STATUS),
+    createSchemaRegex("/+(\\w+)/+schema=([\\S]+)/*", "PUT /{entity}/schema={version}", Info.GET_ENTITY_STATUS),
     //AbstractMetadataResource @Path("/{entity}") updateEntityInfo
-    updateEntityInfoRegex("/+(\\w+)/*","PUT /{entity}",Info.GET_ENTITY),
+    updateEntityInfoRegex("/+(\\w+)/*", "PUT /{entity}", Info.GET_ENTITY),
     //AbstractMetadataResource @Path("/{entity}/{version}/{status}") updateSchemaStatus
-    updateSchemaStatusRegex("/+(\\w+)/+([\\S]+)/+(\\w+)/*","PUT /{entity}/{version}/{status}",Info.GET_ENTITY_VERSION_STATUS),
-
-
+    updateSchemaStatusRegex("/+(\\w+)/+([\\S]+)/+(\\w+)/*", "PUT /{entity}/{version}/{status}", Info.GET_ENTITY_VERSION_STATUS),
     //DELETE
 
     //AbstractMetadataResource @Path("/{entity}") removeEntity
-    removeEntityRegex("/+(\\w+)/*","DELETE /{entity}",Info.GET_ENTITY),
+    removeEntityRegex("/+(\\w+)/*", "DELETE /{entity}", Info.GET_ENTITY),
     //AbstractMetadataResource @Path("/{entity}/default") clearDefaultVersion
     clearDefaultVersionRegex("/+(\\w+)/+default/*", "DELETE /{entity}/default", Info.GET_ENTITY_DEFAULT);
-
 
     private final Pattern pattern;
     private final String operation;
@@ -71,13 +64,13 @@ public enum LightblueMetadataOperationChecker implements LightblueOperationCheck
     }
 
     @Override
-    public Info matches(String content){
+    public Info matches(String content) {
         Matcher matcher = null;
         boolean found = false;
         if (content != null) {
             matcher = getPattern().matcher(content);
             found = matcher.matches();
         }
-        return new Info(getOperation(),found,matcher, moreInfo);
+        return new Info(getOperation(), found, matcher, moreInfo);
     }
 }

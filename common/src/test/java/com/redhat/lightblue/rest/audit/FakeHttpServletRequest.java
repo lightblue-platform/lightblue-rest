@@ -33,7 +33,8 @@ public class FakeHttpServletRequest implements HttpServletRequest {
         return null;
     }
 
-    public void setCharacterEncoding(String env) throws UnsupportedEncodingException {}
+    public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
+    }
 
     public int getContentLength() {
         return 0;
@@ -91,9 +92,11 @@ public class FakeHttpServletRequest implements HttpServletRequest {
         return null;
     }
 
-    public void setAttribute(String name, Object o) {}
+    public void setAttribute(String name, Object o) {
+    }
 
-    public void removeAttribute(String name) {}
+    public void removeAttribute(String name) {
+    }
 
     public Locale getLocale() {
         return null;

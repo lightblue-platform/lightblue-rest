@@ -74,7 +74,7 @@ public abstract class AbstractCrudResource {
 
     static {
         // by default JVM caches DNS forever.  hard code an override to refresh DNS cache every 30 seconds
-        java.security.Security.setProperty("networkaddress.cache.ttl" , "30");
+        java.security.Security.setProperty("networkaddress.cache.ttl", "30");
     }
 
     @PUT
@@ -84,7 +84,7 @@ public abstract class AbstractCrudResource {
                             @PathParam("resourceId") String resourceId,
                             @QueryParam("ttl") Long ttl) {
         Error.reset();
-        CallStatus st=new AcquireCommand(domain,callerId,resourceId,ttl).run();
+        CallStatus st = new AcquireCommand(domain, callerId, resourceId, ttl).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -94,7 +94,7 @@ public abstract class AbstractCrudResource {
                             @PathParam("callerId") String callerId,
                             @PathParam("resourceId") String resourceId) {
         Error.reset();
-        CallStatus st=new ReleaseCommand(domain,callerId,resourceId).run();
+        CallStatus st = new ReleaseCommand(domain, callerId, resourceId).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -104,7 +104,7 @@ public abstract class AbstractCrudResource {
                                  @PathParam("callerId") String callerId,
                                  @PathParam("resourceId") String resourceId) {
         Error.reset();
-        CallStatus st=new GetLockCountCommand(domain,callerId,resourceId).run();
+        CallStatus st = new GetLockCountCommand(domain, callerId, resourceId).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -114,25 +114,26 @@ public abstract class AbstractCrudResource {
                          @PathParam("callerId") String callerId,
                          @PathParam("resourceId") String resourceId) {
         Error.reset();
-        CallStatus st=new LockPingCommand(domain,callerId,resourceId).run();
+        CallStatus st = new LockPingCommand(domain, callerId, resourceId).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
-
     /**
-     * @deprecated Deprecated due to inconsistent path. Use {@link #insert(String, String)} instead.
+     * @deprecated Deprecated due to inconsistent path. Use
+     * {@link #insert(String, String)} instead.
      */
     @PUT
     @Path("/{entity}")
     @LZF
     @Deprecated
     public Response insertAlt(@PathParam(PARAM_ENTITY) String entity,
-                            String request) {
+                              String request) {
         return insert(entity, null, request);
     }
 
     /**
-     * @deprecated Deprecated due to inconsistent path. Use {@link #insert(String, String, String)} instead.
+     * @deprecated Deprecated due to inconsistent path. Use
+     * {@link #insert(String, String, String)} instead.
      */
     @PUT
     @Path("/{entity}/{version}")
@@ -159,7 +160,7 @@ public abstract class AbstractCrudResource {
                            @PathParam(PARAM_VERSION) String version,
                            String request) {
         Error.reset();
-        CallStatus st=new InsertCommand(entity, version, request).run();
+        CallStatus st = new InsertCommand(entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -167,7 +168,7 @@ public abstract class AbstractCrudResource {
     @LZF
     @Path("/save/{entity}")
     public Response save(@PathParam(PARAM_ENTITY) String entity,
-                       String request) {
+                         String request) {
         return save(entity, null, request);
     }
 
@@ -178,7 +179,7 @@ public abstract class AbstractCrudResource {
                          @PathParam(PARAM_VERSION) String version,
                          String request) {
         Error.reset();
-        CallStatus st=new SaveCommand(entity, version, request).run();
+        CallStatus st = new SaveCommand(entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -197,7 +198,7 @@ public abstract class AbstractCrudResource {
                            @PathParam(PARAM_VERSION) String version,
                            String request) {
         Error.reset();
-        CallStatus st=new UpdateCommand(entity, version, request).run();
+        CallStatus st = new UpdateCommand(entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -216,7 +217,7 @@ public abstract class AbstractCrudResource {
                            @PathParam(PARAM_VERSION) String version,
                            String req) {
         Error.reset();
-        CallStatus st=new DeleteCommand(entity, version, req).run();
+        CallStatus st = new DeleteCommand(entity, version, req).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -235,7 +236,7 @@ public abstract class AbstractCrudResource {
                          @PathParam(PARAM_VERSION) String version,
                          String request) {
         Error.reset();
-        CallStatus st=new FindCommand(entity, version, request).run();
+        CallStatus st = new FindCommand(entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -244,7 +245,7 @@ public abstract class AbstractCrudResource {
     @Path("/bulk")
     public Response bulk(String request) {
         Error.reset();
-        CallStatus st=new BulkRequestCommand(request).run();
+        CallStatus st = new BulkRequestCommand(request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -256,7 +257,8 @@ public abstract class AbstractCrudResource {
      * @param path Path of the field in the entity containing the generator
      * @param n Number of values to be generated
      *
-     * @return A lightblue response, with "processed" containing an array of generated values.
+     * @return A lightblue response, with "processed" containing an array of
+     * generated values.
      */
     @GET
     @LZF
@@ -265,7 +267,7 @@ public abstract class AbstractCrudResource {
                              @PathParam("version") String version,
                              @PathParam("path") String path,
                              @QueryParam("n") Integer n) {
-        CallStatus st=new GenerateCommand(entity,version,path,n==null?1:n).run();
+        CallStatus st = new GenerateCommand(entity, version, path, n == null ? 1 : n).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -275,7 +277,7 @@ public abstract class AbstractCrudResource {
     public Response generate(@PathParam("entity") String entity,
                              @PathParam("path") String path,
                              @QueryParam("n") Integer n) {
-        return generate(entity,null,path,n);
+        return generate(entity, null, path, n);
     }
 
     @GET
@@ -322,7 +324,7 @@ public abstract class AbstractCrudResource {
         findRequest.setTo(to);
         String request = findRequest.toString();
 
-        CallStatus st=new FindCommand(null, entity, version, request).run();
+        CallStatus st = new FindCommand(null, entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 }

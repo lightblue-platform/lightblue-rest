@@ -32,7 +32,6 @@ import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.SimpleJsonObject;
 import com.redhat.lightblue.extensions.synch.Locking;
 
-
 public abstract class AbstractLockCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockCommand.class);
 
@@ -40,24 +39,24 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
     protected final String resource;
     protected final String caller;
 
-    public AbstractLockCommand(String domain,String caller,String resource) {
-        this.domain=domain;
-        this.resource=resource;
-        this.caller=caller;
+    public AbstractLockCommand(String domain, String caller, String resource) {
+        this.domain = domain;
+        this.resource = resource;
+        this.caller = caller;
     }
 
     @Override
     public CallStatus run() {
-        LOGGER.debug("run: domain={}, resource={}, caller={}",domain,resource,caller);
+        LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(resource);
         try {
-            Locking locking=RestConfiguration.getFactory().getLocking(domain);
-            JsonNode result=runLockCommand(locking);
-            ObjectNode o=NODE_FACTORY.objectNode();
-            o.set("result",result);
+            Locking locking = RestConfiguration.getFactory().getLocking(domain);
+            JsonNode result = runLockCommand(locking);
+            ObjectNode o = NODE_FACTORY.objectNode();
+            o.set("result", result);
             return new CallStatus(new SimpleJsonObject(o));
         } catch (Error e) {
             LOGGER.error("failure: {}", e);

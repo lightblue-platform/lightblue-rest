@@ -34,49 +34,50 @@ public final class HttpErrorMapper {
      *
      * @param errorCode The Lightblue error code
      *
-     * If errorCode is null, returns OK. Otherwise, this method
-     * tries to map the lightblue error to an http error. If it cannot
-     * map to a suitable error, then INTERNAL_SERVER_ERROR is
-     * returned.
+     * If errorCode is null, returns OK. Otherwise, this method tries to map the
+     * lightblue error to an http error. If it cannot map to a suitable error,
+     * then INTERNAL_SERVER_ERROR is returned.
      */
     public static Response.Status getStatus(String errorCode) {
-        if(CrudConstants.ERR_NO_ACCESS.equals(errorCode)||
-           CrudConstants.ERR_NO_FIELD_INSERT_ACCESS.equals(errorCode) ||
-           CrudConstants.ERR_NO_FIELD_UPDATE_ACCESS.equals(errorCode)) {
+        if (CrudConstants.ERR_NO_ACCESS.equals(errorCode)
+                || CrudConstants.ERR_NO_FIELD_INSERT_ACCESS.equals(errorCode)
+                || CrudConstants.ERR_NO_FIELD_UPDATE_ACCESS.equals(errorCode)) {
             return Response.Status.FORBIDDEN;
-        } else if(CrudConstants.ERR_DISABLED_METADATA.equals(errorCode)||
-                  CrudConstants.ERR_UNKNOWN_ENTITY.equals(errorCode)) {
+        } else if (CrudConstants.ERR_DISABLED_METADATA.equals(errorCode)
+                || CrudConstants.ERR_UNKNOWN_ENTITY.equals(errorCode)) {
             return Response.Status.NOT_FOUND;
-        } else if(errorCode!=null) {
+        } else if (errorCode != null) {
             return Response.Status.INTERNAL_SERVER_ERROR;
-        } else  {
+        } else {
             return Response.Status.OK;
         }
     }
 
     /**
-     * Maps the error code of the error to an http error code. Returns OK if err is null.
+     * Maps the error code of the error to an http error code. Returns OK if err
+     * is null.
      */
     public static Response.Status getStatus(Error err) {
-        if(err!=null)
+        if (err != null) {
             return getStatus(err.getErrorCode());
-        else
+        } else {
             return Response.Status.OK;
+        }
     }
 
     /**
-     * Returns a suitable HTTP error code based on the exception. Returns OK if x is null.
+     * Returns a suitable HTTP error code based on the exception. Returns OK if
+     * x is null.
      */
     public static Response.Status getStatus(Exception x) {
-        if(x!=null) {
-            if(x instanceof Error) {
-                return getStatus((Error)x);
+        if (x != null) {
+            if (x instanceof Error) {
+                return getStatus((Error) x);
             } else {
                 return Response.Status.INTERNAL_SERVER_ERROR;
-            } 
+            }
         } else {
             return Response.Status.OK;
         }
     }
 }
-        

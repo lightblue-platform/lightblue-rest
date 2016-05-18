@@ -23,13 +23,13 @@ import java.util.regex.Matcher;
  *
  * Created by lcestari on 4/1/15.
  */
-@WebFilter(urlPatterns = { "/*" }) // Handle any request
+@WebFilter(urlPatterns = {"/*"}) // Handle any request
 public class LightblueAuditServletFilter implements Filter {
 
     public static final String YYYY_MM_DD_T_HH_MM_SS_SSSZ = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LightblueAuditServletFilter.class);
-    private static final ThreadLocal<SimpleDateFormat> THREAD_DATE_FORMAT =  new ThreadLocal<>();
+    private static final ThreadLocal<SimpleDateFormat> THREAD_DATE_FORMAT = new ThreadLocal<>();
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res,
@@ -39,7 +39,7 @@ public class LightblueAuditServletFilter implements Filter {
            - query parameters
            - request body
          */
-        if(LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("LightblueAuditServletFilter.doFilter invoked - begin");
         }
 
@@ -54,8 +54,8 @@ public class LightblueAuditServletFilter implements Filter {
         // audit authenticated requests
         boolean auditReqFlag = p != null && (isMetadata || isCrud);
 
-        if(auditReqFlag){
-            if(THREAD_DATE_FORMAT.get() == null){
+        if (auditReqFlag) {
+            if (THREAD_DATE_FORMAT.get() == null) {
                 THREAD_DATE_FORMAT.set(new SimpleDateFormat(YYYY_MM_DD_T_HH_MM_SS_SSSZ));
             }
             logEntryBuilder = new LogEntryBuilder();
@@ -66,16 +66,15 @@ public class LightblueAuditServletFilter implements Filter {
 
             setOperationEnittyVersionStatus(hReq, isMetadata, logEntryBuilder);
 
-
             HttpServletResponse httpServletResponse = (HttpServletResponse) res;
-            HttpServletResponse httpServletResponseWrapperBuffered = new HttpServletResponseWrapperBuffered(httpServletResponse,new ByteArrayPrintWriter());
+            HttpServletResponse httpServletResponseWrapperBuffered = new HttpServletResponseWrapperBuffered(httpServletResponse, new ByteArrayPrintWriter());
             res = httpServletResponseWrapperBuffered;
             stopwatch = Stopwatch.createStarted();
         }
 
         fChain.doFilter(hReq, res);
 
-        if(auditReqFlag) {
+        if (auditReqFlag) {
             stopwatch.stop();
             long elapsedTime = stopwatch.elapsed(TimeUnit.NANOSECONDS); // elapsedTime in ns
             logEntryBuilder.setTimeElapsedInNs(elapsedTime);
@@ -86,20 +85,20 @@ public class LightblueAuditServletFilter implements Filter {
             logEntryBuilder.setResponseSize(bytes.length);
             final LogEntry logEntry = logEntryBuilder.createLogEntry();
             String logEntryString = String.format(
-                    "Audited lightblue rest request => " +
-                            "{ " +
-                                "\"initialTimestamp\":\"%s\", " +
-                                "\"currentTimestamp\":\"%s\" , " +
-                                "\"principal\":\"%s\" , " +
-                                "\"resource\":\"%s\" , " +
-                                "\"operation\":\"%s\" , " +
-                                "\"entityName\":\"%s\" , " +
-                                "\"entityVersion\":\"%s\" , " +
-                                "\"entityStatus\":\"%s\" , " +
-                                "\"requestSize\":\"%d\" , " +
-                                "\"responseSize\":\"%d\" , " +
-                                "\"timeElapsedInNs\":\"%d\"  " +
-                            " }",
+                    "Audited lightblue rest request => "
+                    + "{ "
+                    + "\"initialTimestamp\":\"%s\", "
+                    + "\"currentTimestamp\":\"%s\" , "
+                    + "\"principal\":\"%s\" , "
+                    + "\"resource\":\"%s\" , "
+                    + "\"operation\":\"%s\" , "
+                    + "\"entityName\":\"%s\" , "
+                    + "\"entityVersion\":\"%s\" , "
+                    + "\"entityStatus\":\"%s\" , "
+                    + "\"requestSize\":\"%d\" , "
+                    + "\"responseSize\":\"%d\" , "
+                    + "\"timeElapsedInNs\":\"%d\"  "
+                    + " }",
                     logEntry.getTimestampText(),
                     THREAD_DATE_FORMAT.get().format(new Date()),
                     logEntry.getPrincipal().getName(),
@@ -115,7 +114,7 @@ public class LightblueAuditServletFilter implements Filter {
             LOGGER.info(logEntryString);
         }
 
-        if(LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("LightblueAuditServletFilter.doFilter invoked - end");
         }
     }
@@ -128,9 +127,9 @@ public class LightblueAuditServletFilter implements Filter {
 
         LightblueOperationChecker.Info info = null;
         Matcher m = null;
-        switch (method){
+        switch (method) {
             case "GET":
-                if(!processed) {
+                if (!processed) {
                     processed = true;
                     if (!isMetadata) {
                         if ((info = LightblueCrudOperationChecker.simpleFindVersionRegex.matches(servletPath)).found) {
@@ -138,32 +137,30 @@ public class LightblueAuditServletFilter implements Filter {
                         } else if ((info = LightblueCrudOperationChecker.simpleFindRegex.matches(servletPath)).found) {
                             break;
                         }
-                    } else {
-                        if ((info = LightblueMetadataOperationChecker.getDepGraphVersionRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.getDepGraphEntityRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.getDepGraphRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.getEntityRolesVersionRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.getEntityRolesEntityRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.getEntityRolesRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.getEntityNamesRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.getEntityNamesStatusRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.getEntityVersionsRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.getMetadataRegex.matches(servletPath)).found) {
-                            break;
-                        }
+                    } else if ((info = LightblueMetadataOperationChecker.getDepGraphVersionRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.getDepGraphEntityRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.getDepGraphRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.getEntityRolesVersionRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.getEntityRolesEntityRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.getEntityRolesRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.getEntityNamesRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.getEntityNamesStatusRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.getEntityVersionsRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.getMetadataRegex.matches(servletPath)).found) {
+                        break;
                     }
                 }
             case "POST":
-                if(!processed) {
+                if (!processed) {
                     processed = true;
                     if (!isMetadata) {
                         if ((info = LightblueCrudOperationChecker.findRegex.matches(servletPath)).found) {
@@ -184,14 +181,12 @@ public class LightblueAuditServletFilter implements Filter {
                             break;
                         }
 
-                    } else {
-                        if ((info = LightblueMetadataOperationChecker.setDefaultVersionRegex.matches(servletPath)).found) {
-                            break;
-                        }
+                    } else if ((info = LightblueMetadataOperationChecker.setDefaultVersionRegex.matches(servletPath)).found) {
+                        break;
                     }
                 }
             case "PUT":
-                if(!processed) {
+                if (!processed) {
                     processed = true;
                     if (!isMetadata) {
                         if ((info = LightblueCrudOperationChecker.insertRegex.matches(servletPath)).found) {
@@ -203,20 +198,18 @@ public class LightblueAuditServletFilter implements Filter {
                         } else if ((info = LightblueCrudOperationChecker.insertAltVersionRegex.matches(servletPath)).found) {
                             break;
                         }
-                    } else {
-                        if ((info = LightblueMetadataOperationChecker.createSchemaRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.updateSchemaStatusRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.updateEntityInfoRegex.matches(servletPath)).found) {
-                            break;
-                        } else if ((info = LightblueMetadataOperationChecker.createMetadataRegex.matches(servletPath)).found) {
-                            break;
-                        }
+                    } else if ((info = LightblueMetadataOperationChecker.createSchemaRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.updateSchemaStatusRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.updateEntityInfoRegex.matches(servletPath)).found) {
+                        break;
+                    } else if ((info = LightblueMetadataOperationChecker.createMetadataRegex.matches(servletPath)).found) {
+                        break;
                     }
                 }
             case "DELETE":
-                if(!processed) {
+                if (!processed) {
                     if (isMetadata) {
                         processed = true;
                         if ((info = LightblueMetadataOperationChecker.clearDefaultVersionRegex.matches(servletPath)).found) {
@@ -236,9 +229,9 @@ public class LightblueAuditServletFilter implements Filter {
             case "UNLINK":
             case "SHOWMETHOD":
             case "CHECKOUT":
-                // Valid HTTP method but not used yet
+            // Valid HTTP method but not used yet
             default:
-                if(processed){
+                if (processed) {
                     // The URL missed all the patterns. Maybe there is a not mapped rest service or the URL is invalid
                     LOGGER.warn("The URL doesn't map to one of the rest services. Request URI: " + hReq.getRequestURI()); // TODO Unique case where the whole URI is logged, when it is an exception
                 } else {
@@ -246,7 +239,7 @@ public class LightblueAuditServletFilter implements Filter {
                     LOGGER.info("Invalid HTTP method: " + method);
                 }
         }
-        if(info != null) {
+        if (info != null) {
             logEntryBuilder.setOperation(info.operation);
             logEntryBuilder.setEntityName(info.entity);
             logEntryBuilder.setEntityVersion(info.version);

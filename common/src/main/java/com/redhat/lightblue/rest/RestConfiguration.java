@@ -33,13 +33,16 @@ import com.redhat.lightblue.config.LightblueFactory;
 import com.redhat.lightblue.util.JsonUtils;
 
 /**
- * <p>Initialization logic for RestApplication.</p>
+ * <p>
+ * Initialization logic for RestApplication.</p>
  *
- * <p><b>NOTE:</b> In order to guarentee consistent behavior, if it is desirable to specify both the
- * {@link PluginConfiguration} and {@link DataSourcesConfiguration},
- * then call {@link #appendToThreadClassLoader(PluginConfiguration)} prior to
- * instantiating an instance of {@link DataSourcesConfiguration} and passing it into
- * {@link #getFactory(DataSourcesConfiguration)}.</p>
+ * <p>
+ * <b>NOTE:</b> In order to guarentee consistent behavior, if it is desirable to
+ * specify both the {@link PluginConfiguration} and
+ * {@link DataSourcesConfiguration}, then call
+ * {@link #appendToThreadClassLoader(PluginConfiguration)} prior to
+ * instantiating an instance of {@link DataSourcesConfiguration} and passing it
+ * into {@link #getFactory(DataSourcesConfiguration)}.</p>
  *
  * @author nmalik
  */
@@ -53,7 +56,8 @@ public final class RestConfiguration {
     private static DataSourcesConfiguration datasources;
     private static volatile LightblueFactory factory;
 
-    private RestConfiguration() {}
+    private RestConfiguration() {
+    }
 
     public static DataSourcesConfiguration getDatasources() {
         return datasources;
@@ -105,7 +109,7 @@ public final class RestConfiguration {
             if (null == is) {
                 throw new FileNotFoundException(DATASOURCE_FILENAME);
             }
-            return new DataSourcesConfiguration(JsonUtils.json(is,true));
+            return new DataSourcesConfiguration(JsonUtils.json(is, true));
         } catch (Exception e) {
             throw new RuntimeException("Cannot initialize datasources.", e);
         }
@@ -128,7 +132,7 @@ public final class RestConfiguration {
             //No plugin config provided, this is ok.
             return;
         }
-        
+
         Set<URL> externalUrls = pluginConfiguration.getPluginUrls();
 
         if (externalUrls.isEmpty()) {
@@ -137,7 +141,6 @@ public final class RestConfiguration {
         }
 
         //TODO Check that urls are not already on class path?
-
         LOGGER.info("Adding url to classpath: " + pluginConfiguration.toString());
 
         ClassLoader currentThreadLoader = Thread.currentThread().getContextClassLoader();

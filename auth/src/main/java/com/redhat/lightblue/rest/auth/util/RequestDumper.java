@@ -79,7 +79,8 @@ public class RequestDumper extends HttpServlet implements Servlet {
             while ((line = reader.readLine()) != null) {
                 requestBuffer.append(line.trim());
             }
-        } catch (Exception e) { /*report an error*/ }
+        } catch (Exception e) {
+            /*report an error*/ }
 
         buf.append(requestBuffer.toString());
 

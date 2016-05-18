@@ -24,13 +24,13 @@ import com.redhat.lightblue.extensions.synch.Locking;
 
 public class GetLockCountCommand extends AbstractLockCommand {
 
-    public GetLockCountCommand(String domain,String caller,String resource) {
-        super(domain,caller,resource);
+    public GetLockCountCommand(String domain, String caller, String resource) {
+        super(domain, caller, resource);
     }
 
     @Override
     protected JsonNode runLockCommand(Locking locking) {
-        int ret=locking.getLockCount(caller,resource);
+        int ret = locking.getLockCount(caller, resource);
         return NODE_FACTORY.numberNode(ret);
     }
 }
