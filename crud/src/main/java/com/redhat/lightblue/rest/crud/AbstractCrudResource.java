@@ -52,6 +52,7 @@ import com.redhat.lightblue.rest.crud.cmd.LockPingCommand;
 import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
 import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
 import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
+import com.redhat.lightblue.rest.crud.cmd.ExplainCommand;
 import com.redhat.lightblue.rest.util.QueryTemplateUtils;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
@@ -242,6 +243,25 @@ public abstract class AbstractCrudResource {
 
     @POST
     @LZF
+    @Path("/explain/{entity}")
+    public Response explain(@PathParam(PARAM_ENTITY) String entity,
+                            String request) {
+        return explain(entity, null, request);
+    }
+
+    @POST
+    @LZF
+    @Path("/explain/{entity}/{version}")
+    public Response explain(@PathParam(PARAM_ENTITY) String entity,
+                            @PathParam(PARAM_VERSION) String version,
+                            String request) {
+        Error.reset();
+        CallStatus st = new ExplainCommand(entity, version, request).run();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
+    @POST
+    @LZF
     @Path("/bulk")
     public Response bulk(String request) {
         Error.reset();
@@ -305,6 +325,43 @@ public abstract class AbstractCrudResource {
                                @QueryParam("from") Long from,
                                @QueryParam("to") Long to) throws IOException {
         Error.reset();
+        String request=buildSimpleRequest(entity,version,q,p,s,from,to).toString();
+        CallStatus st = new FindCommand(null, entity, version, request).run();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
+    @GET
+    @LZF
+    @Path("/explain/{entity}")
+    //?Q&P&S&from&to
+    public Response simpleExplain(@PathParam(PARAM_ENTITY) String entity,
+                                  @QueryParam("Q") String q,
+                                  @QueryParam("P") String p,
+                                  @QueryParam("S") String s,
+                                  @QueryParam("from") Long from,
+                                  @QueryParam("to") Long to) throws IOException {
+        return simpleExplain(entity, null, q, p, s, from, to);
+    }
+    
+    @GET
+    @LZF
+    @Path("/explain/{entity}/{version}")
+    //?Q&P&S&from&to
+    public Response simpleExplain(@PathParam(PARAM_ENTITY) String entity,
+                                  @PathParam(PARAM_VERSION) String version,
+                                  @QueryParam("Q") String q,
+                                  @QueryParam("P") String p,
+                                  @QueryParam("S") String s,
+                                  @QueryParam("from") Long from,
+                                  @QueryParam("to") Long to) throws IOException {
+        Error.reset();
+        String request=buildSimpleRequest(entity,version,q,p,s,from,to).toString();
+        CallStatus st = new ExplainCommand(null, entity, version, request).run();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
+    private FindRequest buildSimpleRequest(String entity,String version, String q,String p, String s, Long from, Long to)
+        throws IOException {            
         // spec -> https://github.com/lightblue-platform/lightblue/wiki/Rest-Spec-Data#get-simple-find
         String sq = QueryTemplateUtils.buildQueryFieldsTemplate(q);
         LOGGER.debug("query: {} -> {}", q, sq);
@@ -322,9 +379,6 @@ public abstract class AbstractCrudResource {
         findRequest.setSort(ss == null ? null : Sort.fromJson(JsonUtils.json(ss)));
         findRequest.setFrom(from);
         findRequest.setTo(to);
-        String request = findRequest.toString();
-
-        CallStatus st = new FindCommand(null, entity, version, request).run();
-        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+        return findRequest;
     }
 }
