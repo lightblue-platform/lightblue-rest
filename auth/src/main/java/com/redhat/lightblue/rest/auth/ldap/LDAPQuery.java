@@ -21,11 +21,11 @@ public class LDAPQuery {
 
     @Override
     public String toString() {
-        return "LDAPCacheKey{" +
-                "uid='" + uid + '\'' +
-                ", ldapSearchBase='" + ldapSearchBase + '\'' +
-                ", searchFilter='" + searchFilter + '\'' +
-                ", searchControls=" + searchControls +
-                '}';
+        return "LDAPCacheKey{"
+                + "uid='" + uid + '\''
+                + ", ldapSearchBase='" + ldapSearchBase + '\''
+                + ", searchFilter='" + searchFilter + '\''
+                + ", searchControls=" + searchControls
+                + '}';
     }
 }

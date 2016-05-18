@@ -96,8 +96,8 @@ public abstract class AbstractRestCommand {
         if (!req.getEntityVersion().getEntity().equals(entity)) {
             throw Error.get(RestCrudConstants.ERR_NO_ENTITY_MATCH, entity);
         }
-        if (req.getEntityVersion().getVersion()!=null&&version!=null&&
-            !req.getEntityVersion().getVersion().equals(version)) {
+        if (req.getEntityVersion().getVersion() != null && version != null
+                && !req.getEntityVersion().getVersion().equals(version)) {
             throw Error.get(RestCrudConstants.ERR_NO_VERSION_MATCH, version);
         }
     }
@@ -122,7 +122,7 @@ public abstract class AbstractRestCommand {
 
             @Override
             public String getPrincipal() {
-                return httpServletRequest == null ? null :( httpServletRequest.getUserPrincipal() != null ? httpServletRequest.getUserPrincipal().getName() : null );
+                return httpServletRequest == null ? null : (httpServletRequest.getUserPrincipal() != null ? httpServletRequest.getUserPrincipal().getName() : null);
             }
         });
     }

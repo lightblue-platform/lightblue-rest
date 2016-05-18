@@ -15,11 +15,14 @@ import com.restcompress.provider.LZFEncodingInterceptor;
 import com.sun.net.httpserver.HttpServer;
 
 /**
- * <p>Utility class for adding rest layer on top of mongo CRUD Controller. Extend this class when writing tests.</p>
+ * <p>
+ * Utility class for adding rest layer on top of mongo CRUD Controller. Extend
+ * this class when writing tests.</p>
  *
- * <p><b>NOTE:</b> {@link com.redhat.lightblue.rest.PluginConfiguration} cannot be used with the
- * {@link LightblueRestTestHarness} as the expectation is you should never be writing test cases for libraries
- * not in a test scope.</p>
+ * <p>
+ * <b>NOTE:</b> {@link com.redhat.lightblue.rest.PluginConfiguration} cannot be
+ * used with the {@link LightblueRestTestHarness} as the expectation is you
+ * should never be writing test cases for libraries not in a test scope.</p>
  *
  * @author mpatercz
  *
@@ -61,8 +64,7 @@ public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness
     /**
      * Setup lightblue backend with provided schemas and rest endpoints.
      *
-     * @param httpServerPort
-     *            port used for http (rest endpoints)
+     * @param httpServerPort port used for http (rest endpoints)
      * @throws Exception
      */
     public LightblueRestTestHarness(int httpServerPort) throws Exception {

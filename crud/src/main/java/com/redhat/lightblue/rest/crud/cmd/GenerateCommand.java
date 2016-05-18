@@ -64,14 +64,14 @@ public class GenerateCommand extends AbstractRestCommand {
     private final String field;
     private final int n;
 
-    public GenerateCommand(String entity, String version, String field,int n) {
+    public GenerateCommand(String entity, String version, String field, int n) {
         super(null);
         this.entity = entity;
         this.version = version;
         this.field = field;
-        this.n = n<=0?1:n;
+        this.n = n <= 0 ? 1 : n;
     }
-    
+
     @Override
     public CallStatus run() {
         LOGGER.debug("run: entity={}, version={}", entity, version);
@@ -80,37 +80,38 @@ public class GenerateCommand extends AbstractRestCommand {
         Error.push(getClass().getSimpleName());
         Error.push(entity);
         try {
-            LightblueFactory lbf=RestConfiguration.getFactory();
-            Factory factory=lbf.getFactory();
-            Metadata md=lbf.getMetadata();
-            DefaultMetadataResolver mdResolver=new DefaultMetadataResolver(md);
-            Path fieldPath=new Path(field);
-            mdResolver.initialize(entity,version,null,new FieldProjection(fieldPath,true,false));
-            HttpServletRequest sreq=ResteasyProviderFactory.getContextData(HttpServletRequest.class);
-            Set<String> userRoles=new HashSet<>();
-            if(sreq!=null) {
-                for(String role:mdResolver.getMetadataRoles()) {
-                    if(sreq.isUserInRole(role))
+            LightblueFactory lbf = RestConfiguration.getFactory();
+            Factory factory = lbf.getFactory();
+            Metadata md = lbf.getMetadata();
+            DefaultMetadataResolver mdResolver = new DefaultMetadataResolver(md);
+            Path fieldPath = new Path(field);
+            mdResolver.initialize(entity, version, null, new FieldProjection(fieldPath, true, false));
+            HttpServletRequest sreq = ResteasyProviderFactory.getContextData(HttpServletRequest.class);
+            Set<String> userRoles = new HashSet<>();
+            if (sreq != null) {
+                for (String role : mdResolver.getMetadataRoles()) {
+                    if (sreq.isUserInRole(role)) {
                         userRoles.add(role);
+                    }
                 }
             }
-            LOGGER.debug("user roles:{}",userRoles);
-            EntityMetadata emd=mdResolver.getCompositeMetadata();
-            if(emd.getAccess().getInsert().hasAccess(userRoles)||
-               emd.getAccess().getUpdate().hasAccess(userRoles)) {
-                LOGGER.debug("User has access, looking up {}",fieldPath);
-                FieldTreeNode ftn=emd.resolve(fieldPath);
-                LOGGER.debug("Field={}",ftn);
-                SimpleField fld=(SimpleField)ftn;
-                LOGGER.debug("Generator:{}",fld.getValueGenerator());
-                if(fld.getValueGenerator()!=null) {
-                    LOGGER.debug("{} has generator: {}",fieldPath,fld.getValueGenerator().getValueGeneratorType());
-                    ArrayNode arr=JsonNodeFactory.instance.arrayNode();
-                    for(int i=0;i<n;i++) {
-                        JsonNode node=GeneratedFields.generate(factory,fld,emd);
+            LOGGER.debug("user roles:{}", userRoles);
+            EntityMetadata emd = mdResolver.getCompositeMetadata();
+            if (emd.getAccess().getInsert().hasAccess(userRoles)
+                    || emd.getAccess().getUpdate().hasAccess(userRoles)) {
+                LOGGER.debug("User has access, looking up {}", fieldPath);
+                FieldTreeNode ftn = emd.resolve(fieldPath);
+                LOGGER.debug("Field={}", ftn);
+                SimpleField fld = (SimpleField) ftn;
+                LOGGER.debug("Generator:{}", fld.getValueGenerator());
+                if (fld.getValueGenerator() != null) {
+                    LOGGER.debug("{} has generator: {}", fieldPath, fld.getValueGenerator().getValueGeneratorType());
+                    ArrayNode arr = JsonNodeFactory.instance.arrayNode();
+                    for (int i = 0; i < n; i++) {
+                        JsonNode node = GeneratedFields.generate(factory, fld, emd);
                         arr.add(node);
                     }
-                    com.redhat.lightblue.Response r=new com.redhat.lightblue.Response();
+                    com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
                     r.setStatus(OperationStatus.COMPLETE);
                     r.setEntityData(arr);
                     return new CallStatus(r);
@@ -118,12 +119,12 @@ public class GenerateCommand extends AbstractRestCommand {
             } else {
                 throw Error.get(CrudConstants.ERR_NO_ACCESS, "generate " + mdResolver.getTopLevelEntityName());
             }
-        } catch(Error e) {
+        } catch (Error e) {
             return new CallStatus(e);
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_GENERATE, ex.toString()));
         }
-        com.redhat.lightblue.Response r=new com.redhat.lightblue.Response();
+        com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
         r.setStatus(OperationStatus.COMPLETE);
         return new CallStatus(r);
     }

@@ -3,8 +3,8 @@ package com.redhat.lightblue.rest.audit;
 import java.util.regex.Pattern;
 
 /**
- * Represent the '/crud' and '/metadata' rest context path
- * Created by lcestari on 4/10/15.
+ * Represent the '/crud' and '/metadata' rest context path Created by lcestari
+ * on 4/10/15.
  */
 public enum LightblueResource {
     CRUD("/+data/*"), METADATA("/+metadata/*");

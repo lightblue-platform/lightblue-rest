@@ -17,15 +17,12 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.redhat.lightblue.util.JsonInitializable;
 
 /**
- * <p>Parses a configuration file containing paths to external jar files to be loaded into memory
- * at runtime.</p>
+ * <p>
+ * Parses a configuration file containing paths to external jar files to be
+ * loaded into memory at runtime.</p>
  *
  * <p>
- * Expected format is:
- * [
- *    "path/to/file.jar",
- *    "path/to/directory/"
- * ]
+ * Expected format is: [ "path/to/file.jar", "path/to/directory/" ]
  * </p>
  *
  * @author dcrissman
@@ -40,7 +37,8 @@ public class PluginConfiguration implements JsonInitializable {
         return Collections.unmodifiableSet(externalPaths);
     }
 
-    public PluginConfiguration() {}
+    public PluginConfiguration() {
+    }
 
     public PluginConfiguration(JsonNode node) throws IOException {
         initializeFromJson(node);

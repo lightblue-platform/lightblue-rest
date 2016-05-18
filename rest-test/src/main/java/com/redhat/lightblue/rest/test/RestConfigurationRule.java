@@ -25,9 +25,9 @@ import com.redhat.lightblue.config.LightblueFactory;
 import com.redhat.lightblue.rest.RestConfiguration;
 
 /**
- * This {@link TestRule} implementation has one sole purpose, which is to ensure that
- * the {@link LightblueFactory} is reset on the {@link RestConfiguration} appropriately
- * after each test or test suite.
+ * This {@link TestRule} implementation has one sole purpose, which is to ensure
+ * that the {@link LightblueFactory} is reset on the {@link RestConfiguration}
+ * appropriately after each test or test suite.
  *
  * @author dcrissman
  */

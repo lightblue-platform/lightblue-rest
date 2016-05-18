@@ -97,7 +97,7 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
-        Assert.assertTrue("Metadata was not created!", 2<= metadataCollection.find().count());
+        Assert.assertTrue("Metadata was not created!", 2 <= metadataCollection.find().count());
 
         DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
@@ -119,7 +119,7 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
-        Assert.assertTrue("Metadata was not created!", 2<= metadataCollection.find().count());
+        Assert.assertTrue("Metadata was not created!", 2 <= metadataCollection.find().count());
 
         DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
@@ -146,7 +146,7 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
-        Assert.assertTrue("Metadata was not created!", 2<= metadataCollection.find().count());
+        Assert.assertTrue("Metadata was not created!", 2 <= metadataCollection.find().count());
 
         DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
@@ -175,7 +175,7 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
-        Assert.assertTrue("Metadata was not created!", 2<= metadataCollection.find().count());
+        Assert.assertTrue("Metadata was not created!", 2 <= metadataCollection.find().count());
 
         DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
@@ -203,7 +203,7 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
-        Assert.assertTrue("Metadata was not created!", 2<= metadataCollection.find().count());
+        Assert.assertTrue("Metadata was not created!", 2 <= metadataCollection.find().count());
 
         DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
@@ -226,7 +226,7 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
-        Assert.assertTrue("Metadata was not created!", 2<= metadataCollection.find().count());
+        Assert.assertTrue("Metadata was not created!", 2 <= metadataCollection.find().count());
 
         DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
@@ -255,7 +255,7 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
-        Assert.assertTrue("Metadata was not created!", 2<= metadataCollection.find().count());
+        Assert.assertTrue("Metadata was not created!", 2 <= metadataCollection.find().count());
 
         DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 
@@ -298,7 +298,7 @@ public class ITMongoIndexManipulationTest {
         metadataResource.createMetadata(sc, entityName, entityVersion, metadata);
 
         DBCollection metadataCollection = mongo.getDB().getCollection("metadata");
-        Assert.assertTrue("Metadata was not created!", 2<= metadataCollection.find().count());
+        Assert.assertTrue("Metadata was not created!", 2 <= metadataCollection.find().count());
 
         DBCollection entityCollection = mongo.getDB().getCollection(entityName);
 

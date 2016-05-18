@@ -56,8 +56,9 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         try {
 
             List<String> roles = new CachedLdapFindUserRolesByUidCommand(ldapSearchBase, userName, ldapContextProvider).execute();
-            if(roles!=null)
+            if (roles != null) {
                 userRoles.addAll(roles);
+            }
 
         } catch (Exception ce) {
             // Some exception

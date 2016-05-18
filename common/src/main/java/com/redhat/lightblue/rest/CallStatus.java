@@ -35,9 +35,9 @@ import com.redhat.lightblue.util.JsonObject;
 import com.redhat.lightblue.util.Error;
 
 /**
- * Status information returned from Hystrix commands. It contains the
- * return value, and errors. It is expected that either errors or the
- * return value will be populated.
+ * Status information returned from Hystrix commands. It contains the return
+ * value, and errors. It is expected that either errors or the return value will
+ * be populated.
  */
 public class CallStatus<T extends JsonObject> {
 
@@ -50,28 +50,30 @@ public class CallStatus<T extends JsonObject> {
      * Construct a CallStatus with the given return value
      */
     public CallStatus(T ret) {
-        this.returnValue=ret;
+        this.returnValue = ret;
     }
 
     /**
      * Construct a CallStatus witht the given error
      */
     public CallStatus(Error x) {
-        this.errors=new ArrayList<>();
+        this.errors = new ArrayList<>();
         errors.add(x);
     }
 
     /**
      * Construct empty call status
      */
-    public CallStatus() {}
+    public CallStatus() {
+    }
 
     /**
      * Adds an error to the call status
      */
     public void addError(Error error) {
-        if(errors==null)
-            errors=new ArrayList<>();
+        if (errors == null) {
+            errors = new ArrayList<>();
+        }
         errors.add(error);
     }
 
@@ -79,8 +81,9 @@ public class CallStatus<T extends JsonObject> {
      * Adds errors to the call status
      */
     public void addErrors(Collection<Error> errors) {
-        if(this.errors==null)
-            this.errors=new ArrayList<>();
+        if (this.errors == null) {
+            this.errors = new ArrayList<>();
+        }
         this.errors.addAll(errors);
     }
 
@@ -88,7 +91,7 @@ public class CallStatus<T extends JsonObject> {
      * Sets the return value of the call status
      */
     public void setReturnValue(T v) {
-        this.returnValue=v;
+        this.returnValue = v;
     }
 
     /**
@@ -109,41 +112,40 @@ public class CallStatus<T extends JsonObject> {
      * Returns if there are errors in the call status
      */
     public boolean hasErrors() {
-        return errors!=null&&!errors.isEmpty();
+        return errors != null && !errors.isEmpty();
     }
 
     /**
-     * If there are errors, returns an object containing an array of
-     * errors, and a status field with value "ERROR". If there are no
-     * errors, returns the json representation of the return value.
+     * If there are errors, returns an object containing an array of errors, and
+     * a status field with value "ERROR". If there are no errors, returns the
+     * json representation of the return value.
      */
     public JsonNode toJson() {
-        if(hasErrors()) {
-            ObjectNode node=factory.objectNode();
-            ArrayNode arr=factory.arrayNode();
-            for(Error e:errors) {
+        if (hasErrors()) {
+            ObjectNode node = factory.objectNode();
+            ArrayNode arr = factory.arrayNode();
+            for (Error e : errors) {
                 arr.add(e.toJson());
             }
-            node.put("errors",arr);
-            node.put("status","ERROR");
+            node.put("errors", arr);
+            node.put("status", "ERROR");
             return node;
         } else {
-            return returnValue==null?factory.objectNode():returnValue.toJson();
+            return returnValue == null ? factory.objectNode() : returnValue.toJson();
         }
-        
+
     }
 
     /**
      * Returns an http status based on the error information in the return value
      */
     public Status getHttpStatus() {
-        if(hasErrors()) {
+        if (hasErrors()) {
             return HttpErrorMapper.getStatus(errors.get(0));
-        } else {
-            if(returnValue instanceof Response) {
-                List<Error> l=((Response)returnValue).getErrors();
-                if(l!=null&&!l.isEmpty())
-                    return HttpErrorMapper.getStatus(l.get(0));
+        } else if (returnValue instanceof Response) {
+            List<Error> l = ((Response) returnValue).getErrors();
+            if (l != null && !l.isEmpty()) {
+                return HttpErrorMapper.getStatus(l.get(0));
             }
         }
         return Status.OK;

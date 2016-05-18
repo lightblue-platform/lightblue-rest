@@ -36,8 +36,9 @@ public class InitialLdapContextProvider {
     }
 
     /**
-     * This call is expensive. InitialLdapContext should be reused, but then we have to deal with
-     * ldap closing the connections. A real pooling with connection validation is needed.
+     * This call is expensive. InitialLdapContext should be reused, but then we
+     * have to deal with ldap closing the connections. A real pooling with
+     * connection validation is needed.
      *
      * @throws NamingException
      */

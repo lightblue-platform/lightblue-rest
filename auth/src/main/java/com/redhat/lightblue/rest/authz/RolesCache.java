@@ -12,10 +12,13 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+
 /**
- * RolesCache contains 2 caches: rolesCache and fallbackRolesCache. Roles put in the former are evicted after few minutes,
- * so that role membership changes in ldap are reflected reasonably quickly. Roles put in the latter are evicted after few
- * hours. FallbackRolesCache is read only when ldap failure is identified (circuit breaker pattern).
+ * RolesCache contains 2 caches: rolesCache and fallbackRolesCache. Roles put in
+ * the former are evicted after few minutes, so that role membership changes in
+ * ldap are reflected reasonably quickly. Roles put in the latter are evicted
+ * after few hours. FallbackRolesCache is read only when ldap failure is
+ * identified (circuit breaker pattern).
  *
  * @author mpatercz
  *
@@ -33,15 +36,15 @@ public class RolesCache {
                 .expireAfterWrite(5, TimeUnit.MINUTES) // If the session is inactive for more than 5 minutes, remove it
                 .removalListener(
                         new RemovalListener<String, List<String>>() {
-                            {
-                                LOGGER.debug("Removal Listener created");
-                            }
+                    {
+                        LOGGER.debug("Removal Listener created");
+                    }
 
-                            @Override
-                            public void onRemoval(@ParametersAreNonnullByDefault RemovalNotification notification) {
-                                LOGGER.debug("This data from " + notification.getKey() + " evacuated due:" + notification.getCause());
-                            }
-                        }
+                    @Override
+                    public void onRemoval(@ParametersAreNonnullByDefault RemovalNotification notification) {
+                        LOGGER.debug("This data from " + notification.getKey() + " evacuated due:" + notification.getCause());
+                    }
+                }
                 ).build();
         LOGGER.debug("RolesCache: rolesCache was created on a static block");
 

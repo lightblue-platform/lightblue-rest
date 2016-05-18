@@ -49,7 +49,7 @@ public class TestPluginConfiguration {
 
         //Clunky, but guarantees the order.
         List<URL> sortedUrls = new ArrayList<URL>(urls);
-        Collections.sort(sortedUrls, new Comparator<URL>(){
+        Collections.sort(sortedUrls, new Comparator<URL>() {
 
             @Override
             public int compare(URL o1, URL o2) {

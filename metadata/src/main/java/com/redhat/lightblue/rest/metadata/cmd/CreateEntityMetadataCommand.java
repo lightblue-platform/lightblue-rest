@@ -28,7 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class create the metadata if it doesn't exist, and updates it if entity schema exists, but version doesn't
+ * This class create the metadata if it doesn't exist, and updates it if entity
+ * schema exists, but version doesn't
  *
  * @author nmalik
  * @author bserdar
@@ -58,7 +59,7 @@ public class CreateEntityMetadataCommand extends AbstractRestCommand {
         Error.push(entity);
         Error.push(version);
         try {
-            EntityMetadata emd = getJsonTranslator().parse(EntityMetadata.class,JsonUtils.json(data));
+            EntityMetadata emd = getJsonTranslator().parse(EntityMetadata.class, JsonUtils.json(data));
             if (!emd.getName().equals(entity)) {
                 throw Error.get(RestMetadataConstants.ERR_NO_NAME_MATCH, entity);
             }
@@ -69,12 +70,12 @@ public class CreateEntityMetadataCommand extends AbstractRestCommand {
             Metadata md = getMetadata();
             LOGGER.debug("Metadata instance:{}", md);
             // See if entity already exists
-            if(md.getEntityInfo(entity)!=null) {
-                LOGGER.debug("Entity exists: {}, creating version {}",entity, version);
+            if (md.getEntityInfo(entity) != null) {
+                LOGGER.debug("Entity exists: {}, creating version {}", entity, version);
                 md.createNewSchema(emd);
                 md.updateEntityInfo(emd.getEntityInfo());
             } else {
-                LOGGER.debug("Creating new metadata:{} {}",entity,version);
+                LOGGER.debug("Creating new metadata:{} {}", entity, version);
                 md.createNewMetadata(emd);
             }
             emd = md.getEntityMetadata(entity, version);

@@ -37,7 +37,7 @@ public class UpdateEntitySchemaStatusCommand extends AbstractRestCommand {
     private final String status;
     private final String comment;
 
-    public UpdateEntitySchemaStatusCommand( String entity, String version, String status, String comment) {
+    public UpdateEntitySchemaStatusCommand(String entity, String version, String status, String comment) {
         this(null, entity, version, status, comment);
     }
 

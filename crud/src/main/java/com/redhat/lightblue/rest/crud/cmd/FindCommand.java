@@ -67,7 +67,7 @@ public class FindCommand extends AbstractRestCommand {
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
             LOGGER.debug("Find request:{}", ireq);
-            try{
+            try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
                 LOGGER.error("find:validate failure: {}", e);

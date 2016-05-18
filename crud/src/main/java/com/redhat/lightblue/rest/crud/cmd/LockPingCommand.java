@@ -24,14 +24,13 @@ import com.redhat.lightblue.extensions.synch.Locking;
 
 public class LockPingCommand extends AbstractLockCommand {
 
-    public LockPingCommand(String domain,String caller,String resource) {
-        super(domain,caller,resource);
+    public LockPingCommand(String domain, String caller, String resource) {
+        super(domain, caller, resource);
     }
 
     @Override
     protected JsonNode runLockCommand(Locking locking) {
-        locking.ping(caller,resource);
+        locking.ping(caller, resource);
         return NODE_FACTORY.booleanNode(true);
     }
 }
-
