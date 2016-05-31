@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
     <groupId>com.redhat.lightblue.rest</groupId>
     <artifactId>lightblue-rest-pom</artifactId>
     <packaging>pom</packaging>
-    <version>2.7.0-SNAPSHOT</version>
+    <version>2.7.0</version>
     <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
     <description>REST front-ends for Lightblue</description>
     <licenses>
@@ -42,7 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <connection>scm:git:https://github.com/lightblue-platform/lightblue-rest.git</connection>
         <developerConnection>scm:git:git@github.com:lightblue-platform/lightblue-rest.git</developerConnection>
         <url>https://github.com/lightblue-platform/lightblue-rest</url>
-      <tag>HEAD</tag>
+      <tag>V2.7.0</tag>
     </scm>
     <distributionManagement>
         <repository>
@@ -307,7 +307,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.compiler.verbose>true</maven.compiler.verbose>
 
         <lightblue.core.version>2.0.0</lightblue.core.version>
-        <lightblue.mongo.version>1.17.0</lightblue.mongo.version>
+        <lightblue.mongo.version>1.10.0</lightblue.mongo.version>
         <lightblue.ldap.version>1.8.0</lightblue.ldap.version>
         <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
     </properties>
