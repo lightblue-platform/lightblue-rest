@@ -309,8 +309,9 @@ public abstract class AbstractCrudResource {
                                @QueryParam("P") String p,
                                @QueryParam("S") String s,
                                @QueryParam("from") Long from,
-                               @QueryParam("to") Long to) throws IOException {
-        return simpleFind(entity, null, q, p, s, from, to);
+                               @QueryParam("to") Long to,
+                               @QueryParam("maxResults") Long maxResults) throws IOException {
+        return simpleFind(entity, null, q, p, s, from, to, maxResults);
     }
 
     @GET
@@ -323,9 +324,10 @@ public abstract class AbstractCrudResource {
                                @QueryParam("P") String p,
                                @QueryParam("S") String s,
                                @QueryParam("from") Long from,
-                               @QueryParam("to") Long to) throws IOException {
+                               @QueryParam("to") Long to,
+                               @QueryParam("maxResults") Long maxResults) throws IOException {
         Error.reset();
-        String request=buildSimpleRequest(entity,version,q,p,s,from,to).toString();
+        String request=buildSimpleRequest(entity,version,q,p,s,from,to,maxResults).toString();
         CallStatus st = new FindCommand(null, entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
@@ -339,8 +341,9 @@ public abstract class AbstractCrudResource {
                                   @QueryParam("P") String p,
                                   @QueryParam("S") String s,
                                   @QueryParam("from") Long from,
-                                  @QueryParam("to") Long to) throws IOException {
-        return simpleExplain(entity, null, q, p, s, from, to);
+                                  @QueryParam("to") Long to,
+                                  @QueryParam("maxResults") Long maxResults) throws IOException {
+        return simpleExplain(entity, null, q, p, s, from, to,maxResults);
     }
     
     @GET
@@ -353,14 +356,15 @@ public abstract class AbstractCrudResource {
                                   @QueryParam("P") String p,
                                   @QueryParam("S") String s,
                                   @QueryParam("from") Long from,
-                                  @QueryParam("to") Long to) throws IOException {
+                                  @QueryParam("to") Long to,
+                                  @QueryParam("maxResults") Long maxResults) throws IOException {
         Error.reset();
-        String request=buildSimpleRequest(entity,version,q,p,s,from,to).toString();
+        String request=buildSimpleRequest(entity,version,q,p,s,from,to,maxResults).toString();
         CallStatus st = new ExplainCommand(null, entity, version, request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
-    private FindRequest buildSimpleRequest(String entity,String version, String q,String p, String s, Long from, Long to)
+    private FindRequest buildSimpleRequest(String entity,String version, String q,String p, String s, Long from, Long to,Long maxResults)
         throws IOException {            
         // spec -> https://github.com/lightblue-platform/lightblue/wiki/Rest-Spec-Data#get-simple-find
         String sq = QueryTemplateUtils.buildQueryFieldsTemplate(q);
@@ -378,7 +382,11 @@ public abstract class AbstractCrudResource {
         findRequest.setProjection(sp == null ? null : Projection.fromJson(JsonUtils.json(sp)));
         findRequest.setSort(ss == null ? null : Sort.fromJson(JsonUtils.json(ss)));
         findRequest.setFrom(from);
-        findRequest.setTo(to);
+        if(to!=null) {
+            findRequest.setTo(to);
+        } else if(maxResults!=null&&maxResults>0) {
+            findRequest.setTo((from == null ? 0 : from) + maxResults - 1);
+        }
         return findRequest;
     }
 }
