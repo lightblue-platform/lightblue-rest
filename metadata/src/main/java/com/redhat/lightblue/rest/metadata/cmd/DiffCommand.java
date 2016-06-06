@@ -59,11 +59,11 @@ public class DiffCommand extends AbstractRestCommand {
         Error.push(getClass().getSimpleName());
         try {
             EntityMetadata md1 = getMetadata().getEntityMetadata(entity, version1);
-            EntityMetadata md2 = getMetadata().getEntityMetadata(entity, version2);
             if (md1 != null) {
-                JSONMetadataParser parser = getJSONParser();
-                JsonNode jmd1=parser.convert(md1);
+                EntityMetadata md2 = getMetadata().getEntityMetadata(entity, version2);
                 if(md2!=null) {
+                    JSONMetadataParser parser = getJSONParser();
+                    JsonNode jmd1=parser.convert(md1);
                     JsonNode jmd2=parser.convert(md2);
                     List<DocComparator.Delta<JsonNode>> l=new JsonCompare().compareNodes(jmd1,jmd2).getDelta();
                     ArrayNode ret=JsonNodeFactory.instance.arrayNode();
