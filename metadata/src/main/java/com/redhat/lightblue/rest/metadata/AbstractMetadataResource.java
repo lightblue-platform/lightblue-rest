@@ -50,6 +50,7 @@ import com.redhat.lightblue.rest.metadata.cmd.GetDependenciesCommand;
 import com.redhat.lightblue.rest.metadata.cmd.GetEntityMetadataCommand;
 import com.redhat.lightblue.rest.metadata.cmd.GetEntityNamesCommand;
 import com.redhat.lightblue.rest.metadata.cmd.GetEntityRolesCommand;
+import com.redhat.lightblue.rest.metadata.cmd.DiffCommand;
 import com.redhat.lightblue.rest.metadata.cmd.GetEntityVersionsCommand;
 import com.redhat.lightblue.rest.metadata.cmd.ReIndexCommand;
 import com.redhat.lightblue.rest.metadata.cmd.RemoveEntityCommand;
@@ -108,6 +109,19 @@ public abstract class AbstractMetadataResource {
 
         checkPermission(sc, MetadataRole.FIND_DEPENDENCIES);
         return new GetDependenciesCommand(entity, version).run();
+    }
+
+    @GET
+    @LZF
+    @Path("/{entity}/{version}/diff/{version2}")
+    public String getDiff(@Context SecurityContext sc,
+                          @PathParam(PARAM_ENTITY) String entity,
+                          @PathParam(PARAM_VERSION) String version1,
+                          @PathParam("version2") String version2) {
+        Error.reset();
+        checkPermission(sc, MetadataRole.FIND_ENTITY_METADATA);
+        return new DiffCommand(entity,version1,version2).run();
+
     }
 
     @GET

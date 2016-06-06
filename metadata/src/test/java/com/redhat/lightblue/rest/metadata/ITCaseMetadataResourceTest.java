@@ -183,4 +183,24 @@ public class ITCaseMetadataResourceTest {
         String resultUpdateEntityInfo = cutMetadataResource.createMetadata(sc, "country", "1.1.0", expectedUpdateEntityInfo);
         JSONAssert.assertEquals(expectedUpdateEntityInfo, resultUpdateEntityInfo, false);
     }
+    
+    @Test
+    public void diff() throws Exception {
+        Assert.assertNotNull("MetadataResource was not injected by the container", cutMetadataResource);
+
+        SecurityContext sc = new TestSecurityContext();
+
+        System.out.println("factory:" + RestConfiguration.getFactory());
+        String expectedCreated = readFile("expectedCreated.json");
+        cutMetadataResource.createMetadata(sc, "country", "1.0.0", readFile("resultCreated.json"));
+
+        String expectedUpdateEntityInfo = readFile("expectedCreateSchema.json");
+        cutMetadataResource.createMetadata(sc, "country", "1.1.0", expectedUpdateEntityInfo);
+
+        String diff=cutMetadataResource.getDiff(sc,"country","1.0.0","1.1.0");
+        System.out.println("Diff:"+diff);
+        JSONAssert.assertEquals("[{\"-schema.version.value\":\"1.0.0\",\"+schema.version.value\":\"1.1.0\"},{\"+schema.fields.elementx\":{\"type\":\"string\",\"description\":null}},{\"-schema._id\":\"country|1.0.0\",\"+schema._id\":\"country|1.1.0\"}]]",diff,false);
+
+                                   
+    }
 }
