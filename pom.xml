@@ -55,7 +55,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>org.esbtools.lightblue-notification-hook</groupId>
                 <artifactId>lightblue-notification-hook</artifactId>
-                <version>0.1.3</version>
+                <version>0.1.4-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
@@ -306,10 +306,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.compiler.debuglevel>lines,vars,source</maven.compiler.debuglevel>
         <maven.compiler.verbose>true</maven.compiler.verbose>
 
-        <lightblue.core.version>2.2.0</lightblue.core.version>
-        <lightblue.mongo.version>1.20.0</lightblue.mongo.version>
-        <lightblue.ldap.version>1.9.0</lightblue.ldap.version>
-        <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
+        <lightblue.core.version>2.3.0-SNAPSHOT</lightblue.core.version>
+        <lightblue.mongo.version>1.21.0-SNAPSHOT</lightblue.mongo.version>
+        <lightblue.ldap.version>1.10.0-SNAPSHOT</lightblue.ldap.version>
+        <lightblue.audithook.version>1.11.0-SNAPSHOT</lightblue.audithook.version>
     </properties>
     <build>
         <plugins>
