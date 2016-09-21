@@ -21,11 +21,13 @@
  */
 package com.redhat.lightblue.rest.auth.jboss;
 
-import java.security.Principal;
-import java.security.acl.Group;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
+import com.redhat.lightblue.rest.auth.ldap.LightblueLdapRoleProvider;
+import org.apache.commons.lang3.StringUtils;
+import org.jboss.logging.Logger;
+import org.jboss.security.SimpleGroup;
+import org.jboss.security.auth.spi.BaseCertLoginModule;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.NamingException;
 import javax.naming.ldap.LdapName;
@@ -33,15 +35,11 @@ import javax.naming.ldap.Rdn;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
-
-import org.jboss.logging.Logger;
-import org.jboss.security.SimpleGroup;
-import org.jboss.security.auth.spi.BaseCertLoginModule;
-
-import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
-import com.redhat.lightblue.rest.auth.ldap.LightblueLdapRoleProvider;
-
-import org.slf4j.LoggerFactory;
+import java.security.Principal;
+import java.security.acl.Group;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author dhaynes
@@ -51,6 +49,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class CertLdapLoginModule extends BaseCertLoginModule {
+    public static final String UID = "uid";
+    public static final String CN = "cn";
     private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class);
 
     public static final String AUTH_ROLE_NAME = "authRoleName";
@@ -102,17 +102,15 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
 
             initializeLightblueLdapRoleProvider();
 
-            String username = getUsername();
+            String certPrincipal = getUsername();
 
-            LOGGER.debug("Prinicipal username:" + username);
+            LOGGER.debug("Certificate principal:" + certPrincipal);
 
-            LdapName name = new LdapName(username);
-            String searchName = "";
-            for (Rdn rdn : name.getRdns()) {
-                if (rdn.getType().equalsIgnoreCase("cn")) {
-                    searchName = (String) rdn.getValue();
-                    break;
-                }
+            //first try getting search name with in certificate principle (new certificates)
+            String searchName = getSearchName(certPrincipal, UID);
+            if(StringUtils.isBlank(searchName)) {
+                //try looking up by cn instead is uid not available (legacy certificates)
+                searchName = getSearchName(certPrincipal, CN);
             }
 
             Collection<String> groupNames = lbLdap.getUserRoles(searchName);
@@ -127,7 +125,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
             }
 
             if (ACCESS_LOGGER.isDebugEnabled()) {
-                ACCESS_LOGGER.debug("Principal username: " + username + ", roles: " + Arrays.toString(groupNames.toArray()));
+                ACCESS_LOGGER.debug("Certificate principal: " + certPrincipal + ", roles: " + Arrays.toString(groupNames.toArray()));
             }
 
             LOGGER.debug("Assign principal [" + p.getName() + "] to role [" + roleName + "]");
@@ -137,5 +135,17 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         }
         Group[] roleSets = {userRoles};
         return roleSets;
+    }
+
+    private String getSearchName(String certificatePrincipal, String searchAttribute) throws NamingException {
+        String searchName = new String();
+        LdapName name = new LdapName(certificatePrincipal);
+        for (Rdn rdn : name.getRdns()) {
+            if (rdn.getType().equalsIgnoreCase(searchAttribute)) {
+                searchName = (String) rdn.getValue();
+                break;
+            }
+        }
+        return searchName;
     }
 }

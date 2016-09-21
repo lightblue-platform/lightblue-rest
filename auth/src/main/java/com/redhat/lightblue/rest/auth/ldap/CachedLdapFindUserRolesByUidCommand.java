@@ -1,7 +1,9 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Strings;
+import com.redhat.lightblue.rest.authz.RolesCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -9,12 +11,8 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
-import com.redhat.lightblue.rest.authz.RolesCache;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * LDAP Hystrix command that can provide metrics for this service and fall back
