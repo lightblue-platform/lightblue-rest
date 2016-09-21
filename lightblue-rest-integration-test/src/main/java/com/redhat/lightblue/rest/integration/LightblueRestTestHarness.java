@@ -1,15 +1,18 @@
 package com.redhat.lightblue.rest.integration;
 
-import com.redhat.lightblue.mongo.test.LightblueMongoTestHarness;
-import com.redhat.lightblue.rest.RestConfiguration;
-import com.restcompress.provider.LZFDecodingInterceptor;
-import com.restcompress.provider.LZFEncodingInterceptor;
-import com.sun.net.httpserver.HttpServer;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
 import org.jboss.resteasy.plugins.server.sun.http.HttpContextBuilder;
 import org.junit.AfterClass;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
+import com.redhat.lightblue.mongo.test.LightblueMongoTestHarness;
+import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.crud.CrudResource;
+import com.redhat.lightblue.rest.metadata.MetadataResource;
+import com.restcompress.provider.LZFDecodingInterceptor;
+import com.restcompress.provider.LZFEncodingInterceptor;
+import com.sun.net.httpserver.HttpServer;
 
 /**
  * <p>
