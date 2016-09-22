@@ -30,6 +30,7 @@ import org.jboss.security.auth.spi.BaseCertLoginModule;
 import org.slf4j.LoggerFactory;
 
 import javax.naming.NamingException;
+import javax.naming.directory.NoSuchAttributeException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.security.auth.Subject;
@@ -51,6 +52,7 @@ import java.util.Map;
 public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String UID = "uid";
     public static final String CN = "cn";
+    public static final String LOCATION = "l";
     private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class);
 
     public static final String AUTH_ROLE_NAME = "authRoleName";
@@ -58,10 +60,13 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String SEARCH_BASE = "searchBase";
     public static final String BIND_DN = "bindDn";
     public static final String BIND_PWD = "bindPassword";
+    public static final String ENVIRONMENT = "environment";
 
-    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, LDAP_SERVER, SEARCH_BASE, BIND_DN, BIND_PWD};
+    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, LDAP_SERVER, SEARCH_BASE, BIND_DN, BIND_PWD, ENVIRONMENT};
 
     private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
+
+    private static String environment;
 
     // LightblueRoleProvider singleton
     private static LightblueRoleProvider lbLdap = null;
@@ -82,6 +87,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         String searchBase = (String) options.get(SEARCH_BASE);
         String bindDn = (String) options.get(BIND_DN);
         String bindPwd = (String) options.get(BIND_PWD);
+        environment = (String) options.get(ENVIRONMENT);
 
         lbLdap = new LightblueLdapRoleProvider(ldapServer, searchBase, bindDn, bindPwd);
     }
@@ -98,19 +104,23 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         SimpleGroup userRoles = new SimpleGroup("Roles");
 
         Principal p = null;
-        try {
 
+        String certPrincipal = getUsername();
+
+        try {
             initializeLightblueLdapRoleProvider();
 
-            String certPrincipal = getUsername();
 
             LOGGER.debug("Certificate principal:" + certPrincipal);
 
-            //first try getting search name with in certificate principle (new certificates)
-            String searchName = getSearchName(certPrincipal, UID);
-            if(StringUtils.isBlank(searchName)) {
-                //try looking up by cn instead is uid not available (legacy certificates)
-                searchName = getSearchName(certPrincipal, CN);
+            //first try getting search name from uid in certificate principle (new certificates)
+            String searchName = getLDAPAttribute(certPrincipal, UID);
+            if(StringUtils.isNotBlank(searchName)) {
+                //only try to validate environment if it is a certificate that contains uid
+                validateEnvironment(certPrincipal);
+            } else {
+                // fallback to getting search name from cn in certificate principle (legacy certificates)
+                searchName = getLDAPAttribute(certPrincipal, CN);
             }
 
             Collection<String> groupNames = lbLdap.getUserRoles(searchName);
@@ -130,14 +140,24 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
 
             LOGGER.debug("Assign principal [" + p.getName() + "] to role [" + roleName + "]");
         } catch (Exception e) {
-            String principalName = p == null ? "null" : p.getName();
+            String principalName = p == null ? certPrincipal : p.getName();
             LOGGER.error("Failed to assign principal [" + principalName + "] to role [" + roleName + "]", e);
         }
         Group[] roleSets = {userRoles};
         return roleSets;
     }
 
-    private String getSearchName(String certificatePrincipal, String searchAttribute) throws NamingException {
+    private void validateEnvironment(String certificatePrincipal) throws NamingException {
+        if(StringUtils.isNotBlank(environment)) {
+            String location = getLDAPAttribute(certificatePrincipal, LOCATION);
+
+            if(!StringUtils.equals(environment, location)) {
+                throw new NoSuchAttributeException("Location from certificate does not match configured environment");
+            }
+        }
+    }
+
+    private String getLDAPAttribute(String certificatePrincipal, String searchAttribute) throws NamingException {
         String searchName = new String();
         LdapName name = new LdapName(certificatePrincipal);
         for (Rdn rdn : name.getRdns()) {
