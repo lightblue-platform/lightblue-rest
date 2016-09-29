@@ -1,0 +1,46 @@
+{
+    "entityInfo": {
+        "datastore": {
+            "backend": "mongo",
+            "collection": "test",
+            "datasource": "${mongo.datasource}"
+        },
+        "name": "test",
+        "defaultVersion": "1.0.0"
+    },
+    "schema": {
+        "name": "test",
+        "status": {
+            "value": "active"
+        },
+        "version": {
+            "changelog": "test metadata",
+            "value": "1.0.0"
+        },
+        "access": {
+            "delete": [
+                "anyone"
+            ],
+            "find": [
+                "anyone"
+            ],
+            "insert": [
+                "anyone"
+            ],
+            "update": [
+                "anyone"
+            ]
+        },
+        "fields": {
+            "_id": {
+                "type": "string",
+                "valueGenerator": {
+                    "type": "UUID"
+                }
+            },
+            "value": {
+                "type": "string"
+            }
+        }
+    }
+}

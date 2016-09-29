@@ -22,7 +22,7 @@ public class LoggingFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingFilter.class);
 
-    public static final String HEADER_REQUEST_UUID = "requestUuid";
+    public static final String HEADER_REQUEST_UUID = "RequestUUID";
 
     @Override
     public void destroy() {
@@ -53,7 +53,7 @@ public class LoggingFilter implements Filter {
 
             chain.doFilter(req, resp);
         } finally {
-            MDC.clear();
+            MDC.remove(HEADER_REQUEST_UUID);
         }
     }
 
