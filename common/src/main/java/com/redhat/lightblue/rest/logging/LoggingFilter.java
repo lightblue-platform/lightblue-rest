@@ -32,7 +32,7 @@ public class LoggingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         try {
-            String requestUUID = UUID.randomUUID().toString();
+            String requestUUID = String.valueOf(UUID.randomUUID().getMostSignificantBits());
             LOGGER.debug(HEADER_REQUEST_UUID + ": " + requestUUID);
 
             MDC.put(HEADER_REQUEST_UUID, requestUUID);
