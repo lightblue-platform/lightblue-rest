@@ -7,6 +7,15 @@
        <url-pattern>/*</url-pattern>
     </servlet-mapping>
     
+    <filter>
+       <filter-name>LoggingFilter</filter-name>
+       <filter-class>com.redhat.lightblue.rest.logging.LoggingFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>LoggingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
     <servlet>
         <servlet-name>health</servlet-name>
         <jsp-file>/health.jsp</jsp-file>
@@ -28,4 +37,5 @@
         <param-name>resteasy.providers</param-name>
         <param-value>com.restcompress.provider.LZFEncodingInterceptor,com.restcompress.provider.LZFDecodingInterceptor</param-value>
     </context-param>
+    
 </web-app>

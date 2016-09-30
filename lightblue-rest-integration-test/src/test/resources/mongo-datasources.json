@@ -1,0 +1,14 @@
+{
+    "${mongo.datasource}" : {
+        "type" : "com.redhat.lightblue.mongo.config.MongoConfiguration",
+        "metadataBackendParser" : "com.redhat.lightblue.metadata.mongo.MongoBackendParser",
+        "ssl" : false,
+        "database" : "${mongo.database}",
+        "servers" : [
+            {
+                "host" : "${mongo.host}",
+                "port" : "${mongo.port}"
+            }
+        ]
+   }
+}
