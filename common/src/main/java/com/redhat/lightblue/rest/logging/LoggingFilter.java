@@ -23,6 +23,7 @@ public class LoggingFilter implements Filter {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingFilter.class);
 
     public static final String HEADER_REQUEST_UUID = "RequestUUID";
+    public static final String HEADER_REQUEST_PRINCIPAL = "RequestPrincipal";
 
     @Override
     public void destroy() {
@@ -38,7 +39,10 @@ public class LoggingFilter implements Filter {
             MDC.put(HEADER_REQUEST_UUID, requestUUID);
 
             if (req instanceof HttpServletRequest) {
-                ((HttpServletRequest) req).setAttribute(HEADER_REQUEST_UUID, requestUUID);
+                HttpServletRequest httpReq = ((HttpServletRequest) req);
+                httpReq.setAttribute(HEADER_REQUEST_UUID, requestUUID);
+
+                principal(httpReq);
             }
             else {
                 LOGGER.info("ServletRequest of type: " + req.getClass());
@@ -54,6 +58,16 @@ public class LoggingFilter implements Filter {
             chain.doFilter(req, resp);
         } finally {
             MDC.remove(HEADER_REQUEST_UUID);
+            MDC.remove(HEADER_REQUEST_PRINCIPAL);
+        }
+    }
+
+    private void principal(HttpServletRequest httpReq) {
+        if (httpReq.getUserPrincipal() != null) {
+            String principal = httpReq.getUserPrincipal().getName();
+            if (principal != null) {
+                MDC.put(HEADER_REQUEST_PRINCIPAL, principal);
+            }
         }
     }
 

@@ -4,8 +4,14 @@ import static com.redhat.lightblue.util.test.AbstractJsonNodeTest.loadJsonNode;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import javax.ws.rs.core.Response;
+
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.jboss.resteasy.client.jaxrs.BasicAuthentication;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,6 +39,18 @@ public class TestLoggingFilter extends LightblueRestTestClient {
         assertNotNull(entity);
         assertTrue(response.getHeaders().containsKey(LoggingFilter.HEADER_REQUEST_UUID));
         assertNotNull(response.getHeaders().get(LoggingFilter.HEADER_REQUEST_UUID));
+    }
+
+    @Test
+    public void testLogger() throws Exception {
+        ResteasyClient client = new ResteasyClientBuilder().defaultProxy(
+                getHttpHost(), getHttpPort()).build();
+        ResteasyWebTarget target = client.target("/rest/data/find/fake?Q=_id:abc");
+        target.register(new BasicAuthentication("fakeuser", "secret"));
+        Response response = target.request().get();
+
+        ClientRequest request = createDataRequest("/find/fake?Q=_id:abc");
+        assertNotNull(response);
     }
 
 }

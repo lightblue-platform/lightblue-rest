@@ -50,6 +50,12 @@
         <version>3.0.19.Final</version>
     </dependency>
     <dependency>
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>javax.ws.rs-api</artifactId>
+        <version>2.1-m01</version>
+    </dependency>
+    
+    <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
