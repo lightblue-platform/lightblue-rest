@@ -11,7 +11,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.redhat.lightblue.rest.integration.LightblueRestTestClient;
 
-
 public class TestLoggingFilter extends LightblueRestTestClient {
 
     public TestLoggingFilter() throws Exception {

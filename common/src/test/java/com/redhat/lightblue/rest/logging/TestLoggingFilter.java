@@ -1,9 +1,13 @@
 package com.redhat.lightblue.rest.logging;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -30,19 +34,37 @@ public class TestLoggingFilter {
         ArgumentCaptor<String> captureUUID = ArgumentCaptor.forClass(String.class);
 
         new LoggingFilter().doFilter(request, response, chain);
+        new LoggingFilter().doFilter(request, response, chain);
 
-        verify(request, atLeastOnce()).setAttribute(eq(LoggingFilter.HEADER_REQUEST_UUID), captureUUID.capture());
-        assertNotNull(captureUUID.getValue());
+        verify(request, times(2)).setAttribute(eq(LoggingFilter.HEADER_REQUEST_UUID), captureUUID.capture());
+
+        List<String> values = captureUUID.getAllValues();
+        assertNotNull(values);
+        assertEquals(2, values.size());
+        assertNotNull(values.get(0));
+        assertNotNull(values.get(1));
+
+        //Ensure that two subsequent runs produce different values
+        assertNotEquals(values.get(0), values.get(1));
     }
-    
+
     @Test
     public void testResponse_SetHeader_RequestUUID() throws Exception {
         ArgumentCaptor<String> captureUUID = ArgumentCaptor.forClass(String.class);
 
         new LoggingFilter().doFilter(request, response, chain);
+        new LoggingFilter().doFilter(request, response, chain);
 
-        verify(response, atLeastOnce()).setHeader(eq(LoggingFilter.HEADER_REQUEST_UUID), captureUUID.capture());
-        assertNotNull(captureUUID.getValue());
+        verify(response, times(2)).setHeader(eq(LoggingFilter.HEADER_REQUEST_UUID), captureUUID.capture());
+
+        List<String> values = captureUUID.getAllValues();
+        assertNotNull(values);
+        assertEquals(2, values.size());
+        assertNotNull(values.get(0));
+        assertNotNull(values.get(1));
+
+        //Ensure that two subsequent runs produce different values
+        assertNotEquals(values.get(0), values.get(1));
     }
 
 }
