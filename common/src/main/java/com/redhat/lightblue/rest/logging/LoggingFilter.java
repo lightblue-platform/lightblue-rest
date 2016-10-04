@@ -55,6 +55,8 @@ public class LoggingFilter implements Filter {
                 LOGGER.info("ServletResponse of type: " + resp.getClass());
             }
 
+            LOGGER.debug("log for testing");
+
             chain.doFilter(req, resp);
         } finally {
             MDC.remove(HEADER_REQUEST_UUID);
