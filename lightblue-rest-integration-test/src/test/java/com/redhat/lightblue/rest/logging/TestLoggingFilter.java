@@ -80,8 +80,7 @@ public class TestLoggingFilter extends LightblueRestTestClient {
                 return client
                         .target(getDataUrl())
                         .path("/find/fake")
-                        .queryParam("Q", "_id:abc")
-                        .register(new BasicAuthentication("fakeuser", "secret"));
+                        .queryParam("Q", "_id:abc");
             }).get(String.class);
         }
         catch(Exception e) {
