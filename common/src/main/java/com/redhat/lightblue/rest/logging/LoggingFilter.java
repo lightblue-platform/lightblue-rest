@@ -22,7 +22,7 @@ public class LoggingFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingFilter.class);
 
-    public static final String HEADER_REQUEST_UUID = "RequestUUID";
+    public static final String HEADER_REQUEST_ID = "RequestID";
     public static final String HEADER_REQUEST_PRINCIPAL = "RequestPrincipal";
 
     @Override
@@ -33,14 +33,14 @@ public class LoggingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         try {
-            String requestUUID = String.valueOf(UUID.randomUUID().getMostSignificantBits());
-            LOGGER.debug(HEADER_REQUEST_UUID + ": " + requestUUID);
+            String requestID = String.valueOf(UUID.randomUUID().getMostSignificantBits());
+            LOGGER.debug(HEADER_REQUEST_ID + ": " + requestID);
 
-            MDC.put(HEADER_REQUEST_UUID, requestUUID);
+            MDC.put(HEADER_REQUEST_ID, requestID);
 
             if (req instanceof HttpServletRequest) {
                 HttpServletRequest httpReq = ((HttpServletRequest) req);
-                httpReq.setAttribute(HEADER_REQUEST_UUID, requestUUID);
+                httpReq.setAttribute(HEADER_REQUEST_ID, requestID);
 
                 //Add principal to MDC
                 if (httpReq.getUserPrincipal() != null) {
@@ -55,7 +55,7 @@ public class LoggingFilter implements Filter {
             }
 
             if (resp instanceof HttpServletResponse) {
-                ((HttpServletResponse) resp).setHeader(HEADER_REQUEST_UUID, requestUUID);
+                ((HttpServletResponse) resp).setHeader(HEADER_REQUEST_ID, requestID);
             }
             else {
                 LOGGER.info("ServletResponse of type: " + resp.getClass());
@@ -65,7 +65,7 @@ public class LoggingFilter implements Filter {
 
             chain.doFilter(req, resp);
         } finally {
-            MDC.remove(HEADER_REQUEST_UUID);
+            MDC.remove(HEADER_REQUEST_ID);
             MDC.remove(HEADER_REQUEST_PRINCIPAL);
         }
     }

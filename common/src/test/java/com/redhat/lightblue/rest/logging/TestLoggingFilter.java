@@ -30,15 +30,15 @@ public class TestLoggingFilter {
     private FilterChain chain;
 
     @Test
-    public void testRequest_SetAttribute_RequestUUID() throws Exception {
-        ArgumentCaptor<String> captureUUID = ArgumentCaptor.forClass(String.class);
+    public void testRequest_SetAttribute_RequestID() throws Exception {
+        ArgumentCaptor<String> captureID = ArgumentCaptor.forClass(String.class);
 
         new LoggingFilter().doFilter(request, response, chain);
         new LoggingFilter().doFilter(request, response, chain);
 
-        verify(request, times(2)).setAttribute(eq(LoggingFilter.HEADER_REQUEST_UUID), captureUUID.capture());
+        verify(request, times(2)).setAttribute(eq(LoggingFilter.HEADER_REQUEST_ID), captureID.capture());
 
-        List<String> values = captureUUID.getAllValues();
+        List<String> values = captureID.getAllValues();
         assertNotNull(values);
         assertEquals(2, values.size());
         assertNotNull(values.get(0));
@@ -49,15 +49,15 @@ public class TestLoggingFilter {
     }
 
     @Test
-    public void testResponse_SetHeader_RequestUUID() throws Exception {
-        ArgumentCaptor<String> captureUUID = ArgumentCaptor.forClass(String.class);
+    public void testResponse_SetHeader_RequestID() throws Exception {
+        ArgumentCaptor<String> captureID = ArgumentCaptor.forClass(String.class);
 
         new LoggingFilter().doFilter(request, response, chain);
         new LoggingFilter().doFilter(request, response, chain);
 
-        verify(response, times(2)).setHeader(eq(LoggingFilter.HEADER_REQUEST_UUID), captureUUID.capture());
+        verify(response, times(2)).setHeader(eq(LoggingFilter.HEADER_REQUEST_ID), captureID.capture());
 
-        List<String> values = captureUUID.getAllValues();
+        List<String> values = captureID.getAllValues();
         assertNotNull(values);
         assertEquals(2, values.size());
         assertNotNull(values.get(0));

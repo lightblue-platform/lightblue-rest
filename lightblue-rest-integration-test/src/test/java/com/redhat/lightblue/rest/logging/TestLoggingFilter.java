@@ -58,7 +58,7 @@ public class TestLoggingFilter extends LightblueRestTestClient {
     }
 
     @Test
-    public void testResponseForRequestUuidHeader() throws Exception {
+    public void testResponseForRequestIDHeader() throws Exception {
         Response response = createRequest((ResteasyClient client) -> {
             return client
                     .target(getDataUrl())
@@ -67,12 +67,12 @@ public class TestLoggingFilter extends LightblueRestTestClient {
         }).get();
 
         assertNotNull(response);
-        assertTrue(response.getHeaders().containsKey(LoggingFilter.HEADER_REQUEST_UUID));
-        assertNotNull(response.getHeaders().get(LoggingFilter.HEADER_REQUEST_UUID));
+        assertTrue(response.getHeaders().containsKey(LoggingFilter.HEADER_REQUEST_ID));
+        assertNotNull(response.getHeaders().get(LoggingFilter.HEADER_REQUEST_ID));
     }
-    
+
     @Test
-    public void testLogsForUUID() throws Exception {
+    public void testLogsForRequestID() throws Exception {
         exception.expect(InternalServerErrorException.class);
 
         try{
@@ -88,7 +88,7 @@ public class TestLoggingFilter extends LightblueRestTestClient {
             boolean atLeastOne = false;
             for (LoggingEvent le : logAppender.getEvents()) {
                 if (le.getRenderedMessage().contains("log for testing")) {
-                    assertNotNull(le.getRenderedMessage(), le.getMDC(LoggingFilter.HEADER_REQUEST_UUID));
+                    assertNotNull(le.getRenderedMessage(), le.getMDC(LoggingFilter.HEADER_REQUEST_ID));
                     atLeastOne = true;
                 }
             }
