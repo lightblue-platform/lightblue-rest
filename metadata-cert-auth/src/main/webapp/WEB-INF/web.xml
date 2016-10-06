@@ -7,6 +7,15 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
 
+  <filter>
+     <filter-name>LoggingFilter</filter-name>
+     <filter-class>com.redhat.lightblue.rest.logging.LoggingFilter</filter-class>
+  </filter>
+  <filter-mapping>
+      <filter-name>LoggingFilter</filter-name>
+      <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>rest-metadata services</web-resource-name>

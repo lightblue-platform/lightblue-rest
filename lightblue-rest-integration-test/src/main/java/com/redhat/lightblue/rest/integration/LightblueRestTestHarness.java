@@ -17,8 +17,10 @@ import com.restcompress.provider.LZFDecodingInterceptor;
 import com.restcompress.provider.LZFEncodingInterceptor;
 
 import io.undertow.Undertow;
+import io.undertow.security.idm.IdentityManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
+import io.undertow.servlet.api.LoginConfig;
 
 /**
  * <p>
@@ -36,16 +38,18 @@ import io.undertow.servlet.api.DeploymentInfo;
 public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness {
 
     private static final String DEFAULT_CONTEXT_PATH_METADATA = "/rest/metadata";
+
     private static final String DEFAULT_CONTEXT_PATH_DATA = "/rest/data";
 
+    private final static String DEFAULT_HOST = "localhost";
     private final static int DEFAULT_PORT = 8000;
 
     private static UndertowJaxrsServer httpServer;
 
-    private final String httpHost;
     private final int httpPort;
     private final String dataUrl;
     private final String metadataUrl;
+    private IdentityManager identityManager;
 
     @AfterClass
     public static void stopHttpServer() {
@@ -56,7 +60,7 @@ public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness
     }
 
     public String getHttpHost() {
-        return httpHost;
+        return DEFAULT_HOST;
     }
 
     public int getHttpPort() {
@@ -71,8 +75,40 @@ public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness
         return metadataUrl;
     }
 
+    public String getDataContextPath() {
+        return DEFAULT_CONTEXT_PATH_DATA;
+    }
+
+    public String getMetadataContextPath() {
+        return DEFAULT_CONTEXT_PATH_METADATA;
+    }
+
+    /**
+     * {@link IdentityManager} used for authentication. By default the value is <code>null</code> which
+     * is the same as no authentication required.
+     * @return {@link IdentityManager}.
+     */
+    public IdentityManager getIdentityManager() {
+        return identityManager;
+    }
+
+    /**
+     * <p>{@link IdentityManager} type can be changed, but a change will not take effect until the application
+     * server is restarted.</p>
+     * <p>A <code>null</code> value is the same as no authentication.
+     * <p>To restart application server, call {@link #stopHttpServer()} and then {@link #ensureHttpServerIsRunning()}.</p>
+     * @param identityManager - implementation of {@link IdentityManager}.
+     */
+    public void setIdentityManager(IdentityManager identityManager) {
+        this.identityManager = identityManager;
+    }
+
     public LightblueRestTestHarness() throws Exception {
         this(DEFAULT_PORT);
+    }
+
+    public LightblueRestTestHarness(IdentityManager identityManager) throws Exception {
+        this(DEFAULT_PORT, identityManager);
     }
 
     /**
@@ -82,22 +118,26 @@ public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness
      * @throws Exception
      */
     public LightblueRestTestHarness(int httpServerPort) throws Exception {
+        this(httpServerPort, null);
+    }
+
+    public LightblueRestTestHarness(int httpServerPort, IdentityManager identityManager) throws Exception {
         super();
-        httpHost = "localhost";
         httpPort = httpServerPort;
+        this.identityManager = identityManager;
 
         dataUrl = new StringBuffer("http://")
-                .append(httpHost)
+                .append(getHttpHost())
                 .append(':')
-                .append(httpPort)
-                .append(DEFAULT_CONTEXT_PATH_DATA)
+                .append(getHttpPort())
+                .append(getDataContextPath())
                 .toString();
 
         metadataUrl = new StringBuffer("http://")
-                .append(httpHost)
+                .append(getHttpHost())
                 .append(':')
-                .append(httpPort)
-                .append(DEFAULT_CONTEXT_PATH_METADATA)
+                .append(getHttpPort())
+                .append(getMetadataContextPath())
                 .toString();
 
         ensureHttpServerIsRunning();
@@ -118,28 +158,39 @@ public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness
             metadataDeployment.getActualProviderClasses().add(LZFDecodingInterceptor.class);
 
             Undertow.Builder builder = Undertow.builder()
-                    .addHttpListener(httpPort, httpHost);
+                    .addHttpListener(getHttpPort(), getHttpHost());
 
             httpServer = new UndertowJaxrsServer();
             httpServer.start(builder);
 
             DeploymentInfo dataDeploymentInfo = httpServer.undertowDeployment(dataDeployment);
-            dataDeploymentInfo.setClassLoader(getClass().getClassLoader());
-            dataDeploymentInfo.setDeploymentName("data");
-            dataDeploymentInfo.setContextPath(DEFAULT_CONTEXT_PATH_DATA);
-            dataDeploymentInfo.addFilter(Servlets.filter("DataLoggingFilter", LoggingFilter.class));
-            dataDeploymentInfo.addFilterUrlMapping("DataLoggingFilter", "/*", DispatcherType.REQUEST);
+            configureDeployment(dataDeploymentInfo, "data", getDataContextPath());
 
             DeploymentInfo metadataDeploymentInfo = httpServer.undertowDeployment(metadataDeployment);
-            metadataDeploymentInfo.setClassLoader(getClass().getClassLoader());
-            metadataDeploymentInfo.setDeploymentName("metadata");
-            metadataDeploymentInfo.setContextPath(DEFAULT_CONTEXT_PATH_METADATA);
-            metadataDeploymentInfo.addFilter(Servlets.filter("MetadataLoggingFilter", LoggingFilter.class));
-            metadataDeploymentInfo.addFilterUrlMapping("MetadataLoggingFilter", "/*", DispatcherType.REQUEST);
+            configureDeployment(metadataDeploymentInfo, "metadata", getMetadataContextPath());
+
+            //Optionally require authentication, by default none is used.
+            if (getIdentityManager() != null) {
+                configureDeploymentSecurity(dataDeploymentInfo);
+                configureDeploymentSecurity(metadataDeploymentInfo);
+            }
 
             httpServer.deploy(dataDeploymentInfo);
             httpServer.deploy(metadataDeploymentInfo);
         }
+    }
+
+    private void configureDeployment(DeploymentInfo deploymentInfo, String name, String contextPath) {
+        deploymentInfo.setClassLoader(getClass().getClassLoader());
+        deploymentInfo.setDeploymentName(name);
+        deploymentInfo.setContextPath(contextPath);
+        deploymentInfo.addFilter(Servlets.filter(name + "LoggingFilter", LoggingFilter.class));
+        deploymentInfo.addFilterUrlMapping(name + "LoggingFilter", "/*", DispatcherType.REQUEST);
+    }
+
+    private void configureDeploymentSecurity(DeploymentInfo deploymentInfo) {
+        deploymentInfo.setIdentityManager(identityManager);
+        deploymentInfo.setLoginConfig(new LoginConfig("BASIC", "lightblueRealm"));
     }
 
 }

@@ -6,16 +6,17 @@ import static org.junit.Assert.assertNotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.Before;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.redhat.lightblue.rest.integration.LightblueRestTestClient;
+import com.redhat.lightblue.rest.integration.client.LightblueRestTestClient;
 
 public class TestCrudResource extends LightblueRestTestClient {
 
@@ -35,7 +36,7 @@ public class TestCrudResource extends LightblueRestTestClient {
         cleanupMongoCollections("test");
     }
 
-    protected <T> ClientResponse<T> insertTestEntry(String id, String value, Class<T> type) throws Exception {
+    protected String insertTestEntry(String id, String value) throws Exception {
         Map<String, Object> entityMap = new HashMap<>();
         entityMap.put("objectType", "test");
 
@@ -54,23 +55,37 @@ public class TestCrudResource extends LightblueRestTestClient {
         projectionMap.put("recursive", true);
         entityMap.put("projection", projectionMap);
 
-        ClientRequest request = createDataRequest("/insert/test");
-        request.body(MediaType.APPLICATION_JSON, new ObjectMapper().writeValueAsString(entityMap));
-        ClientResponse<T> response = request.put(type);
+        String response = createRequest((ResteasyClient client) -> {
+            return client
+                    .target(getDataUrl())
+                    .path("/insert/test");
+        }).put(Entity.entity(
+                    new ObjectMapper().writeValueAsString(entityMap),
+                    MediaType.APPLICATION_JSON),
+                String.class);
+
         assertNotNull(response);
-        assertNotNull(response.getEntity());
+        JSONAssert.assertEquals(
+                "{\"status\":\"COMPLETE\",\"modifiedCount\":1,\"matchCount\":0}",
+                response, false);
         return response;
     }
 
     @Test
     public void testFindSimple() throws Exception {
-        insertTestEntry("abc", "sample", String.class);
+        insertTestEntry("abc", "sample");
 
-        ClientRequest request = createDataRequest("/find/test?Q=_id:abc");
-        ClientResponse<String> response = request.get(String.class);
+        String response = createRequest((ResteasyClient client) -> {
+            return client
+                    .target(getDataUrl())
+                    .path("/find/test")
+                    .queryParam("Q", "_id:abc");
+        }).get(String.class);
+
         assertNotNull(response);
-        String entity = response.getEntity(String.class);
-        assertNotNull(entity);
+        JSONAssert.assertEquals(
+                "{\"status\":\"COMPLETE\",\"modifiedCount\":0,\"matchCount\":1}",
+                response, false);
     }
 
 }
