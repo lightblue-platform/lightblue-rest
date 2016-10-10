@@ -10,6 +10,11 @@
   <artifactId>lightblue-rest-integration-test</artifactId>
   <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
   
+  <properties>
+    <org.jboss.resteasy.version>3.0.19.Final</org.jboss.resteasy.version>
+    <io.undertow.version>1.3.25.Final</io.undertow.version>
+  </properties>
+  
   <dependencies>
     <dependency>
         <groupId>com.redhat.lightblue</groupId>
@@ -42,17 +47,17 @@
     <dependency>
         <groupId>io.undertow</groupId>
         <artifactId>undertow-servlet</artifactId>
-        <version>1.3.25.Final</version>
+        <version>${io.undertow.version}</version>
     </dependency>
     <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-undertow</artifactId>
-        <version>3.0.19.Final</version>
+        <version>${org.jboss.resteasy.version}</version>
     </dependency>
     <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-jaxrs</artifactId>
-        <version>3.0.19.Final</version>
+        <version>${org.jboss.resteasy.version}</version>
     </dependency>
     
     <dependency>
