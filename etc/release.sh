@@ -36,7 +36,7 @@ if [ $MERGE_BASE != $HEAD_HASH ]; then
 fi
 
 # update to non-snapshot versions of lightblue dependencies and commit
-mvn versions:update-properties -DallowSnapshots=false
+mvn versions:update-properties -Dincludes=*lightblue* -DallowSnapshots=false
 git commit -a -m "Updated versions to non snapshot"
 
 # prepare for release (note, this will warn if any snapshot dependencies still exist and allow for fixing)
