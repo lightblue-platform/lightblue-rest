@@ -18,16 +18,11 @@
  */
 package com.redhat.lightblue.rest.auth.ldap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.spy;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.naming.NamingException;
-
+import com.google.common.cache.Cache;
+import com.redhat.lightblue.ldap.test.LdapServerExternalResource;
+import com.redhat.lightblue.ldap.test.LdapServerExternalResource.InMemoryLdapServer;
+import com.redhat.lightblue.rest.authz.RolesCache;
+import com.unboundid.ldap.sdk.Attribute;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -37,11 +32,14 @@ import org.junit.runners.MethodSorters;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
-import com.google.common.cache.Cache;
-import com.redhat.lightblue.ldap.test.LdapServerExternalResource;
-import com.redhat.lightblue.ldap.test.LdapServerExternalResource.InMemoryLdapServer;
-import com.redhat.lightblue.rest.authz.RolesCache;
-import com.unboundid.ldap.sdk.Attribute;
+import javax.naming.NamingException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.spy;
 
 @InMemoryLdapServer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -85,7 +83,7 @@ public class LightblueLdapRoleProviderTest {
                 "ldap://localhost:" + LdapServerExternalResource.DEFAULT_PORT,
                 LdapServerExternalResource.DEFAULT_BASE_DN,
                 LdapServerExternalResource.DEFAULT_BINDABLE_DN,
-                LdapServerExternalResource.DEFAULT_PASSWORD);
+                LdapServerExternalResource.DEFAULT_PASSWORD,false, null, null);
 
         RolesCache.setRolesCache(rolesCacheSpy);
         RolesCache.setFallbackRolesCache(fallbackRolesCacheSpy);

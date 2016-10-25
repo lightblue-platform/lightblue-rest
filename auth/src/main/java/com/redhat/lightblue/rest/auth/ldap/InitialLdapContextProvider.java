@@ -1,13 +1,12 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
-import java.util.Hashtable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.ldap.InitialLdapContext;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Hashtable;
 
 /**
  * Holds configurations needed for ldap lookup and does the lookup on demand.
@@ -21,7 +20,7 @@ public class InitialLdapContextProvider {
 
     private Hashtable<String, Object> env = new Hashtable<>();
 
-    public InitialLdapContextProvider(String server, String bindDn, String bindDNPwd) {
+    public InitialLdapContextProvider(String server, String bindDn, String bindDNPwd, Boolean useSSL, String trustStore, String trustStorePassword) {
         LOGGER.debug("init()");
 
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
@@ -33,6 +32,11 @@ public class InitialLdapContextProvider {
         }
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, server);
+        if(useSSL) {
+            System.setProperty("javax.net.ssl.trustStore", trustStore);
+            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+        }
+
     }
 
     /**
