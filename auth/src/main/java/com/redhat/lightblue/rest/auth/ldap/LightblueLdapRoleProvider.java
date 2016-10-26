@@ -18,17 +18,14 @@
  */
 package com.redhat.lightblue.rest.auth.ldap;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.naming.NamingException;
-import javax.naming.ldap.InitialLdapContext;
-
+import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
+import com.redhat.lightblue.rest.authz.RolesCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
-import com.redhat.lightblue.rest.authz.RolesCache;
+import javax.naming.NamingException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Fetches user roles from ldap. Results are cached (see {@link RolesCache}).
@@ -47,6 +44,12 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         LOGGER.debug("Creating LightblueLdapRoleProvider");
         ldapSearchBase = searchBase;
         ldapContextProvider = new InitialLdapContextProvider(server, bindDn, bindDNPwd);
+    }
+
+    public LightblueLdapRoleProvider(String server, String searchBase, String bindDn, String bindDNPwd, Boolean useSSL, String trustStore, String trustStorePassword) throws NamingException {
+        LOGGER.debug("Creating LightblueLdapRoleProvider");
+        ldapSearchBase = searchBase;
+        ldapContextProvider = new InitialLdapContextProvider(server, bindDn, bindDNPwd, useSSL, trustStore, trustStorePassword);
     }
 
     @Override

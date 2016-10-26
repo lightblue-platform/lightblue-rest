@@ -60,9 +60,13 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String SEARCH_BASE = "searchBase";
     public static final String BIND_DN = "bindDn";
     public static final String BIND_PWD = "bindPassword";
+    public static final String USE_SSL = "useSSL";
+    public static final String TRUST_STORE = "trustStore";
+    public static final String TRUST_STORE_PASSWORD = "trustStorePassword";
+
     public static final String ENVIRONMENT = "environment";
 
-    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, LDAP_SERVER, SEARCH_BASE, BIND_DN, BIND_PWD, ENVIRONMENT};
+    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, LDAP_SERVER, SEARCH_BASE, BIND_DN, BIND_PWD, ENVIRONMENT, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD};
 
     private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
 
@@ -88,8 +92,11 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         String bindDn = (String) options.get(BIND_DN);
         String bindPwd = (String) options.get(BIND_PWD);
         environment = (String) options.get(ENVIRONMENT);
+        Boolean useSSL = Boolean.valueOf((String) options.get(USE_SSL));
+        String trustStore = (String) options.get(TRUST_STORE);
+        String trustStorePassword = (String) options.get(TRUST_STORE_PASSWORD);
 
-        lbLdap = new LightblueLdapRoleProvider(ldapServer, searchBase, bindDn, bindPwd);
+        lbLdap = new LightblueLdapRoleProvider(ldapServer, searchBase, bindDn, bindPwd, useSSL, trustStore, trustStorePassword);
     }
 
     /* (non-Javadoc)
