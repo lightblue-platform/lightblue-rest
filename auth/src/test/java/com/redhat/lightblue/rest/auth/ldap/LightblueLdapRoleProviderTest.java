@@ -83,7 +83,7 @@ public class LightblueLdapRoleProviderTest {
                 "ldap://localhost:" + LdapServerExternalResource.DEFAULT_PORT,
                 LdapServerExternalResource.DEFAULT_BASE_DN,
                 LdapServerExternalResource.DEFAULT_BINDABLE_DN,
-                LdapServerExternalResource.DEFAULT_PASSWORD,false, null, null);
+                LdapServerExternalResource.DEFAULT_PASSWORD);
 
         RolesCache.setRolesCache(rolesCacheSpy);
         RolesCache.setFallbackRolesCache(fallbackRolesCacheSpy);

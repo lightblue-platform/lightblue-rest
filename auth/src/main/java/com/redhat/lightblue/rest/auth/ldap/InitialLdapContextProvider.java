@@ -20,7 +20,7 @@ public class InitialLdapContextProvider {
 
     private Hashtable<String, Object> env = new Hashtable<>();
 
-    public InitialLdapContextProvider(String server, String bindDn, String bindDNPwd, Boolean useSSL, String trustStore, String trustStorePassword) {
+    public InitialLdapContextProvider(String server, String bindDn, String bindDNPwd) {
         LOGGER.debug("init()");
 
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
@@ -32,6 +32,12 @@ public class InitialLdapContextProvider {
         }
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, server);
+    }
+
+    public InitialLdapContextProvider(String server, String bindDn, String bindDNPwd, Boolean useSSL, String trustStore, String trustStorePassword) {
+
+        this(server, bindDn, bindDNPwd);
+
         if(useSSL) {
             System.setProperty("javax.net.ssl.trustStore", trustStore);
             System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);

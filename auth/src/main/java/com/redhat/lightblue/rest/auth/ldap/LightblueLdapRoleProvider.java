@@ -40,6 +40,12 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     InitialLdapContextProvider ldapContextProvider;
     String ldapSearchBase;
 
+    public LightblueLdapRoleProvider(String server, String searchBase, String bindDn, String bindDNPwd) throws NamingException {
+        LOGGER.debug("Creating LightblueLdapRoleProvider");
+        ldapSearchBase = searchBase;
+        ldapContextProvider = new InitialLdapContextProvider(server, bindDn, bindDNPwd);
+    }
+
     public LightblueLdapRoleProvider(String server, String searchBase, String bindDn, String bindDNPwd, Boolean useSSL, String trustStore, String trustStorePassword) throws NamingException {
         LOGGER.debug("Creating LightblueLdapRoleProvider");
         ldapSearchBase = searchBase;
