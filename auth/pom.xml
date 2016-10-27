@@ -30,6 +30,12 @@
             <groupId>com.redhat.lightblue</groupId>
             <artifactId>lightblue-core-util</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.unboundid/unboundid-ldapsdk -->
+        <dependency>
+            <groupId>com.unboundid</groupId>
+            <artifactId>unboundid-ldapsdk</artifactId>
+            <version>3.1.1</version>
+        </dependency>
         <dependency>
             <groupId>com.redhat.lightblue.ldap</groupId>
             <artifactId>lightblue-ldap-test</artifactId>

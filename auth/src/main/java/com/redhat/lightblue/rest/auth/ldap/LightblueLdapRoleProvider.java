@@ -37,19 +37,36 @@ import java.util.List;
 public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
 
-    InitialLdapContextProvider ldapContextProvider;
     String ldapSearchBase;
+    LdapConfiguration ldapConfiguration;
 
-    public LightblueLdapRoleProvider(String server, String searchBase, String bindDn, String bindDNPwd) throws NamingException {
+    public LightblueLdapRoleProvider(String server, String port, String searchBase, String bindDn, String bindDNPwd) throws NamingException {
         LOGGER.debug("Creating LightblueLdapRoleProvider");
+        ldapConfiguration = new LdapConfiguration().server(server).bindDn(bindDn).bindDNPwd(bindDNPwd);
         ldapSearchBase = searchBase;
-        ldapContextProvider = new InitialLdapContextProvider(server, bindDn, bindDNPwd);
+        ldapConfiguration = new LdapConfiguration()
+                .server(server)
+                .port(Integer.parseInt(port))
+                .bindDn(bindDn)
+                .bindDNPwd(bindDNPwd)
+                .poolSize(Integer.parseInt("1"))
+                .useSSL(false);
     }
 
-    public LightblueLdapRoleProvider(String server, String searchBase, String bindDn, String bindDNPwd, Boolean useSSL, String trustStore, String trustStorePassword) throws NamingException {
+    public LightblueLdapRoleProvider(String server, String port, String searchBase, String bindDn, String bindDNPwd,
+                                     String useSSL, String trustStore, String trustStorePassword, String poolSize)
+            throws NamingException {
         LOGGER.debug("Creating LightblueLdapRoleProvider");
         ldapSearchBase = searchBase;
-        ldapContextProvider = new InitialLdapContextProvider(server, bindDn, bindDNPwd, useSSL, trustStore, trustStorePassword);
+        ldapConfiguration = new LdapConfiguration()
+                .server(server)
+                .port(Integer.parseInt(port))
+                .bindDn(bindDn)
+                .bindDNPwd(bindDNPwd)
+                .useSSL(Boolean.parseBoolean(useSSL))
+                .trustStore(trustStore)
+                .trustStorePassword(trustStorePassword)
+                .poolSize(Integer.parseInt(poolSize));
     }
 
     @Override
@@ -57,16 +74,16 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRoles");
         List<String> userRoles = new ArrayList<>();
         try {
+            List<String> roles = new CachedLdapFindUserRolesByUidCommand(
+                    ldapConfiguration,
+                    ldapSearchBase,
+                    userName
+            ).execute();
 
-            List<String> roles = new CachedLdapFindUserRolesByUidCommand(ldapSearchBase, userName, ldapContextProvider).execute();
-            if (roles != null) {
-                userRoles.addAll(roles);
-            }
-
-        } catch (Exception ce) {
-            // Some exception
-            LOGGER.error("Naming error " + userName, ce);
-            throw new RuntimeException(ce);
+            userRoles.addAll(roles);
+        } catch (Exception e) {
+            LOGGER.error("A problem was encountered retrieving user roles " + userName, e);
+            throw new RuntimeException(e);
         }
 
         return userRoles;

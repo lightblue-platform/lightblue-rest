@@ -56,17 +56,19 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class);
 
     public static final String AUTH_ROLE_NAME = "authRoleName";
-    public static final String LDAP_SERVER = "ldapServer";
+    public static final String SERVER = "ldapServer";
+    public static final String PORT = "port";
     public static final String SEARCH_BASE = "searchBase";
     public static final String BIND_DN = "bindDn";
     public static final String BIND_PWD = "bindPassword";
     public static final String USE_SSL = "useSSL";
     public static final String TRUST_STORE = "trustStore";
     public static final String TRUST_STORE_PASSWORD = "trustStorePassword";
+    public static final String POOL_SIZE = "poolSize";
 
     public static final String ENVIRONMENT = "environment";
 
-    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, LDAP_SERVER, SEARCH_BASE, BIND_DN, BIND_PWD, ENVIRONMENT, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD};
+    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, SERVER, PORT, SEARCH_BASE, BIND_DN, BIND_PWD, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD, POOL_SIZE, ENVIRONMENT};
 
     private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
 
@@ -87,16 +89,21 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     }
 
     public void initializeLightblueLdapRoleProvider() throws NamingException {
-        String ldapServer = (String) options.get(LDAP_SERVER);
+        String server = (String) options.get(SERVER);
+        String port = (String) options.get(PORT);
         String searchBase = (String) options.get(SEARCH_BASE);
         String bindDn = (String) options.get(BIND_DN);
-        String bindPwd = (String) options.get(BIND_PWD);
-        environment = (String) options.get(ENVIRONMENT);
-        Boolean useSSL = Boolean.valueOf((String) options.get(USE_SSL));
+        String bindDNPwd = (String) options.get(BIND_PWD);
+        String useSSL = (String) options.get(USE_SSL);
         String trustStore = (String) options.get(TRUST_STORE);
         String trustStorePassword = (String) options.get(TRUST_STORE_PASSWORD);
+        String poolSize = (String) options.get(POOL_SIZE);
 
-        lbLdap = new LightblueLdapRoleProvider(ldapServer, searchBase, bindDn, bindPwd, useSSL, trustStore, trustStorePassword);
+        environment = (String) options.get(ENVIRONMENT);
+
+        lbLdap = new LightblueLdapRoleProvider(
+                server, port, searchBase, bindDn, bindDNPwd,
+                useSSL, trustStore, trustStorePassword, poolSize);
     }
 
     /* (non-Javadoc)
@@ -116,7 +123,6 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
 
         try {
             initializeLightblueLdapRoleProvider();
-
 
             LOGGER.debug("Certificate principal:" + certPrincipal);
 
