@@ -23,6 +23,7 @@ import com.redhat.lightblue.ldap.test.LdapServerExternalResource;
 import com.redhat.lightblue.ldap.test.LdapServerExternalResource.InMemoryLdapServer;
 import com.redhat.lightblue.rest.authz.RolesCache;
 import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.LDAPException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -33,13 +34,13 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import javax.naming.NamingException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 @InMemoryLdapServer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -54,12 +55,12 @@ public class LightblueLdapRoleProviderTest {
     private static final String BASEDB_GROUPS = "ou=Departments,dc=example,dc=com";
 
     private static LightblueLdapRoleProvider provider;
+    private static LightblueLdapRoleProvider downProvider;
 
     static Cache<String, List<String>> rolesCache = RolesCache.getRolesCache();
     static Cache<String, List<String>> fallbackRolesCache = RolesCache.getFallbackRolesCache();
     static Cache<String, List<String>> rolesCacheSpy = spy(RolesCache.getRolesCache());
     static Cache<String, List<String>> fallbackRolesCacheSpy = spy(RolesCache.getFallbackRolesCache());
-    static LDAPSearcher ldapSearcherSpy = spy(new LDAPSearcher());
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -80,7 +81,13 @@ public class LightblueLdapRoleProviderTest {
         System.setProperty("ldap.department.basedn", BASEDB_GROUPS);
 
         provider = new LightblueLdapRoleProvider(
-                "ldap://localhost:" + LdapServerExternalResource.DEFAULT_PORT,
+                "localhost", Integer.toString(LdapServerExternalResource.DEFAULT_PORT),
+                LdapServerExternalResource.DEFAULT_BASE_DN,
+                LdapServerExternalResource.DEFAULT_BINDABLE_DN,
+                LdapServerExternalResource.DEFAULT_PASSWORD);
+
+        downProvider = new LightblueLdapRoleProvider(
+                "does.not.exist", Integer.toString(LdapServerExternalResource.DEFAULT_PORT),
                 LdapServerExternalResource.DEFAULT_BASE_DN,
                 LdapServerExternalResource.DEFAULT_BINDABLE_DN,
                 LdapServerExternalResource.DEFAULT_PASSWORD);
@@ -88,12 +95,11 @@ public class LightblueLdapRoleProviderTest {
         RolesCache.setRolesCache(rolesCacheSpy);
         RolesCache.setFallbackRolesCache(fallbackRolesCacheSpy);
 
-        LDAPSearcher.setInstance(ldapSearcherSpy);
     }
 
     @Before
     public void cacheInvalidateAll() {
-        Mockito.reset(rolesCacheSpy, fallbackRolesCacheSpy, ldapSearcherSpy);
+        Mockito.reset(rolesCacheSpy, fallbackRolesCacheSpy);
 
         rolesCache.invalidateAll();
         fallbackRolesCache.invalidateAll();
@@ -113,11 +119,10 @@ public class LightblueLdapRoleProviderTest {
         assertNotNull(userRoles);
         assertEquals(expectedUserRoles, userRoles);
 
-        InOrder inOrder = Mockito.inOrder(rolesCacheSpy, fallbackRolesCacheSpy, ldapSearcherSpy);
+        InOrder inOrder = Mockito.inOrder(rolesCacheSpy, fallbackRolesCacheSpy);
 
         // cache miss
         inOrder.verify(rolesCacheSpy).getIfPresent("derek63");
-        inOrder.verify(ldapSearcherSpy).searchLDAPServer(Mockito.any(LDAPQuery.class), Mockito.any(InitialLdapContextProvider.class));
         inOrder.verify(rolesCacheSpy).put("derek63", expectedUserRoles);
         inOrder.verify(fallbackRolesCacheSpy).put("derek63", expectedUserRoles);
 
@@ -130,7 +135,6 @@ public class LightblueLdapRoleProviderTest {
 
         Mockito.verifyNoMoreInteractions(rolesCacheSpy);
         Mockito.verifyNoMoreInteractions(fallbackRolesCacheSpy);
-        Mockito.verifyNoMoreInteractions(ldapSearcherSpy);
     }
 
     @Test
@@ -140,7 +144,7 @@ public class LightblueLdapRoleProviderTest {
     }
 
     @Test
-    public void testFallback() throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException {
+    public void testFallback() throws NamingException, LDAPUserNotFoundException, LDAPMultipleUserFoundException, LDAPException {
         // cache
         provider.getUserRoles("derek63");
 
@@ -148,13 +152,10 @@ public class LightblueLdapRoleProviderTest {
         Mockito.verify(fallbackRolesCacheSpy).put(Mockito.eq("derek63"), Mockito.any(List.class));
 
         // expire cache
-        Mockito.when(rolesCacheSpy.getIfPresent("derek63")).thenReturn(null);
-        // break ldap
-        Mockito.doThrow(new RuntimeException(new IOException("connection closed")))
-                .when(ldapSearcherSpy).searchLDAPServer(Mockito.any(LDAPQuery.class), Mockito.any(InitialLdapContextProvider.class));
+        when(rolesCacheSpy.getIfPresent("derek63")).thenReturn(null);
 
         // get roles when ldap server is down
-        List<String> userRoles = provider.getUserRoles("derek63");
+        List<String> userRoles = downProvider.getUserRoles("derek63");
 
         Mockito.verify(fallbackRolesCacheSpy).getIfPresent("derek63");
 
