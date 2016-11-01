@@ -34,6 +34,10 @@ public class FakeIdentityManager implements IdentityManager {
 
     @Override
     public Account verify(String id, Credential credential) {
+        if (id == null || id.trim().length() == 0) {
+            return null;
+        }
+
         FakeAccount account = accounts.get(id);
         if ((credential instanceof PasswordCredential)
                 && String.valueOf(((PasswordCredential) credential).getPassword()).equals(account.password)) {
@@ -45,8 +49,7 @@ public class FakeIdentityManager implements IdentityManager {
 
     @Override
     public Account verify(Credential credential) {
-        // TODO Auto-generated method stub
-        return null;
+        return null; //Intentional
     }
 
     private class FakeAccount implements Account {

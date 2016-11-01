@@ -3,6 +3,7 @@ package com.redhat.lightblue.rest.integration;
 import java.io.IOException;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.spi.ResteasyDeployment;
@@ -190,7 +191,7 @@ public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness
 
     private void configureDeploymentSecurity(DeploymentInfo deploymentInfo) {
         deploymentInfo.setIdentityManager(identityManager);
-        deploymentInfo.setLoginConfig(new LoginConfig("BASIC", "lightblueRealm"));
+        deploymentInfo.setLoginConfig(new LoginConfig(HttpServletRequest.BASIC_AUTH, "Login Required"));
     }
 
 }
