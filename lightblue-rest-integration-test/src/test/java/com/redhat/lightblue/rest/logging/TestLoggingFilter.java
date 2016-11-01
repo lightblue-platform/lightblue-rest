@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.redhat.lightblue.rest.integration.client.FakeIdentityManager;
+import com.redhat.lightblue.rest.integration.FakeIdentityManager;
 import com.redhat.lightblue.rest.integration.client.LightblueRestTestClient;
 import com.redhat.lightblue.rest.integration.util.CapturableLogAppender;
 

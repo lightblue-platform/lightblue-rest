@@ -1,4 +1,4 @@
-package com.redhat.lightblue.rest.integration.client;
+package com.redhat.lightblue.rest.integration;
 
 import java.security.Principal;
 import java.util.HashMap;
