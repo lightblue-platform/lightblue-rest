@@ -38,19 +38,19 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
     private final Logger LOGGER = LoggerFactory.getLogger(LightblueLdapRoleProvider.class);
 
     String ldapSearchBase;
-    LdapConfiguration ldapConfiguration;
+    LdapRepository ldapRepository;
 
     public LightblueLdapRoleProvider(String server, String port, String searchBase, String bindDn, String bindDNPwd) throws NamingException {
         LOGGER.debug("Creating LightblueLdapRoleProvider");
-        ldapConfiguration = new LdapConfiguration().server(server).bindDn(bindDn).bindDNPwd(bindDNPwd);
         ldapSearchBase = searchBase;
-        ldapConfiguration = new LdapConfiguration()
+        LdapConfiguration ldapConfiguration = new LdapConfiguration()
                 .server(server)
                 .port(Integer.parseInt(port))
                 .bindDn(bindDn)
                 .bindDNPwd(bindDNPwd)
-                .poolSize(Integer.parseInt("1"))
+                .poolSize(1)
                 .useSSL(false);
+        ldapRepository = new LdapRepository(ldapConfiguration);
     }
 
     public LightblueLdapRoleProvider(String server, String port, String searchBase, String bindDn, String bindDNPwd,
@@ -58,7 +58,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
             throws NamingException {
         LOGGER.debug("Creating LightblueLdapRoleProvider");
         ldapSearchBase = searchBase;
-        ldapConfiguration = new LdapConfiguration()
+        LdapConfiguration ldapConfiguration = new LdapConfiguration()
                 .server(server)
                 .port(Integer.parseInt(port))
                 .bindDn(bindDn)
@@ -67,6 +67,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
                 .trustStore(trustStore)
                 .trustStorePassword(trustStorePassword)
                 .poolSize(Integer.parseInt(poolSize));
+        ldapRepository = new LdapRepository(ldapConfiguration);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         List<String> userRoles = new ArrayList<>();
         try {
             List<String> roles = new CachedLdapFindUserRolesByUidCommand(
-                    ldapConfiguration,
+                    ldapRepository,
                     ldapSearchBase,
                     userName
             ).execute();

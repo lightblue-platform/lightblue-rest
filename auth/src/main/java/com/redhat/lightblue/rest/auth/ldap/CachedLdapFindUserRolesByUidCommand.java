@@ -30,7 +30,7 @@ public class CachedLdapFindUserRolesByUidCommand {
     private final LDAPQuery ldapQuery;
     private final LdapRepository ldapRepository;
 
-    public CachedLdapFindUserRolesByUidCommand(LdapConfiguration ldapConfiguration, String ldapSearchBase, String uid) throws Exception {
+    public CachedLdapFindUserRolesByUidCommand(LdapRepository ldapRepository, String ldapSearchBase, String uid) throws Exception {
         LOGGER.debug("Creating CachedLdapFindUserRolesByUidCommand");
         //check if the informed parameters are valid
         if (Strings.isNullOrEmpty(uid)) {
@@ -39,12 +39,12 @@ public class CachedLdapFindUserRolesByUidCommand {
         } else if (Strings.isNullOrEmpty(ldapSearchBase)) {
             LOGGER.error("ldapSearchBase informed in LdapFindUserByUidCommand constructor is empty or null");
             throw new IllegalArgumentException(String.format(INVALID_PARAM, "ldapSearchBase"));
-        } else if (ldapConfiguration == null) {
-            LOGGER.error("ldapConfiguration cannot be null");
-            throw new IllegalArgumentException(String.format(INVALID_PARAM, "contextProvider"));
+        } else if (ldapRepository == null) {
+            LOGGER.error("ldapRepository cannot be null");
+            throw new IllegalArgumentException(String.format(INVALID_PARAM, "ldapRepository"));
         }
         this.ldapQuery = new LDAPQuery(uid, ldapSearchBase, "(uid=" + uid + ")", SearchControls.SUBTREE_SCOPE);
-        this.ldapRepository = new LdapRepository(ldapConfiguration);
+        this.ldapRepository = ldapRepository;
     }
 
     public List<String> execute() throws Exception {
