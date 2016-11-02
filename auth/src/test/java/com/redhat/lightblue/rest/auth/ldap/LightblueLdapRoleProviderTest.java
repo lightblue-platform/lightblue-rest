@@ -154,6 +154,8 @@ public class LightblueLdapRoleProviderTest {
         // expire cache
         when(rolesCacheSpy.getIfPresent("derek63")).thenReturn(null);
 
+        // force connection pool init to make ldap fail
+        LdapRepository.connectionPool = null;
         // get roles when ldap server is down
         List<String> userRoles = downProvider.getUserRoles("derek63");
 
