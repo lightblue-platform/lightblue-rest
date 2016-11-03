@@ -50,7 +50,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
                 .bindDNPwd(bindDNPwd)
                 .poolSize(1)
                 .useSSL(false);
-        ldapRepository = new LdapRepository(ldapConfiguration);
+        ldapRepository = LdapRepository.getInstance(ldapConfiguration);
     }
 
     public LightblueLdapRoleProvider(String server, String port, String searchBase, String bindDn, String bindDNPwd,
@@ -67,7 +67,7 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
                 .trustStore(trustStore)
                 .trustStorePassword(trustStorePassword)
                 .poolSize(Integer.parseInt(poolSize));
-        ldapRepository = new LdapRepository(ldapConfiguration);
+        ldapRepository = LdapRepository.getInstance(ldapConfiguration);
     }
 
     @Override

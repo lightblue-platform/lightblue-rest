@@ -21,9 +21,19 @@ public class LdapRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapRepository.class);
 
     LdapConfiguration ldapConfiguration;
-    LDAPConnectionPool connectionPool;
+    // Connection pool is a singleton
+    static LDAPConnectionPool connectionPool;
 
-    public LdapRepository(LdapConfiguration ldapConfiguration) {
+    /**
+     * Subsequent LdapRepository initializations will ignore LdapConfiguration, because connection pool is already initialized.
+     *
+     * @param ldapConfiguration
+     */
+    public static LdapRepository getInstance(LdapConfiguration ldapConfiguration) {
+        return new LdapRepository(ldapConfiguration);
+    }
+
+    private LdapRepository(LdapConfiguration ldapConfiguration) {
         this.ldapConfiguration = ldapConfiguration;
     }
 
@@ -64,13 +74,18 @@ public class LdapRepository {
         }
 
         connectionPool = new LDAPConnectionPool(ldapConnection, ldapConfiguration.getPoolSize());
+        LOGGER.debug("Initialized LDAPConnectionPool of size "+ldapConfiguration.getPoolSize());
 
     }
 
     public SearchResult search(String baseDn, String filter) throws Exception {
 
-        if(null == connectionPool) {
-            initialize();
+        if (null == connectionPool) {
+            synchronized (LdapRepository.class) {
+                if(null == connectionPool) {
+                    initialize();
+                }
+            }
         }
 
         SearchRequest searchRequest = new SearchRequest(baseDn, SearchScope.SUB, filter);
