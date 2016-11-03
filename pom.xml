@@ -311,10 +311,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.compiler.debuglevel>lines,vars,source</maven.compiler.debuglevel>
         <maven.compiler.verbose>true</maven.compiler.verbose>
 
-        <lightblue.core.version>2.7.0-SNAPSHOT</lightblue.core.version>
-        <lightblue.mongo.version>1.26.0-SNAPSHOT</lightblue.mongo.version>
-        <lightblue.ldap.version>1.12.0-SNAPSHOT</lightblue.ldap.version>
-        <lightblue.audithook.version>1.11.0-SNAPSHOT</lightblue.audithook.version>
+        <lightblue.core.version>2.6.0</lightblue.core.version>
+        <lightblue.mongo.version>1.25.0</lightblue.mongo.version>
+        <lightblue.ldap.version>1.11.0</lightblue.ldap.version>
+        <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
     </properties>
     <build>
         <plugins>
