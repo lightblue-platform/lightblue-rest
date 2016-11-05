@@ -41,6 +41,8 @@ public class FakeIdentityManager implements IdentityManager {
         FakeAccount account = accounts.get(id);
         if ((credential instanceof PasswordCredential)
                 && String.valueOf(((PasswordCredential) credential).getPassword()).equals(account.password)) {
+            account.roles.add(
+                    LightblueRestTestHarness.SECURITY_ROLE_AUTHENTICATED);
             return account;
         }
 
