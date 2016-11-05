@@ -191,7 +191,7 @@ public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness
 
     private void configureDeploymentSecurity(DeploymentInfo deploymentInfo) {
         deploymentInfo.setIdentityManager(identityManager);
-        deploymentInfo.setLoginConfig(new LoginConfig(HttpServletRequest.BASIC_AUTH, "Login Required"));
+        deploymentInfo.setLoginConfig(new LoginConfig(HttpServletRequest.BASIC_AUTH, "lightblueRealm"));
     }
 
 }
