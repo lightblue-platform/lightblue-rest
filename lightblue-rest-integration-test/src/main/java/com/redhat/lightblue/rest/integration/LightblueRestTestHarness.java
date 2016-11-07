@@ -3,6 +3,7 @@ package com.redhat.lightblue.rest.integration;
 import java.io.IOException;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.spi.ResteasyDeployment;
@@ -21,6 +22,8 @@ import io.undertow.security.idm.IdentityManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.LoginConfig;
+import io.undertow.servlet.api.SecurityConstraint;
+import io.undertow.servlet.api.WebResourceCollection;
 
 /**
  * <p>
@@ -36,6 +39,8 @@ import io.undertow.servlet.api.LoginConfig;
  *
  */
 public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness {
+
+    static final String SECURITY_ROLE_AUTHENTICATED = "authenticated";
 
     private static final String DEFAULT_CONTEXT_PATH_METADATA = "/rest/metadata";
 
@@ -190,7 +195,11 @@ public abstract class LightblueRestTestHarness extends LightblueMongoTestHarness
 
     private void configureDeploymentSecurity(DeploymentInfo deploymentInfo) {
         deploymentInfo.setIdentityManager(identityManager);
-        deploymentInfo.setLoginConfig(new LoginConfig("BASIC", "lightblueRealm"));
+        deploymentInfo.setLoginConfig(new LoginConfig(HttpServletRequest.BASIC_AUTH, "lightblueRealm"));
+        deploymentInfo.addSecurityConstraint(new SecurityConstraint()
+                .addWebResourceCollection(new WebResourceCollection().addUrlPattern("/*"))
+                .addRoleAllowed(SECURITY_ROLE_AUTHENTICATED));
+        deploymentInfo.addSecurityRole(SECURITY_ROLE_AUTHENTICATED);
     }
 
 }
