@@ -22,6 +22,7 @@
 package com.redhat.lightblue.rest.auth.jboss;
 
 import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
+import com.redhat.lightblue.rest.auth.ldap.LdapConfiguration;
 import com.redhat.lightblue.rest.auth.ldap.LightblueLdapRoleProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
@@ -65,6 +66,8 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String TRUST_STORE = "trustStore";
     public static final String TRUST_STORE_PASSWORD = "trustStorePassword";
     public static final String POOL_SIZE = "poolSize";
+    public static final String CONNECTION_TIMEOUT_MS = "connectionTimeoutMS";
+    public static final String RESPONSE_TIMEOUT_MS = "responseTimeoutMS";
 
     public static final String ENVIRONMENT = "environment";
 
@@ -89,21 +92,30 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     }
 
     public void initializeLightblueLdapRoleProvider() throws NamingException {
-        String server = (String) options.get(SERVER);
-        String port = (String) options.get(PORT);
-        String searchBase = (String) options.get(SEARCH_BASE);
-        String bindDn = (String) options.get(BIND_DN);
-        String bindDNPwd = (String) options.get(BIND_PWD);
-        String useSSL = (String) options.get(USE_SSL);
-        String trustStore = (String) options.get(TRUST_STORE);
-        String trustStorePassword = (String) options.get(TRUST_STORE_PASSWORD);
-        String poolSize = (String) options.get(POOL_SIZE);
 
         environment = (String) options.get(ENVIRONMENT);
 
-        lbLdap = new LightblueLdapRoleProvider(
-                server, port, searchBase, bindDn, bindDNPwd,
-                useSSL, trustStore, trustStorePassword, poolSize);
+        LdapConfiguration ldapConf = new LdapConfiguration();
+
+        ldapConf.server((String) options.get(SERVER));
+        ldapConf.port(Integer.parseInt((String) options.get(PORT)));
+        String searchBase = (String) options.get(SEARCH_BASE);
+        ldapConf.bindDn((String) options.get(BIND_DN));
+        ldapConf.bindDNPwd((String) options.get(BIND_PWD));
+        ldapConf.useSSL(Boolean.parseBoolean( (String) options.get(USE_SSL)));
+        ldapConf.trustStore((String) options.get(TRUST_STORE));
+        ldapConf.trustStorePassword((String) options.get(TRUST_STORE_PASSWORD));
+        ldapConf.poolSize(Integer.parseInt((String) options.get(POOL_SIZE)));
+
+        // optional configurations
+        if (options.containsKey(CONNECTION_TIMEOUT_MS)) {
+            ldapConf.connectionTimeoutMS(Integer.parseInt((String)options.get(CONNECTION_TIMEOUT_MS)));
+        }
+        if (options.containsKey(RESPONSE_TIMEOUT_MS)) {
+            ldapConf.responseTimeoutMS(Integer.parseInt((String)options.get(RESPONSE_TIMEOUT_MS)));
+        }
+
+        lbLdap = new LightblueLdapRoleProvider(searchBase, ldapConf);
     }
 
     /* (non-Javadoc)

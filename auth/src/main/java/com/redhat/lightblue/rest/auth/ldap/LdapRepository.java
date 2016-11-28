@@ -3,6 +3,7 @@ package com.redhat.lightblue.rest.auth.ldap;
 import com.unboundid.ldap.sdk.BindRequest;
 import com.unboundid.ldap.sdk.BindResult;
 import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPConnectionOptions;
 import com.unboundid.ldap.sdk.LDAPConnectionPool;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchRequest;
@@ -41,6 +42,14 @@ public class LdapRepository {
 
         LDAPConnection ldapConnection;
 
+        LDAPConnectionOptions options = new LDAPConnectionOptions();
+        // A flag that indicates whether to use the SO_KEEPALIVE socket option to attempt to more quickly detect when idle TCP connections have been lost or to prevent them from being unexpectedly closed by intermediate network hardware. By default, the SO_KEEPALIVE socket option will be used.
+        options.setUseKeepAlive(true);
+        // A value which specifies the maximum length of time in milliseconds that an attempt to establish a connection should be allowed to block before failing. By default, a timeout of 60,000 milliseconds (1 minute) will be used.
+        options.setConnectTimeoutMillis(ldapConfiguration.getConnectionTimeoutMS());
+        // A value which specifies the default timeout in milliseconds that the SDK should wait for a response from the server before failing. By default, a timeout of 300,000 milliseconds (5 minutes) will be used.
+        options.setResponseTimeoutMillis(ldapConfiguration.getResponseTimeoutMS());
+
         if(ldapConfiguration.getUseSSL()) {
             TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(
                     ldapConfiguration.getTrustStore(),
@@ -51,6 +60,7 @@ public class LdapRepository {
 
             ldapConnection = new LDAPConnection(
                     socketFactory,
+                    options,
                     ldapConfiguration.getServer(),
                     ldapConfiguration.getPort(),
                     ldapConfiguration.getBindDn(),
@@ -58,6 +68,7 @@ public class LdapRepository {
             );
         } else {
             ldapConnection = new LDAPConnection(
+                    options,
                     ldapConfiguration.getServer(),
                     ldapConfiguration.getPort(),
                     ldapConfiguration.getBindDn(),
@@ -74,7 +85,7 @@ public class LdapRepository {
         }
 
         connectionPool = new LDAPConnectionPool(ldapConnection, ldapConfiguration.getPoolSize());
-        LOGGER.debug("Initialized LDAPConnectionPool of size "+ldapConfiguration.getPoolSize());
+        LOGGER.info("Initialized LDAPConnectionPool: size={}, connectionTimeout={}, responseTimeout={}", ldapConfiguration.getPoolSize(), ldapConfiguration.getConnectionTimeoutMS(), ldapConfiguration.getResponseTimeoutMS());
 
     }
 

@@ -70,6 +70,12 @@ public class LightblueLdapRoleProvider implements LightblueRoleProvider {
         ldapRepository = LdapRepository.getInstance(ldapConfiguration);
     }
 
+    public LightblueLdapRoleProvider(String searchBase, LdapConfiguration ldapConfiguration) {
+        LOGGER.debug("Creating LightblueLdapRoleProvider");
+        this.ldapSearchBase = searchBase;
+        ldapRepository = LdapRepository.getInstance(ldapConfiguration);
+    }
+
     @Override
     public List<String> getUserRoles(String userName) {
         LOGGER.debug("Invoking LightblueLdapRoleProvider#getUserRoles");

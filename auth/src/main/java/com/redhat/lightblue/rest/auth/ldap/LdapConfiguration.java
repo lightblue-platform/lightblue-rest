@@ -11,6 +11,8 @@ public class LdapConfiguration {
     private String trustStore;
     private String trustStorePassword;
     private Integer poolSize;
+    private Integer connectionTimeoutMS = 3000; // time to wait to estabilish connection
+    private Integer responseTimeoutMS = 3000; // time to wait until receiving response from ldap
 
     public LdapConfiguration server (String server) {
         this.server = server;
@@ -82,5 +84,23 @@ public class LdapConfiguration {
 
     public Integer getPoolSize() {
         return poolSize;
+    }
+
+    public Integer getConnectionTimeoutMS() {
+        return connectionTimeoutMS;
+    }
+
+    public LdapConfiguration connectionTimeoutMS(Integer connectionTimeoutMS) {
+        this.connectionTimeoutMS = connectionTimeoutMS;
+        return this;
+    }
+
+    public Integer getResponseTimeoutMS() {
+        return responseTimeoutMS;
+    }
+
+    public LdapConfiguration responseTimeoutMS(Integer responseTimeoutMS) {
+        this.responseTimeoutMS = responseTimeoutMS;
+        return this;
     }
 }
