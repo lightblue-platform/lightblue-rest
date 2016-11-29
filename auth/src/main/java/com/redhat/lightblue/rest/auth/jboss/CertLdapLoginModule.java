@@ -68,6 +68,8 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String POOL_SIZE = "poolSize";
     public static final String CONNECTION_TIMEOUT_MS = "connectionTimeoutMS";
     public static final String RESPONSE_TIMEOUT_MS = "responseTimeoutMS";
+    public static final String DEBUG = "debug";
+    public static final String HTTP_KEEP_ALIVE = "keepAlive";
 
     public static final String ENVIRONMENT = "environment";
 
@@ -113,6 +115,12 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         }
         if (options.containsKey(RESPONSE_TIMEOUT_MS)) {
             ldapConf.responseTimeoutMS(Integer.parseInt((String)options.get(RESPONSE_TIMEOUT_MS)));
+        }
+        if (options.containsKey(DEBUG)) {
+            ldapConf.debug(Boolean.parseBoolean((String)options.get(DEBUG)));
+        }
+        if (options.containsKey(HTTP_KEEP_ALIVE)) {
+            ldapConf.debug(Boolean.parseBoolean((String)options.get(HTTP_KEEP_ALIVE)));
         }
 
         lbLdap = new LightblueLdapRoleProvider(searchBase, ldapConf);

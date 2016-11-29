@@ -13,6 +13,8 @@ public class LdapConfiguration {
     private Integer poolSize;
     private Integer connectionTimeoutMS = 3000; // time to wait to estabilish connection
     private Integer responseTimeoutMS = 3000; // time to wait until receiving response from ldap
+    private boolean debug = false;
+    private boolean keepAlive = true;
 
     public LdapConfiguration server (String server) {
         this.server = server;
@@ -101,6 +103,24 @@ public class LdapConfiguration {
 
     public LdapConfiguration responseTimeoutMS(Integer responseTimeoutMS) {
         this.responseTimeoutMS = responseTimeoutMS;
+        return this;
+    }
+
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public LdapConfiguration debug(boolean debug) {
+        this.debug = debug;
+        return this;
+    }
+
+    public boolean isKeepAlive() {
+        return keepAlive;
+    }
+
+    public LdapConfiguration keepAlive(boolean keepAlive) {
+        this.keepAlive = keepAlive;
         return this;
     }
 }

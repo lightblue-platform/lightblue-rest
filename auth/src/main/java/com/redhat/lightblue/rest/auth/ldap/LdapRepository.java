@@ -1,5 +1,10 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
+import javax.net.ssl.SSLSocketFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.unboundid.ldap.sdk.BindRequest;
 import com.unboundid.ldap.sdk.BindResult;
 import com.unboundid.ldap.sdk.LDAPConnection;
@@ -10,12 +15,9 @@ import com.unboundid.ldap.sdk.SearchRequest;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.SimpleBindRequest;
+import com.unboundid.util.DebugType;
 import com.unboundid.util.ssl.SSLUtil;
 import com.unboundid.util.ssl.TrustStoreTrustManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.net.ssl.SSLSocketFactory;
 
 public class LdapRepository {
 
@@ -40,6 +42,16 @@ public class LdapRepository {
 
     private void initialize() throws Exception {
 
+        if (ldapConfiguration.isDebug()) {
+            // bridge java.util.Logger output to log4j
+            System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+
+            // setting the ldap debug level...
+            System.setProperty("com.unboundid.ldap.sdk.debug.enabled", "true");
+            System.setProperty("com.unboundid.ldap.sdk.debug.level", "FINEST");
+            System.setProperty("com.unboundid.ldap.sdk.debug.type", DebugType.getTypeNameList());
+        }
+
         LDAPConnection ldapConnection;
 
         LDAPConnectionOptions options = new LDAPConnectionOptions();
@@ -49,6 +61,9 @@ public class LdapRepository {
         options.setConnectTimeoutMillis(ldapConfiguration.getConnectionTimeoutMS());
         // A value which specifies the default timeout in milliseconds that the SDK should wait for a response from the server before failing. By default, a timeout of 300,000 milliseconds (5 minutes) will be used.
         options.setResponseTimeoutMillis(ldapConfiguration.getResponseTimeoutMS());
+        // Specifies whether to use the SO_KEEPALIVE option for the underlying sockets used by associated connections.
+        options.setUseKeepAlive(ldapConfiguration.isKeepAlive());
+
 
         if(ldapConfiguration.getUseSSL()) {
             TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(
@@ -85,7 +100,9 @@ public class LdapRepository {
         }
 
         connectionPool = new LDAPConnectionPool(ldapConnection, ldapConfiguration.getPoolSize());
-        LOGGER.info("Initialized LDAPConnectionPool: size={}, connectionTimeout={}, responseTimeout={}", ldapConfiguration.getPoolSize(), ldapConfiguration.getConnectionTimeoutMS(), ldapConfiguration.getResponseTimeoutMS());
+        LOGGER.info("Initialized LDAPConnectionPool: size={}, connectionTimeout={}, responseTimeout={}, debug={}, keepAlive={}",
+                ldapConfiguration.getPoolSize(), ldapConfiguration.getConnectionTimeoutMS(), ldapConfiguration.getResponseTimeoutMS(),
+                ldapConfiguration.isDebug(), ldapConfiguration.isKeepAlive());
 
     }
 
