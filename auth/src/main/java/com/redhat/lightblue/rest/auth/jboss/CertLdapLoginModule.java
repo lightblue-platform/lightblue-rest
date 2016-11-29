@@ -69,11 +69,11 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String CONNECTION_TIMEOUT_MS = "connectionTimeoutMS";
     public static final String RESPONSE_TIMEOUT_MS = "responseTimeoutMS";
     public static final String DEBUG = "debug";
-    public static final String HTTP_KEEP_ALIVE = "keepAlive";
+    public static final String KEEP_ALIVE = "keepAlive";
 
     public static final String ENVIRONMENT = "environment";
 
-    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, SERVER, PORT, SEARCH_BASE, BIND_DN, BIND_PWD, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD, POOL_SIZE, ENVIRONMENT};
+    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, SERVER, PORT, SEARCH_BASE, BIND_DN, BIND_PWD, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD, POOL_SIZE, ENVIRONMENT,CONNECTION_TIMEOUT_MS,RESPONSE_TIMEOUT_MS,DEBUG,KEEP_ALIVE};
 
     private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
 
@@ -119,8 +119,8 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         if (options.containsKey(DEBUG)) {
             ldapConf.debug(Boolean.parseBoolean((String)options.get(DEBUG)));
         }
-        if (options.containsKey(HTTP_KEEP_ALIVE)) {
-            ldapConf.debug(Boolean.parseBoolean((String)options.get(HTTP_KEEP_ALIVE)));
+        if (options.containsKey(KEEP_ALIVE)) {
+            ldapConf.keepAlive(Boolean.parseBoolean((String)options.get(KEEP_ALIVE)));
         }
 
         lbLdap = new LightblueLdapRoleProvider(searchBase, ldapConf);
