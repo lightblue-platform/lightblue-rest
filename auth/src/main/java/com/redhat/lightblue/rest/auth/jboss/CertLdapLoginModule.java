@@ -69,7 +69,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String CONNECTION_TIMEOUT_MS = "connectionTimeoutMS";
     public static final String RESPONSE_TIMEOUT_MS = "responseTimeoutMS";
     public static final String DEBUG = "debug";
-    public static final String HTTP_KEEP_ALIVE = "httpKeepAlive";
+    public static final String HTTP_KEEP_ALIVE = "keepAlive";
 
     public static final String ENVIRONMENT = "environment";
 
