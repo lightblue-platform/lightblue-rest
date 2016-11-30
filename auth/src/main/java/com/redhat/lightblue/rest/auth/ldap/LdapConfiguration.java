@@ -11,6 +11,7 @@ public class LdapConfiguration {
     private String trustStore;
     private String trustStorePassword;
     private Integer poolSize;
+    private Integer poolMaxConnectionAgeMS = 15000; // re-estabilish connection in the pool after that time
     private Integer connectionTimeoutMS = 3000; // time to wait to estabilish connection
     private Integer responseTimeoutMS = 3000; // time to wait until receiving response from ldap
     private boolean debug = false;
@@ -121,6 +122,15 @@ public class LdapConfiguration {
 
     public LdapConfiguration keepAlive(boolean keepAlive) {
         this.keepAlive = keepAlive;
+        return this;
+    }
+
+    public Integer getPoolMaxConnectionAgeMS() {
+        return poolMaxConnectionAgeMS;
+    }
+
+    public LdapConfiguration poolMaxConnectionAgeMS(Integer poolMaxConnectionAgeMS) {
+        this.poolMaxConnectionAgeMS = poolMaxConnectionAgeMS;
         return this;
     }
 }

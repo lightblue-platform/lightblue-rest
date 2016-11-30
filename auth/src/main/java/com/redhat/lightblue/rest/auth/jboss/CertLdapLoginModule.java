@@ -66,6 +66,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String TRUST_STORE = "trustStore";
     public static final String TRUST_STORE_PASSWORD = "trustStorePassword";
     public static final String POOL_SIZE = "poolSize";
+    public static final String POOL_MAX_CONNECTION_AGE_MS = "poolMaxConnectionAgeMS";
     public static final String CONNECTION_TIMEOUT_MS = "connectionTimeoutMS";
     public static final String RESPONSE_TIMEOUT_MS = "responseTimeoutMS";
     public static final String DEBUG = "debug";
@@ -73,7 +74,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
 
     public static final String ENVIRONMENT = "environment";
 
-    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, SERVER, PORT, SEARCH_BASE, BIND_DN, BIND_PWD, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD, POOL_SIZE, ENVIRONMENT,CONNECTION_TIMEOUT_MS,RESPONSE_TIMEOUT_MS,DEBUG,KEEP_ALIVE};
+    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, SERVER, PORT, SEARCH_BASE, BIND_DN, BIND_PWD, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD, POOL_SIZE, POOL_MAX_CONNECTION_AGE_MS, ENVIRONMENT,CONNECTION_TIMEOUT_MS,RESPONSE_TIMEOUT_MS,DEBUG,KEEP_ALIVE};
 
     private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
 
@@ -121,6 +122,9 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         }
         if (options.containsKey(KEEP_ALIVE)) {
             ldapConf.keepAlive(Boolean.parseBoolean((String)options.get(KEEP_ALIVE)));
+        }
+        if (options.containsKey(POOL_MAX_CONNECTION_AGE_MS)) {
+            ldapConf.poolMaxConnectionAgeMS(Integer.parseInt((String)options.get(POOL_MAX_CONNECTION_AGE_MS)));
         }
 
         lbLdap = new LightblueLdapRoleProvider(searchBase, ldapConf);
