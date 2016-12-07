@@ -21,9 +21,11 @@
  */
 package com.redhat.lightblue.rest.auth.jboss;
 
-import com.redhat.lightblue.rest.auth.LightblueRoleProvider;
+import com.redhat.lightblue.rest.auth.CachedRolesProvider;
+import com.redhat.lightblue.rest.auth.RolesCache;
+import com.redhat.lightblue.rest.auth.RolesProvider;
 import com.redhat.lightblue.rest.auth.ldap.LdapConfiguration;
-import com.redhat.lightblue.rest.auth.ldap.LightblueLdapRoleProvider;
+import com.redhat.lightblue.rest.auth.ldap.LdapRolesProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 import org.jboss.security.SimpleGroup;
@@ -71,17 +73,18 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String RESPONSE_TIMEOUT_MS = "responseTimeoutMS";
     public static final String DEBUG = "debug";
     public static final String KEEP_ALIVE = "keepAlive";
+    public static final String ROLES_CACHE_EXPIRY_MS = "rolesCacheExpiryMS";
 
     public static final String ENVIRONMENT = "environment";
 
-    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, SERVER, PORT, SEARCH_BASE, BIND_DN, BIND_PWD, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD, POOL_SIZE, POOL_MAX_CONNECTION_AGE_MS, ENVIRONMENT,CONNECTION_TIMEOUT_MS,RESPONSE_TIMEOUT_MS,DEBUG,KEEP_ALIVE};
+    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, SERVER, PORT, SEARCH_BASE, BIND_DN, BIND_PWD, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD, POOL_SIZE, POOL_MAX_CONNECTION_AGE_MS, ENVIRONMENT,CONNECTION_TIMEOUT_MS,RESPONSE_TIMEOUT_MS,DEBUG,KEEP_ALIVE,ROLES_CACHE_EXPIRY_MS};
 
     private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
 
     private static String environment;
 
     // LightblueRoleProvider singleton
-    private static LightblueRoleProvider lbLdap = null;
+    private static RolesProvider lbLdap = null;
 
     public CertLdapLoginModule() {
 
@@ -94,7 +97,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         super.initialize(subject, callbackHandler, sharedState, options);
     }
 
-    public void initializeLightblueLdapRoleProvider() throws NamingException {
+    public void initialize() throws Exception {
 
         environment = (String) options.get(ENVIRONMENT);
 
@@ -127,7 +130,18 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
             ldapConf.poolMaxConnectionAgeMS(Integer.parseInt((String)options.get(POOL_MAX_CONNECTION_AGE_MS)));
         }
 
-        lbLdap = new LightblueLdapRoleProvider(searchBase, ldapConf);
+        int rolesCacheExpiry = 5*60*1000; // default 5 minutes
+        if (options.containsKey(ROLES_CACHE_EXPIRY_MS)) {
+            rolesCacheExpiry = Integer.parseInt((String)options.get(ROLES_CACHE_EXPIRY_MS));
+        }
+
+        if (lbLdap == null) {
+            synchronized(LdapRolesProvider.class) {
+                if (lbLdap == null) {
+                    lbLdap = new CachedRolesProvider(new LdapRolesProvider(searchBase, ldapConf), new RolesCache(rolesCacheExpiry));
+                }
+            }
+        }
     }
 
     /* (non-Javadoc)
@@ -146,7 +160,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         String certPrincipal = getUsername();
 
         try {
-            initializeLightblueLdapRoleProvider();
+            initialize();
 
             LOGGER.debug("Certificate principal:" + certPrincipal);
 

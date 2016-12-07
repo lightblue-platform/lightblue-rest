@@ -7,10 +7,10 @@ public class LdapConfiguration {
     private Integer port;
     private String bindDn;
     private String bindDNPwd;
-    private Boolean useSSL;
+    private Boolean useSSL = false;
     private String trustStore;
     private String trustStorePassword;
-    private Integer poolSize;
+    private Integer poolSize = 5;
     private Integer poolMaxConnectionAgeMS = 15000; // re-estabilish connection in the pool after that time
     private Integer connectionTimeoutMS = 3000; // time to wait to estabilish connection
     private Integer responseTimeoutMS = 3000; // time to wait until receiving response from ldap
