@@ -18,10 +18,23 @@
  */
 package com.redhat.lightblue.rest.auth;
 
-import java.util.Collection;
+import java.util.Set;
 
-public interface LightblueRoleProvider {
+/**
+ * Roles provider.
+ *
+ * @author mpatercz
+ *
+ */
+public interface RolesProvider {
 
-    public Collection<String> getUserRoles(String userName);
+    /**
+     * Get roles for given user.
+     *
+     * @param username
+     * @return A set of roles. If no roles are found, returns an empty set. Never returns null.
+     * @throws Exception
+     */
+    public Set<String> getUserRoles(String username) throws Exception;
 
 }
