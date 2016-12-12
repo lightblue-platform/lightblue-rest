@@ -327,9 +327,15 @@ public class ITCaseCrudResourceTest {
     public void testLockWithPost() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
 
-        LockRequest lockRequest = new LockRequest("acquire", "test", "caller", "resource/slash", null);
+        String request =
+                "{" +
+                        "\"operation\" : \"acquire\"," +
+                        "\"domain\" : \"test\"," +
+                        "\"callerId\" : \"caller\"," +
+                        "\"resourceId\" : \"resource/slash\"" +
+                        "}";
 
-        String result = cutCrudResource.lock(lockRequest).getEntity().toString();
+        String result = cutCrudResource.lock(request).getEntity().toString();
         Assert.assertEquals("{\"result\":true}", result);
     }
 

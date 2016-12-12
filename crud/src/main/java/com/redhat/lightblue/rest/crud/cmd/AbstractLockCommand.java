@@ -19,11 +19,11 @@
 package com.redhat.lightblue.rest.crud.cmd;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.extensions.synch.Locking;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.rest.crud.LockRequest;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.SimpleJsonObject;
@@ -32,6 +32,11 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractLockCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockCommand.class);
+
+    public static final String OPERATION_ACQUIRE = "acquire";
+    public static final String OPERATION_RELEASE = "release";
+    public static final String OPERATION_COUNT = "count";
+    public static final String OPERATION_PING = "ping";
 
     protected final String domain;
     protected final String resource;
@@ -43,29 +48,31 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
         this.caller = caller;
     }
 
-    public static AbstractLockCommand getLockCommand(LockRequest request) {
+    public static AbstractLockCommand getLockCommand(String request) {
         AbstractLockCommand command = null;
         try {
-            String operation = request.getOperation();
-            String domain = request.getDomain();
-            String callerId = request.getCallerId();
-            String resourceId = request.getResourceId();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readValue(request, JsonNode.class);
+            String operation = rootNode.get("operation").asText();
+            String domain = rootNode.get("domain").asText();
+            String callerId = rootNode.get("callerId").asText();
+            String resourceId = rootNode.get("resourceId").asText();
 
             switch(operation) {
-                case LockRequest.OPERATION_ACQUIRE :
+                case OPERATION_ACQUIRE :
                     Long ttl = null;
-                    if(null != request.getTtl()) {
-                        ttl = request.getTtl();
+                    if(null != rootNode.get("ttl")) {
+                        ttl = rootNode.get("ttl").asLong();
                     }
                     command = new AcquireCommand(domain, callerId, resourceId, ttl);
                     break;
-                case LockRequest.OPERATION_RELEASE :
+                case OPERATION_RELEASE :
                     command = new ReleaseCommand(domain, callerId, resourceId);
                     break;
-                case LockRequest.OPERATION_COUNT :
+                case OPERATION_COUNT :
                     command = new GetLockCountCommand(domain, callerId, resourceId);
                     break;
-                case LockRequest.OPERATION_PING :
+                case OPERATION_PING :
                     command = new LockPingCommand(domain, callerId, resourceId);
                     break;
                 default :
