@@ -80,7 +80,7 @@ public abstract class AbstractCrudResource {
 
     @POST
     @Path("/lock/")
-    public Response lock(LockRequest request) {
+    public Response lock(String request) {
         Error.reset();
         CallStatus st = getLockCommand(request).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
