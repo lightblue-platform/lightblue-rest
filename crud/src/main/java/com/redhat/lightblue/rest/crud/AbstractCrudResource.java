@@ -18,7 +18,30 @@
  */
 package com.redhat.lightblue.rest.crud;
 
-import java.io.IOException;
+import com.redhat.lightblue.EntityVersion;
+import com.redhat.lightblue.crud.FindRequest;
+import com.redhat.lightblue.query.Projection;
+import com.redhat.lightblue.query.QueryExpression;
+import com.redhat.lightblue.query.Sort;
+import com.redhat.lightblue.rest.CallStatus;
+import com.redhat.lightblue.rest.crud.cmd.AcquireCommand;
+import com.redhat.lightblue.rest.crud.cmd.BulkRequestCommand;
+import com.redhat.lightblue.rest.crud.cmd.DeleteCommand;
+import com.redhat.lightblue.rest.crud.cmd.ExplainCommand;
+import com.redhat.lightblue.rest.crud.cmd.FindCommand;
+import com.redhat.lightblue.rest.crud.cmd.GenerateCommand;
+import com.redhat.lightblue.rest.crud.cmd.GetLockCountCommand;
+import com.redhat.lightblue.rest.crud.cmd.InsertCommand;
+import com.redhat.lightblue.rest.crud.cmd.LockPingCommand;
+import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
+import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
+import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
+import com.redhat.lightblue.rest.util.QueryTemplateUtils;
+import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.JsonUtils;
+import com.restcompress.provider.LZF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -31,32 +54,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.redhat.lightblue.EntityVersion;
-import com.redhat.lightblue.crud.FindRequest;
-import com.redhat.lightblue.query.Projection;
-import com.redhat.lightblue.query.QueryExpression;
-import com.redhat.lightblue.query.Sort;
-import com.redhat.lightblue.rest.CallStatus;
-import com.redhat.lightblue.rest.crud.cmd.AcquireCommand;
-import com.redhat.lightblue.rest.crud.cmd.BulkRequestCommand;
-import com.redhat.lightblue.rest.crud.cmd.DeleteCommand;
-import com.redhat.lightblue.rest.crud.cmd.FindCommand;
-import com.redhat.lightblue.rest.crud.cmd.GenerateCommand;
-import com.redhat.lightblue.rest.crud.cmd.GetLockCountCommand;
-import com.redhat.lightblue.rest.crud.cmd.InsertCommand;
-import com.redhat.lightblue.rest.crud.cmd.LockPingCommand;
-import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
-import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
-import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
-import com.redhat.lightblue.rest.crud.cmd.ExplainCommand;
-import com.redhat.lightblue.rest.util.QueryTemplateUtils;
-import com.redhat.lightblue.util.Error;
-import com.redhat.lightblue.util.JsonUtils;
-import com.restcompress.provider.LZF;
+import static com.redhat.lightblue.rest.crud.cmd.AbstractLockCommand.getLockCommand;
 
 /**
  *
@@ -76,6 +76,14 @@ public abstract class AbstractCrudResource {
     static {
         // by default JVM caches DNS forever.  hard code an override to refresh DNS cache every 30 seconds
         java.security.Security.setProperty("networkaddress.cache.ttl", "30");
+    }
+
+    @POST
+    @Path("/lock/")
+    public Response lock(String request) {
+        Error.reset();
+        CallStatus st = getLockCommand(request).run();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     @PUT

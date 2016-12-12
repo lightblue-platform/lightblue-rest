@@ -18,19 +18,19 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.redhat.lightblue.extensions.synch.Locking;
+import com.redhat.lightblue.rest.CallStatus;
+import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.SimpleJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import com.redhat.lightblue.rest.CallStatus;
-import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.util.JsonUtils;
-import com.redhat.lightblue.util.Error;
-import com.redhat.lightblue.util.SimpleJsonObject;
-import com.redhat.lightblue.extensions.synch.Locking;
+import java.io.IOException;
 
 public abstract class AbstractLockCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockCommand.class);
@@ -43,6 +43,42 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
         this.domain = domain;
         this.resource = resource;
         this.caller = caller;
+    }
+
+    public static AbstractLockCommand getLockCommand(String request) {
+        AbstractLockCommand command = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readValue(request, JsonNode.class);
+            String operation = rootNode.get("operation").asText();
+            String domain = rootNode.get("domain").asText();
+            String callerId = rootNode.get("callerId").asText();
+            String resourceId = rootNode.get("resourceId").asText();
+
+            switch(operation) {
+                case "acquire" :
+                    Long ttl = null;
+                    if(null != rootNode.get("ttl")) {
+                        ttl = rootNode.get("ttl").asLong();
+                    }
+                    command = new AcquireCommand(domain, callerId, resourceId, ttl);
+                    break;
+                case "release" :
+                    command = new ReleaseCommand(domain, callerId, resourceId);
+                    break;
+                case "count" :
+                    command = new GetLockCountCommand(domain, callerId, resourceId);
+                    break;
+                case "ping" :
+                    command = new LockPingCommand(domain, callerId, resourceId);
+                    break;
+                default :
+                    Error.push("Error parsing lock request");
+            }
+        } catch (IOException e) {
+            Error.push("Error parsing lock request");
+        }
+        return command;
     }
 
     @Override
