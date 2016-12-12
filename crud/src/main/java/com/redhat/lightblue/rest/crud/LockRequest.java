@@ -1,6 +1,11 @@
 package com.redhat.lightblue.rest.crud;
 
 public class LockRequest {
+    public static final String OPERATION_ACQUIRE = "acquire";
+    public static final String OPERATION_RELEASE = "release";
+    public static final String OPERATION_COUNT = "count";
+    public static final String OPERATION_PING = "ping";
+
     String operation;
     String domain;
     String callerId;

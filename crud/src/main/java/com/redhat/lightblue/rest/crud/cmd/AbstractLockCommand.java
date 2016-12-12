@@ -52,20 +52,20 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             String resourceId = request.getResourceId();
 
             switch(operation) {
-                case "acquire" :
+                case LockRequest.OPERATION_ACQUIRE :
                     Long ttl = null;
                     if(null != request.getTtl()) {
                         ttl = request.getTtl();
                     }
                     command = new AcquireCommand(domain, callerId, resourceId, ttl);
                     break;
-                case "release" :
+                case LockRequest.OPERATION_RELEASE :
                     command = new ReleaseCommand(domain, callerId, resourceId);
                     break;
-                case "count" :
+                case LockRequest.OPERATION_COUNT :
                     command = new GetLockCountCommand(domain, callerId, resourceId);
                     break;
-                case "ping" :
+                case LockRequest.OPERATION_PING :
                     command = new LockPingCommand(domain, callerId, resourceId);
                     break;
                 default :
