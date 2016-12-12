@@ -18,19 +18,17 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import com.redhat.lightblue.extensions.synch.Locking;
 import com.redhat.lightblue.rest.CallStatus;
-import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.util.JsonUtils;
+import com.redhat.lightblue.rest.crud.LockRequest;
+import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.SimpleJsonObject;
-import com.redhat.lightblue.extensions.synch.Locking;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractLockCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockCommand.class);
@@ -43,6 +41,40 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
         this.domain = domain;
         this.resource = resource;
         this.caller = caller;
+    }
+
+    public static AbstractLockCommand getLockCommand(LockRequest request) {
+        AbstractLockCommand command = null;
+        try {
+            String operation = request.getOperation();
+            String domain = request.getDomain();
+            String callerId = request.getCallerId();
+            String resourceId = request.getResourceId();
+
+            switch(operation) {
+                case LockRequest.OPERATION_ACQUIRE :
+                    Long ttl = null;
+                    if(null != request.getTtl()) {
+                        ttl = request.getTtl();
+                    }
+                    command = new AcquireCommand(domain, callerId, resourceId, ttl);
+                    break;
+                case LockRequest.OPERATION_RELEASE :
+                    command = new ReleaseCommand(domain, callerId, resourceId);
+                    break;
+                case LockRequest.OPERATION_COUNT :
+                    command = new GetLockCountCommand(domain, callerId, resourceId);
+                    break;
+                case LockRequest.OPERATION_PING :
+                    command = new LockPingCommand(domain, callerId, resourceId);
+                    break;
+                default :
+                    Error.push("Error parsing lock request");
+            }
+        } catch (Exception e) {
+            Error.push("Error parsing lock request");
+        }
+        return command;
     }
 
     @Override

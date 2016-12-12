@@ -18,16 +18,30 @@
  */
 package com.redhat.lightblue.rest.crud;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-
-import javax.inject.Inject;
-
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.Mongo;
+import com.redhat.lightblue.config.CrudConfiguration;
+import com.redhat.lightblue.config.MetadataConfiguration;
+import com.redhat.lightblue.metadata.EntityMetadata;
+import com.redhat.lightblue.mongo.config.MongoConfiguration;
+import com.redhat.lightblue.mongo.metadata.MongoMetadata;
+import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.test.RestConfigurationRule;
+import com.redhat.lightblue.util.JsonUtils;
+import com.redhat.lightblue.util.test.FileUtil;
+import de.flapdoodle.embed.mongo.Command;
+import de.flapdoodle.embed.mongo.MongodExecutable;
+import de.flapdoodle.embed.mongo.MongodProcess;
+import de.flapdoodle.embed.mongo.MongodStarter;
+import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
+import de.flapdoodle.embed.mongo.config.Net;
+import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
+import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import de.flapdoodle.embed.process.config.io.ProcessOutput;
+import de.flapdoodle.embed.process.io.IStreamProcessor;
+import de.flapdoodle.embed.process.io.Processors;
+import de.flapdoodle.embed.process.runtime.Network;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -43,31 +57,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.redhat.lightblue.config.CrudConfiguration;
-import com.redhat.lightblue.config.MetadataConfiguration;
-import com.redhat.lightblue.metadata.EntityMetadata;
-import com.redhat.lightblue.mongo.metadata.MongoMetadata;
-import com.redhat.lightblue.mongo.config.MongoConfiguration;
-import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.rest.test.RestConfigurationRule;
-import com.redhat.lightblue.util.JsonUtils;
-import com.redhat.lightblue.util.test.FileUtil;
-
-import de.flapdoodle.embed.mongo.Command;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
-import de.flapdoodle.embed.process.io.IStreamProcessor;
-import de.flapdoodle.embed.process.io.Processors;
-import de.flapdoodle.embed.process.runtime.Network;
+import javax.inject.Inject;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 
 /**
  *
@@ -324,6 +320,16 @@ public class ITCaseCrudResourceTest {
     public void testLock() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
         Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
         String result = cutCrudResource.acquire("test", "caller", "resource", null).getEntity().toString();
+        Assert.assertEquals("{\"result\":true}", result);
+    }
+
+    @Test
+    public void testLockWithPost() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
+        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+
+        LockRequest lockRequest = new LockRequest("acquire", "test", "caller", "resource/slash", null);
+
+        String result = cutCrudResource.lock(lockRequest).getEntity().toString();
         Assert.assertEquals("{\"result\":true}", result);
     }
 
