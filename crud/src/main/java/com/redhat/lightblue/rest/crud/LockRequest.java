@@ -12,6 +12,10 @@ public class LockRequest {
     String resourceId;
     Long ttl;
 
+    public LockRequest() {
+
+    }
+
     public LockRequest(String operation, String domain, String callerId, String resourceId) {
         this.operation = operation;
         this.domain = domain;
