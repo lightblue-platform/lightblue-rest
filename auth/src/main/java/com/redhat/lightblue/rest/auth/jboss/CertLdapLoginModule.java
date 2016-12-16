@@ -84,7 +84,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     private static String environment;
 
     // LightblueRoleProvider singleton
-    private static RolesProvider lbLdap = null;
+    private static volatile RolesProvider lbLdap = null;
 
     public CertLdapLoginModule() {
 
@@ -99,49 +99,51 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
 
     public void initialize() throws Exception {
 
-        synchronized(LdapRolesProvider.class) {
+        if (lbLdap == null) {
+            synchronized(LdapRolesProvider.class) {
 
-            if (lbLdap == null) {
-                environment = (String) options.get(ENVIRONMENT);
+                if (lbLdap == null) {
+                    environment = (String) options.get(ENVIRONMENT);
 
-                LdapConfiguration ldapConf = new LdapConfiguration();
+                    LdapConfiguration ldapConf = new LdapConfiguration();
 
-                ldapConf.server((String) options.get(SERVER));
-                ldapConf.port(Integer.parseInt((String) options.get(PORT)));
-                String searchBase = (String) options.get(SEARCH_BASE);
-                ldapConf.bindDn((String) options.get(BIND_DN));
-                ldapConf.bindDNPwd((String) options.get(BIND_PWD));
-                ldapConf.useSSL(Boolean.parseBoolean( (String) options.get(USE_SSL)));
-                ldapConf.trustStore((String) options.get(TRUST_STORE));
-                ldapConf.trustStorePassword((String) options.get(TRUST_STORE_PASSWORD));
-                ldapConf.poolSize(Integer.parseInt((String) options.get(POOL_SIZE)));
+                    ldapConf.server((String) options.get(SERVER));
+                    ldapConf.port(Integer.parseInt((String) options.get(PORT)));
+                    String searchBase = (String) options.get(SEARCH_BASE);
+                    ldapConf.bindDn((String) options.get(BIND_DN));
+                    ldapConf.bindDNPwd((String) options.get(BIND_PWD));
+                    ldapConf.useSSL(Boolean.parseBoolean( (String) options.get(USE_SSL)));
+                    ldapConf.trustStore((String) options.get(TRUST_STORE));
+                    ldapConf.trustStorePassword((String) options.get(TRUST_STORE_PASSWORD));
+                    ldapConf.poolSize(Integer.parseInt((String) options.get(POOL_SIZE)));
 
-                // optional configurations
-                if (options.containsKey(CONNECTION_TIMEOUT_MS)) {
-                    ldapConf.connectionTimeoutMS(Integer.parseInt((String)options.get(CONNECTION_TIMEOUT_MS)));
-                }
-                if (options.containsKey(RESPONSE_TIMEOUT_MS)) {
-                    ldapConf.responseTimeoutMS(Integer.parseInt((String)options.get(RESPONSE_TIMEOUT_MS)));
-                }
-                if (options.containsKey(DEBUG)) {
-                    ldapConf.debug(Boolean.parseBoolean((String)options.get(DEBUG)));
-                }
-                if (options.containsKey(KEEP_ALIVE)) {
-                    ldapConf.keepAlive(Boolean.parseBoolean((String)options.get(KEEP_ALIVE)));
-                }
-                if (options.containsKey(POOL_MAX_CONNECTION_AGE_MS)) {
-                    ldapConf.poolMaxConnectionAgeMS(Integer.parseInt((String)options.get(POOL_MAX_CONNECTION_AGE_MS)));
-                }
+                    // optional configurations
+                    if (options.containsKey(CONNECTION_TIMEOUT_MS)) {
+                        ldapConf.connectionTimeoutMS(Integer.parseInt((String)options.get(CONNECTION_TIMEOUT_MS)));
+                    }
+                    if (options.containsKey(RESPONSE_TIMEOUT_MS)) {
+                        ldapConf.responseTimeoutMS(Integer.parseInt((String)options.get(RESPONSE_TIMEOUT_MS)));
+                    }
+                    if (options.containsKey(DEBUG)) {
+                        ldapConf.debug(Boolean.parseBoolean((String)options.get(DEBUG)));
+                    }
+                    if (options.containsKey(KEEP_ALIVE)) {
+                        ldapConf.keepAlive(Boolean.parseBoolean((String)options.get(KEEP_ALIVE)));
+                    }
+                    if (options.containsKey(POOL_MAX_CONNECTION_AGE_MS)) {
+                        ldapConf.poolMaxConnectionAgeMS(Integer.parseInt((String)options.get(POOL_MAX_CONNECTION_AGE_MS)));
+                    }
 
-                int rolesCacheExpiry = 5*60*1000; // default 5 minutes
-                if (options.containsKey(ROLES_CACHE_EXPIRY_MS)) {
-                    rolesCacheExpiry = Integer.parseInt((String)options.get(ROLES_CACHE_EXPIRY_MS));
-                }
+                    int rolesCacheExpiry = 5*60*1000; // default 5 minutes
+                    if (options.containsKey(ROLES_CACHE_EXPIRY_MS)) {
+                        rolesCacheExpiry = Integer.parseInt((String)options.get(ROLES_CACHE_EXPIRY_MS));
+                    }
 
-                lbLdap = new CachedRolesProvider(new LdapRolesProvider(searchBase, ldapConf), new RolesCache(rolesCacheExpiry));
+                    lbLdap = new CachedRolesProvider(new LdapRolesProvider(searchBase, ldapConf), new RolesCache(rolesCacheExpiry));
+
+                }
 
             }
-
         }
 
     }
