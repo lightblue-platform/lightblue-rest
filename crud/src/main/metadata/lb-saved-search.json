@@ -1,0 +1,154 @@
+{
+    "entityInfo": {
+        "datastore": {
+            "backend": "mongo",
+            "collection": "savedSearches",
+            "datasource": "mongodata"
+        },
+        "defaultVersion": "0.0.1-SNAPSHOT",
+        "indexes": [
+            {
+                "fields": [
+                    {
+                        "caseInsensitive": false,
+                        "dir": "$asc",
+                        "field": "searchName"
+                    },
+                    {
+                        "caseInsensitive": false,
+                        "dir": "$asc",
+                        "field": "entity"
+                    },
+                    {
+                        "caseInsensitive": false,
+                        "dir": "$asc",
+                        "field": "versions"
+                    }
+                ],
+                "name": "search_entity_version",
+                "unique":true
+            },
+            {
+                "fields": [
+                    {
+                        "_id": false,
+                        "dir": "$asc",
+                        "field": "_id"
+                    }
+                ],
+                "name": "id_index",
+                "unique":true
+            }
+        ],
+        "name": "savedSearch"
+    },
+    "schema": {
+        "access": {
+            "delete": [
+                "anyone"
+            ],
+            "find": [
+                "anyone"
+            ],
+            "insert": [
+                "anyone"
+            ],
+            "update": [
+                "anyone"
+            ]
+        },
+        "fields": {
+            "_id": {
+                "access": {
+                    "update": [
+                        "noone"
+                    ]
+                },
+                "constraints": {
+                    "identity": true
+                },
+                "description": "unique search id",
+                "type": "string"
+            },
+            "objectType": {
+                "access": {
+                    "find": [
+                        "anyone"
+                    ],
+                    "update": [
+                        "noone"
+                    ]
+                },
+                "constraints": {
+                    "minLength": 1,
+                    "required": true
+                },
+                "description": null,
+                "type": "string"
+            },
+            "name": {
+                "type":"string",
+                "constraints":{
+                    "required":true
+                },
+                "description":"Name of the search"
+                
+            },
+            "entity": {
+                "type":"string",
+                "constraints":{
+                    "required":"true"
+                },
+                "description":"The entity search works on"
+            },
+            "versions": {
+                "type":"array",
+                "description":"Entity versions this search can be applied to. If specific versions are given, the search only applies to those versions. If empty, search applies to all versions. If there are multiple searches, best matching version is used, i.e. if there is a search with matching version number, that will be used. Otherwise, if there is a search without version numbers, the one without versions numbers will be used",
+                "items": {
+                    "type":"string",
+                    "description":"Version values"
+                }
+            },
+            "parameters": {
+                "type":"array",
+                "description":"Query parameters",
+                "items":{
+                    "type":"object",
+                    "fields":{
+                        "name":{
+                            "type":"string",
+                            "constraints":{
+                                "required":"true"
+                            },
+                            "description":"Parameter name"
+                        },
+                        "type":{
+                            "type":"string",
+                            "description":"Optional type of parameter."
+                        },
+                        "optional":{
+                            "type":"boolean",
+                            "description":"If parameter is optional or not"
+                        },
+                        "defaultValue":{
+                            "type":"any",
+                            "description":"Default value of parameter if it is optional"
+                        }
+                    }
+                }
+            },
+            "query":{
+                "type":"any",
+                "description":"The query"
+            }
+        }
+        "name": "savedSearch",
+        "status": {
+            "value": "active"
+        },
+        "version": {
+            "changelog": "First version",
+            "value": "0.0.1-SNAPSHOT"
+        }
+    }
+}
