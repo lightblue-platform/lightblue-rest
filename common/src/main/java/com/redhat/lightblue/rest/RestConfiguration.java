@@ -28,6 +28,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.redhat.lightblue.savedsearch.SavedSearchCache;
+
 import com.redhat.lightblue.config.DataSourcesConfiguration;
 import com.redhat.lightblue.config.LightblueFactory;
 import com.redhat.lightblue.util.JsonUtils;
@@ -55,12 +57,30 @@ public final class RestConfiguration {
 
     private static DataSourcesConfiguration datasources;
     private static volatile LightblueFactory factory;
+    private static volatile SavedSearchCache savedSearchCache;
 
     private RestConfiguration() {
     }
 
     public static DataSourcesConfiguration getDatasources() {
         return datasources;
+    }
+
+    public static SavedSearchCache getSavedSearchCache() {
+        SavedSearchCache c=savedSearchCache;
+        if(c==null) {
+            synchronized(RestConfiguration.class) {
+                if(savedSearchCache==null) {
+                    try {
+                        savedSearchCache=new SavedSearchCache(getFactory().getCrudConfiguration().getSavedSearch());
+                        c=savedSearchCache;
+                    } catch(Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return c;
     }
 
     public static LightblueFactory getFactory(final DataSourcesConfiguration ds) {

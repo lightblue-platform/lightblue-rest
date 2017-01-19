@@ -3,9 +3,9 @@
         "datastore": {
             "backend": "mongo",
             "collection": "savedSearches",
-            "datasource": "mongodata"
+            "datasource": "mongo"
         },
-        "defaultVersion": "0.0.1-SNAPSHOT",
+        "defaultVersion": "1.0.0",
         "indexes": [
             {
                 "fields": [
@@ -97,13 +97,13 @@
             "entity": {
                 "type":"string",
                 "constraints":{
-                    "required":"true"
+                    "required":true
                 },
-                "description":"The entity search works on"
+                "description":"The name of the entity search works on"
             },
             "versions": {
                 "type":"array",
-                "description":"Entity versions this search can be applied to. If specific versions are given, the search only applies to those versions. If empty, search applies to all versions. If there are multiple searches, best matching version is used, i.e. if there is a search with matching version number, that will be used. Otherwise, if there is a search without version numbers, the one without versions numbers will be used",
+                "description": "Entity versions this search can be applied to. It is a partial version match. A 1.0 value in this array means the search will be used for all 1.0.x versions as well as 1.0 version. A null value means the search will be used for all entity versions that are not explicitly selected by other elements in the array.",
                 "items": {
                     "type":"string",
                     "description":"Version values"
@@ -118,7 +118,7 @@
                         "name":{
                             "type":"string",
                             "constraints":{
-                                "required":"true"
+                                "required":true
                             },
                             "description":"Parameter name"
                         },
@@ -139,16 +139,31 @@
             },
             "query":{
                 "type":"any",
-                "description":"The query"
+                "constraints":{
+                    "required":true
+                },
+                "description":"The query. Bound parameters are given as ${parameter}. This could be a strig, or json "
+            },
+            "projection":{
+                "type":"any"
+            },
+            "sort":{
+                "type":"any"
+            },
+            "range":{
+                "type":"array",
+                "items":{
+                    "type":"integer"
+                }
             }
-        }
+        },
         "name": "savedSearch",
         "status": {
             "value": "active"
         },
         "version": {
             "changelog": "First version",
-            "value": "0.0.1-SNAPSHOT"
+            "value": "1.0.0"
         }
     }
 }

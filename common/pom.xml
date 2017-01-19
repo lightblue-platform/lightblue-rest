@@ -30,6 +30,10 @@
     <dependencies>
         <dependency>
             <groupId>com.redhat.lightblue</groupId>
+            <artifactId>lightblue-core-misc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.redhat.lightblue</groupId>
             <artifactId>lightblue-core-config</artifactId>
         </dependency>
         <dependency>

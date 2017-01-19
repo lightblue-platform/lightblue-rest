@@ -18,6 +18,15 @@
  */
 package com.redhat.lightblue.rest.crud;
 
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+
 import com.redhat.lightblue.EntityVersion;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.query.Projection;
@@ -36,6 +45,7 @@ import com.redhat.lightblue.rest.crud.cmd.LockPingCommand;
 import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
 import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
 import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
+import com.redhat.lightblue.rest.crud.cmd.RunSavedSearchCommand;
 import com.redhat.lightblue.rest.util.QueryTemplateUtils;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
@@ -54,6 +64,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Context;
 import java.io.IOException;
 
 import static com.redhat.lightblue.rest.crud.cmd.AbstractLockCommand.getLockCommand;
@@ -77,6 +89,108 @@ public abstract class AbstractCrudResource {
         // by default JVM caches DNS forever.  hard code an override to refresh DNS cache every 30 seconds
         java.security.Security.setProperty("networkaddress.cache.ttl", "30");
     }
+
+    @GET
+    @Path("/search/{searchName}/{entity}")
+    public Response runSavedSearch(@PathParam("searchName") String searchName,
+                                   @PathParam("entity") String entity,
+                                   @QueryParam("P") String projection,
+                                   @QueryParam("S") String sort,
+                                   @QueryParam("from") Integer from,
+                                   @QueryParam("to") Integer to,
+                                   @QueryParam("maxResults") Integer maxResults,
+                                   @Context UriInfo uriInfo) {
+        return runSavedSearch(searchName,entity,null,projection,sort,from,to,maxResults,uriInfo);
+    }
+
+    @GET
+    @Path("/search/{searchName}/{entity}/{version}")
+    public Response runSavedSearch(@PathParam("searchName") String searchName,
+                                   @PathParam("entity") String entity,
+                                   @PathParam("version") String version,
+                                   @QueryParam("P") String projection,
+                                   @QueryParam("S") String sort,
+                                   @QueryParam("from") Integer from,
+                                   @QueryParam("to") Integer to,
+                                   @QueryParam("maxResults") Integer maxResults,
+                                   @Context UriInfo uriInfo) {
+        Map<String,List<String>> qmap=uriInfo.getQueryParameters();
+        Map<String,String> map=new HashMap<>();
+        for(Map.Entry<String,List<String>> entry:qmap.entrySet()) {
+            if(entry.getValue().size()!=1)
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            map.put(entry.getKey(),entry.getValue().get(0));
+        }
+        return runSavedSearch(searchName,entity,version,projection,sort,from,to,maxResults,map);
+    }
+
+    @POST
+    @LZF
+    @Path("/search/{searchName}/{entity}/{version}")
+    public Response runSavedSearch(@PathParam("searchName") String searchName,
+                                   @PathParam("entity") String entity,
+                                   @PathParam("version") String version,
+                                   @QueryParam("P") String projection,
+                                   @QueryParam("S") String sort,
+                                   @QueryParam("from") Integer from,
+                                   @QueryParam("to") Integer to,
+                                   @QueryParam("maxResults") Integer maxResults,
+                                   String body) {
+        Map<String,String> map=new HashMap<>();
+        try {
+            JsonNode node=JsonUtils.json(body);
+            if(node instanceof ObjectNode) {
+                for(Iterator<Map.Entry<String,JsonNode>> itr=node.fields();itr.hasNext();) {
+                    Map.Entry<String,JsonNode> entry=itr.next();
+                    map.put(entry.getKey(),entry.getValue() instanceof NullNode?null:entry.getValue().asText());
+                }
+            }
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        
+        return runSavedSearch(searchName,entity,version,projection,sort,from,to,maxResults,map);
+    }
+
+
+    private Response runSavedSearch(String searchName,
+                                    String entity,
+                                    String version,
+                                    String projection,
+                                    String sort,
+                                    Integer from,
+                                    Integer to,
+                                    Integer maxResults,
+                                    Map<String,String> parameters) {
+        Projection p=null;
+        Sort s=null;
+        Integer f=null;
+        Integer t=null;
+        try {
+            if(projection!=null) {
+                String x=QueryTemplateUtils.buildProjectionsTemplate(projection);
+                if(x!=null)
+                    p=Projection.fromJson(JsonUtils.json(x));
+            }
+            if(sort!=null) {
+                String x=QueryTemplateUtils.buildSortsTemplate(sort);
+                if(x!=null)
+                    s=Sort.fromJson(JsonUtils.json(x));
+            }
+            if(from!=null)
+                f=from;
+            if(to!=null)
+                t=to;
+            if(maxResults!=null)
+                t=new Integer(f==null?0:f+maxResults-1);
+        } catch(Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        Error.reset();
+        CallStatus st=new RunSavedSearchCommand(searchName,entity,version,p,s,f,t,parameters).run();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }        
+    
 
     @POST
     @Path("/lock/")

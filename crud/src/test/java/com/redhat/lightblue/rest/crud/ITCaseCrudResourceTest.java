@@ -354,4 +354,43 @@ public class ITCaseCrudResourceTest {
         System.out.println("Generated:" + result);
         JSONAssert.assertEquals("{\"processed\":[\"50000001\",\"50000002\",\"50000003\"]}", result, false);
     }
+
+    @Test
+    public void testSavedSearch() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
+        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+
+        // Saved search metadata
+        System.out.println("Insert saved search md");
+        String metadata = readFile("lb-saved-search.json");
+        EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
+        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+        System.out.println("saved search md inserted");
+
+        // Country metadata
+        System.out.println("Insert country md");
+        metadata = readFile("metadata.json");
+        em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
+        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+        System.out.println("country md inserted");
+        String auditMetadata = FileUtil.readFile("metadata/audit.json");
+        EntityMetadata aEm = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(auditMetadata));
+        RestConfiguration.getFactory().getMetadata().createNewMetadata(aEm);
+
+        // insert country data
+        System.out.println("Insert country");
+        cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity().toString();
+        System.out.println("country inserted");
+
+        // insert saved search
+        System.out.println("Insert savedSearch");
+        cutCrudResource.insert("savedSearch","1.0.0","{'data':{'name':'test','entity':'country','parameters':[{'name':'iso'}],'query':{'field':'iso2code','op':'=','rvalue':'${iso}'}}}".
+                               replaceAll("'","\""));
+        System.out.println("savedSearch inserted");
+
+        // Run saved search
+        String result = cutCrudResource.runSavedSearch("test","country","1.0.0",null,null,null,null,null,"{'iso':'CA'}".replaceAll("'","\"")).getEntity().toString();
+        Assert.assertTrue(result.indexOf("\"matchCount\":1")!=-1);
+        System.out.println("result:" + result);
+
+    }
 }

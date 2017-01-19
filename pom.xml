@@ -113,6 +113,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
+                <artifactId>lightblue-core-misc</artifactId>
+                <version>${lightblue.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-util</artifactId>
                 <version>${lightblue.core.version}</version>
             </dependency>
