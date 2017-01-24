@@ -31,8 +31,11 @@ import com.redhat.lightblue.EntityVersion;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.query.Projection;
 import com.redhat.lightblue.query.QueryExpression;
+import com.redhat.lightblue.query.FieldProjection;
 import com.redhat.lightblue.query.Sort;
+import com.redhat.lightblue.query.SortKey;
 import com.redhat.lightblue.rest.CallStatus;
+import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.cmd.AcquireCommand;
 import com.redhat.lightblue.rest.crud.cmd.BulkRequestCommand;
 import com.redhat.lightblue.rest.crud.cmd.DeleteCommand;
@@ -88,6 +91,38 @@ public abstract class AbstractCrudResource {
     static {
         // by default JVM caches DNS forever.  hard code an override to refresh DNS cache every 30 seconds
         java.security.Security.setProperty("networkaddress.cache.ttl", "30");
+    }
+
+    @GET
+    @LZF
+    @Path("/searches/{entity}")
+    public Response getSearchesForEntity(@PathParam("entity") String entity,
+                                         @QueryParam("P") String projection,
+                                         @QueryParam("S") String sort) {
+        return getSearchesForEntity(entity,null,projection,sort);
+    }
+
+    @GET
+    @LZF
+    @Path("/searches/{entity}/{version}")
+    public Response getSearchesForEntity(@PathParam("entity") String entity,
+                                         @PathParam("version") String version,
+                                         @QueryParam("P") String projection,
+                                         @QueryParam("S") String sort) {
+        FindRequest freq=new FindRequest();
+        freq.setEntityVersion(new EntityVersion(RestConfiguration.getSavedSearchCache().savedSearchEntity,
+                                                RestConfiguration.getSavedSearchCache().savedSearchVersion));
+
+        try {
+            freq.setProjection(projection==null?FieldProjection.ALL:Projection.fromJson(JsonUtils.json(QueryTemplateUtils.buildProjectionsTemplate(projection))));
+            freq.setSort(sort==null?new SortKey(new com.redhat.lightblue.util.Path("name"),false):Sort.fromJson(JsonUtils.json(QueryTemplateUtils.buildSortsTemplate(sort))));
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).build();
+        }
+        CallStatus st=new FindCommand(freq.getEntityVersion().getEntity(),
+                                      freq.getEntityVersion().getVersion(),
+                                      freq.toJson().toString()).run();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
     @GET

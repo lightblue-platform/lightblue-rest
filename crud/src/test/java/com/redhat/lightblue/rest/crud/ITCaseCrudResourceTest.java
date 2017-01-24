@@ -393,4 +393,28 @@ public class ITCaseCrudResourceTest {
         System.out.println("result:" + result);
 
     }
+
+    @Test
+    public void testListSavedSearch() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
+        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+
+        // Saved search metadata
+        System.out.println("Insert saved search md");
+        String metadata = readFile("lb-saved-search.json");
+        EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
+        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+        System.out.println("saved search md inserted");
+
+        // insert saved search
+        System.out.println("Insert savedSearch");
+        cutCrudResource.insert("savedSearch","1.0.0","{'data':{'name':'test','entity':'country','parameters':[{'name':'iso'}],'query':{'field':'iso2code','op':'=','rvalue':'${iso}'}}}".
+                               replaceAll("'","\""));
+        System.out.println("savedSearch inserted");
+
+        // get saved search
+        String result = cutCrudResource.getSearchesForEntity("country","1.0.0",null,null).getEntity().toString();
+        Assert.assertTrue(result.indexOf("\"matchCount\":1")!=-1);
+        System.out.println("result:" + result);
+
+    }
 }
