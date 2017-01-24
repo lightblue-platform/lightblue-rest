@@ -91,23 +91,25 @@ public abstract class AbstractCrudResource {
     }
 
     @GET
-    @Path("/search/{searchName}/{entity}")
-    public Response runSavedSearch(@PathParam("searchName") String searchName,
-                                   @PathParam("entity") String entity,
+    @LZF
+    @Path("/search/{entity}/{searchName}")
+    public Response runSavedSearch(@PathParam("entity") String entity,
+                                   @PathParam("searchName") String searchName,
                                    @QueryParam("P") String projection,
                                    @QueryParam("S") String sort,
                                    @QueryParam("from") Integer from,
                                    @QueryParam("to") Integer to,
                                    @QueryParam("maxResults") Integer maxResults,
                                    @Context UriInfo uriInfo) {
-        return runSavedSearch(searchName,entity,null,projection,sort,from,to,maxResults,uriInfo);
+        return runSavedSearch(entity,null,searchName,projection,sort,from,to,maxResults,uriInfo);
     }
 
     @GET
-    @Path("/search/{searchName}/{entity}/{version}")
-    public Response runSavedSearch(@PathParam("searchName") String searchName,
-                                   @PathParam("entity") String entity,
+    @LZF
+    @Path("/search/{entity}/{version}/{searchName}")
+    public Response runSavedSearch(@PathParam("entity") String entity,
                                    @PathParam("version") String version,
+                                   @PathParam("searchName") String searchName,
                                    @QueryParam("P") String projection,
                                    @QueryParam("S") String sort,
                                    @QueryParam("from") Integer from,
@@ -121,15 +123,29 @@ public abstract class AbstractCrudResource {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             map.put(entry.getKey(),entry.getValue().get(0));
         }
-        return runSavedSearch(searchName,entity,version,projection,sort,from,to,maxResults,map);
+        return runSavedSearch(entity,version,searchName,projection,sort,from,to,maxResults,map);
     }
 
     @POST
     @LZF
-    @Path("/search/{searchName}/{entity}/{version}")
-    public Response runSavedSearch(@PathParam("searchName") String searchName,
-                                   @PathParam("entity") String entity,
+    @Path("/search/{entity}/{searchName}")
+    public Response runSavedSearch(@PathParam("entity") String entity,
+                                   @PathParam("searchName") String searchName,
+                                   @QueryParam("P") String projection,
+                                   @QueryParam("S") String sort,
+                                   @QueryParam("from") Integer from,
+                                   @QueryParam("to") Integer to,
+                                   @QueryParam("maxResults") Integer maxResults,
+                                   String body) {
+        return runSavedSearch(entity,null,searchName,projection,sort,from,to,maxResults,body);
+    }
+
+    @POST
+    @LZF
+    @Path("/search/{entity}/{version}/{searchName}")
+    public Response runSavedSearch(@PathParam("entity") String entity,
                                    @PathParam("version") String version,
+                                   @PathParam("searchName") String searchName,
                                    @QueryParam("P") String projection,
                                    @QueryParam("S") String sort,
                                    @QueryParam("from") Integer from,
@@ -149,13 +165,13 @@ public abstract class AbstractCrudResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         
-        return runSavedSearch(searchName,entity,version,projection,sort,from,to,maxResults,map);
+        return runSavedSearch(entity,version,searchName,projection,sort,from,to,maxResults,map);
     }
 
 
-    private Response runSavedSearch(String searchName,
-                                    String entity,
+    private Response runSavedSearch(String entity,
                                     String version,
+                                    String searchName,
                                     String projection,
                                     String sort,
                                     Integer from,

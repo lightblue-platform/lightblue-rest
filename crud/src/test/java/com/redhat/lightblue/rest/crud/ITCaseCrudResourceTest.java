@@ -388,7 +388,7 @@ public class ITCaseCrudResourceTest {
         System.out.println("savedSearch inserted");
 
         // Run saved search
-        String result = cutCrudResource.runSavedSearch("test","country","1.0.0",null,null,null,null,null,"{'iso':'CA'}".replaceAll("'","\"")).getEntity().toString();
+        String result = cutCrudResource.runSavedSearch("country","1.0.0","test",null,null,null,null,null,"{'iso':'CA'}".replaceAll("'","\"")).getEntity().toString();
         Assert.assertTrue(result.indexOf("\"matchCount\":1")!=-1);
         System.out.println("result:" + result);
 
