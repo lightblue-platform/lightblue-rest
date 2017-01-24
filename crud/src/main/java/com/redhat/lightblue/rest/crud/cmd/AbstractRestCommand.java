@@ -113,18 +113,22 @@ public abstract class AbstractRestCommand {
         return tx;
     }
 
-    protected void addCallerId(Request req) {
-        req.setClientId(new ClientIdentification() {
+    public ClientIdentification getCallerId() {
+        return new ClientIdentification() {
             @Override
             public boolean isUserInRole(String role) {
                 return httpServletRequest == null ? false : httpServletRequest.isUserInRole(role);
             }
-
+            
             @Override
             public String getPrincipal() {
                 return httpServletRequest == null ? null : (httpServletRequest.getUserPrincipal() != null ? httpServletRequest.getUserPrincipal().getName() : null);
             }
-        });
+        };
+    }
+
+    protected void addCallerId(Request req) {
+        req.setClientId(getCallerId());
     }
 
     public abstract CallStatus run();
