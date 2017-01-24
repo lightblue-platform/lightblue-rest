@@ -95,18 +95,8 @@ public abstract class AbstractCrudResource {
 
     @GET
     @LZF
-    @Path("/searches/{entity}")
+    @Path("/search/{entity}")
     public Response getSearchesForEntity(@PathParam("entity") String entity,
-                                         @QueryParam("P") String projection,
-                                         @QueryParam("S") String sort) {
-        return getSearchesForEntity(entity,null,projection,sort);
-    }
-
-    @GET
-    @LZF
-    @Path("/searches/{entity}/{version}")
-    public Response getSearchesForEntity(@PathParam("entity") String entity,
-                                         @PathParam("version") String version,
                                          @QueryParam("P") String projection,
                                          @QueryParam("S") String sort) {
         FindRequest freq=new FindRequest();

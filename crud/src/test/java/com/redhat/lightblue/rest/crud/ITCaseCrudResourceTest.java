@@ -412,7 +412,7 @@ public class ITCaseCrudResourceTest {
         System.out.println("savedSearch inserted");
 
         // get saved search
-        String result = cutCrudResource.getSearchesForEntity("country","1.0.0",null,null).getEntity().toString();
+        String result = cutCrudResource.getSearchesForEntity("country",null,null).getEntity().toString();
         Assert.assertTrue(result.indexOf("\"matchCount\":1")!=-1);
         System.out.println("result:" + result);
 
