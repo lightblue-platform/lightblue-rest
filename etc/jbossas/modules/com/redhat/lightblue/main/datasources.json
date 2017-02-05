@@ -16,7 +16,7 @@
            "host" : "localhost",
            "port" : "27017"
         }
-   }
+   },
    "mongodata" : {
      "documentation" : [
        "MongoDB makes a distinction between servers (a list) and server (a single address), ",
