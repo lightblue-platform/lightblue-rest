@@ -97,16 +97,14 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         super.initialize(subject, callbackHandler, sharedState, options);
     }
 
-    public void initialize() throws Exception {
-
+    public void initializeRolesProvider() throws Exception {
+        LOGGER.debug("CertLdapLoginModule#initializeRolesProvider was invoked");
         if (lbLdap == null) {
             synchronized(LdapRolesProvider.class) {
-
                 if (lbLdap == null) {
                     environment = (String) options.get(ENVIRONMENT);
 
                     LdapConfiguration ldapConf = new LdapConfiguration();
-
                     ldapConf.server((String) options.get(SERVER));
                     ldapConf.port(Integer.parseInt((String) options.get(PORT)));
                     String searchBase = (String) options.get(SEARCH_BASE);
@@ -140,12 +138,9 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
                     }
 
                     lbLdap = new CachedRolesProvider(new LdapRolesProvider(searchBase, ldapConf), new RolesCache(rolesCacheExpiry));
-
                 }
-
             }
         }
-
     }
 
     /* (non-Javadoc)
@@ -164,7 +159,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
         String certPrincipal = getUsername();
 
         try {
-            initialize();
+            initializeRolesProvider();
 
             LOGGER.debug("Certificate principal:" + certPrincipal);
 
