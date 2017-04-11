@@ -385,23 +385,41 @@ public abstract class AbstractCrudResource {
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
+    /**
+     * This endpoint streams the results with chunked encoding if
+     * stream query parameter is true
+     */
     @POST
     @LZF
     @Path("/find/{entity}")
     public Response find(@PathParam(PARAM_ENTITY) String entity,
+                         @QueryParam("stream") Boolean stream,
                          String request) {
-        return find(entity, null, request);
+        return find(entity, null, stream,request);
     }
 
+    /**
+     * This endpoint streams the results with chunked encoding if
+     * stream query parameter is true
+     */
     @POST
     @LZF
     @Path("/find/{entity}/{version}")
     public Response find(@PathParam(PARAM_ENTITY) String entity,
                          @PathParam(PARAM_VERSION) String version,
+                         @QueryParam("stream") Boolean stream,
                          String request) {
         Error.reset();
-        CallStatus st = new FindCommand(entity, version, request).run();
-        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+        boolean bstream=stream!=null&&stream;
+        FindCommand f=new FindCommand(entity, version, request,bstream);
+        CallStatus st=f.run();
+        if(!st.hasErrors()&&bstream) {
+            // This is how you stream. You put a response stream into
+            // the response, and data is streamed to the client
+            return Response.ok().entity(f.getResponseStream()).build();
+        } else {
+            return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+        }
     }
 
     @POST

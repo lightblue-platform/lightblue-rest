@@ -18,9 +18,21 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.io.IOException;
+
+import java.util.List;
+
+import javax.ws.rs.core.StreamingOutput;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
+import com.redhat.lightblue.ResultMetadata;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
@@ -39,16 +51,81 @@ public class FindCommand extends AbstractRestCommand {
     private final String entity;
     private final String version;
     private final String request;
+    private final boolean stream;
+
+    private Response streamResponse;
 
     public FindCommand(String entity, String version, String request) {
-        this(null, entity, version, request);
+        this(null,entity,version,request,false);
+    }
+        
+    public FindCommand(String entity, String version, String request,boolean stream) {
+        this(null, entity, version, request,stream);
     }
 
     public FindCommand(Mediator mediator, String entity, String version, String request) {
+        this(mediator,entity,version,request,false);
+    }
+    
+    public FindCommand(Mediator mediator, String entity, String version, String request,boolean stream) {
         super(mediator);
         this.entity = entity;
         this.version = version;
         this.request = request;
+        this.stream=stream;
+    }
+
+    /**
+     * The streaming protocol:
+     * <pre>
+     *   {
+     *     ... ; result, without document data, or metadata
+     *   }
+     *   {
+     *      processed: { document },
+     *      resultMetadata: { metadata }
+     *   }
+     *    ...
+     *  {
+     *      last: true
+     *      processed: { document },
+     *      resultMetadata: { metadata }
+     *   }
+     * </pre>
+     */
+    public StreamingOutput getResponseStream() {
+        return new StreamingOutput() {
+            ObjectNode chunkNode;
+            ArrayNode resultNode;
+            ArrayNode rmdNode;
+            
+            @Override
+            public void write(OutputStream os) throws IOException {
+                // clear out the streamed results from the response
+                // We will stream entitydata and resultMetadata
+                ArrayNode entityData=(ArrayNode)streamResponse.getEntityData();
+                streamResponse.setEntityData(null);
+                List<ResultMetadata> rmd=streamResponse.getResultMetadata();
+                streamResponse.setResultMetadata(null);
+                
+                // Send the response to output as the first chunk
+                Writer writer=new OutputStreamWriter(os);
+                writer.write(streamResponse.toJson().toString());
+                writer.flush();
+                
+                for(int i=0;i<entityData.size();i++) {
+                    ObjectNode chunkNode=JsonNodeFactory.instance.objectNode();
+                    if(i==entityData.size()-1) {
+                        chunkNode.set("last",JsonNodeFactory.instance.booleanNode(true));
+                    }
+                    chunkNode.set("processed",entityData.get(i));
+                    if(i<rmd.size())
+                        chunkNode.set("resultMetadata",rmd.get(i).toJson());
+                    writer.write(chunkNode.toString());
+                }
+                writer.flush();
+            }
+        };
     }
 
     @Override
@@ -74,7 +151,12 @@ public class FindCommand extends AbstractRestCommand {
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
             addCallerId(ireq);
+            // Until streaming is supported in mediator, we'll get the
+            // results and stream them
             Response r = getMediator().find(ireq);
+            if(stream) {
+                streamResponse=r;
+            }
             return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("find:generic_error failure: {}", e);
