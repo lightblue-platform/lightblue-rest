@@ -247,7 +247,7 @@ public class ITCaseCrudResourceTest {
         JSONAssert.assertEquals(expectedInserted, resultInserted, false);
 
         String auditExpectedFound = readFile("auditExpectedFound.json");
-        String auditResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
+        String auditResultFound = cutCrudResource.find("audit", "1.0.1", false,readFile("auditResultFound.json")).getEntity().toString();
         System.out.println("resultFound:" + auditResultFound);
         auditResultFound = auditResultFound.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
         auditResultFound = auditResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
@@ -270,10 +270,10 @@ public class ITCaseCrudResourceTest {
         // audit2ResultFound = audit2ResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
         // JSONAssert.assertEquals(audit2ExpectedFound, audit2ResultFound, false);
         String expectedFound = readFile("expectedFound.json");
-        String resultFound = cutCrudResource.find("country", "1.0.0", readFile("resultFound.json")).getEntity().toString();
+        String resultFound = cutCrudResource.find("country", "1.0.0", false, readFile("resultFound.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedFound, resultFound, false); // #TODO #FIX Not finding the right version
 
-        String expectedAll = cutCrudResource.find("country", "1.0.0", readFile("country-noq.json")).getEntity().toString();
+        String expectedAll = cutCrudResource.find("country", "1.0.0", false, readFile("country-noq.json")).getEntity().toString();
         System.out.println("returnVAlue:" + expectedAll);
         JSONAssert.assertEquals(expectedFound, expectedAll, false);
 
@@ -312,7 +312,7 @@ public class ITCaseCrudResourceTest {
         JSONAssert.assertEquals(expectedDeleted, resultDeleted, false);
 
         String expectedFound2 = readFile("expectedFound2.json");
-        String resultFound2 = cutCrudResource.find("country", "1.0.0", readFile("resultFound2.json")).getEntity().toString();
+        String resultFound2 = cutCrudResource.find("country", "1.0.0", false,readFile("resultFound2.json")).getEntity().toString();
         JSONAssert.assertEquals(expectedFound2, resultFound2, false);
     }
 
