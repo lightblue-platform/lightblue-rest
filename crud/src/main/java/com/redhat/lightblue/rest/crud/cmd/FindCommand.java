@@ -27,6 +27,7 @@ import java.util.List;
 
 import javax.ws.rs.core.StreamingOutput;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -103,8 +104,18 @@ public class FindCommand extends AbstractRestCommand {
             public void write(OutputStream os) throws IOException {
                 // clear out the streamed results from the response
                 // We will stream entitydata and resultMetadata
-                ArrayNode entityData=(ArrayNode)streamResponse.getEntityData();
+                JsonNode entityDataNode=streamResponse.getEntityData();
                 streamResponse.setEntityData(null);
+                
+                ArrayNode entityData;
+                if(entityDataNode instanceof ArrayNode) {
+                    entityData=(ArrayNode)entityDataNode;
+                } else {
+                    entityData=JsonNodeFactory.instance.arrayNode();
+                    if (entityDataNode instanceof ObjectNode) {
+                        entityData.add(entityDataNode);
+                    }
+                } 
                 List<ResultMetadata> rmd=streamResponse.getResultMetadata();
                 streamResponse.setResultMetadata(null);
                 
