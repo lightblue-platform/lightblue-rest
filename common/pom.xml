@@ -1,64 +1,70 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!--
-    Copyright 2013 Red Hat, Inc. and/or its affiliates.
+<!-- Copyright 2013 Red Hat, Inc. and/or its affiliates. This file is part 
+	of lightblue. This program is free software: you can redistribute it and/or 
+	modify it under the terms of the GNU General Public License as published 
+	by the Free Software Foundation, either version 3 of the License, or (at 
+	your option) any later version. This program is distributed in the hope that 
+	it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty 
+	of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General 
+	Public License for more details. You should have received a copy of the GNU 
+	General Public License along with this program. If not, see <http://www.gnu.org/licenses 
+	/>. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.redhat.lightblue.rest</groupId>
+		<artifactId>lightblue-rest-pom</artifactId>
+		<version>2.19.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>lightblue-rest-common</artifactId>
+	<packaging>jar</packaging>
+	<name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
+	<dependencies>
+		<dependency>
+			<groupId>com.redhat.lightblue</groupId>
+			<artifactId>lightblue-core-misc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.redhat.lightblue</groupId>
+			<artifactId>lightblue-core-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.redhat.lightblue.mongo</groupId>
+			<artifactId>lightblue-mongo</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.redhat.lightblue.mongo</groupId>
+			<artifactId>lightblue-mongo-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ebaysf.web</groupId>
+			<artifactId>cors-filter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.mifmif</groupId>
+			<artifactId>generex</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-healthchecks</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-servlets</artifactId>
+		</dependency>
 
-    This file is part of lightblue.
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses />.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.redhat.lightblue.rest</groupId>
-        <artifactId>lightblue-rest-pom</artifactId>
-        <version>2.19.0-SNAPSHOT</version>
-    </parent>
-    <artifactId>lightblue-rest-common</artifactId>
-    <packaging>jar</packaging>
-    <name>lightblue-rest: ${project.groupId}|${project.artifactId}</name>
-    <dependencies>
-        <dependency>
-            <groupId>com.redhat.lightblue</groupId>
-            <artifactId>lightblue-core-misc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue</groupId>
-            <artifactId>lightblue-core-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>lightblue-mongo</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.redhat.lightblue.mongo</groupId>
-            <artifactId>lightblue-mongo-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ebaysf.web</groupId>
-            <artifactId>cors-filter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mifmif</groupId>
-            <artifactId>generex</artifactId>
-        </dependency>
-    </dependencies>
+	</dependencies>
 </project>

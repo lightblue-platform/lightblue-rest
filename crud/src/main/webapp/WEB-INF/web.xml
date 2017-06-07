@@ -1,41 +1,53 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
-    <servlet-mapping>
-       <servlet-name>com.redhat.lightblue.rest.crud.RestApplication</servlet-name>
-       <url-pattern>/*</url-pattern>
-    </servlet-mapping>
-    
-    <filter>
-       <filter-name>LoggingFilter</filter-name>
-       <filter-class>com.redhat.lightblue.rest.logging.LoggingFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>LoggingFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-    
-    <servlet>
-        <servlet-name>health</servlet-name>
-        <jsp-file>/health.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>health</servlet-name>
-        <url-pattern>/health</url-pattern>
-    </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>com.redhat.lightblue.rest.crud.RestApplication</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
 
-    <listener>
-        <listener-class>com.redhat.lightblue.rest.cors.CorsInitializingServletContextListener</listener-class>
-    </listener>
+	<filter>
+		<filter-name>LoggingFilter</filter-name>
+		<filter-class>com.redhat.lightblue.rest.logging.LoggingFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>LoggingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
 
-    <context-param>
-        <param-name>cors.configuration.resource</param-name>
-        <param-value>lightblue-crud-cors.json</param-value>
-    </context-param>
-    <context-param>
-        <param-name>resteasy.providers</param-name>
-        <param-value>com.restcompress.provider.LZFEncodingInterceptor,com.restcompress.provider.LZFDecodingInterceptor</param-value>
-    </context-param>
-    
+	<servlet>
+		<servlet-name>health</servlet-name>
+		<jsp-file>/health.jsp</jsp-file>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>health</servlet-name>
+		<url-pattern>/health</url-pattern>
+	</servlet-mapping>
+
+	<listener>
+		<listener-class>com.redhat.lightblue.rest.cors.CorsInitializingServletContextListener</listener-class>
+	</listener>
+
+	<context-param>
+		<param-name>cors.configuration.resource</param-name>
+		<param-value>lightblue-crud-cors.json</param-value>
+	</context-param>
+	<context-param>
+		<param-name>resteasy.providers</param-name>
+		<param-value>com.restcompress.provider.LZFEncodingInterceptor,com.restcompress.provider.LZFDecodingInterceptor</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>com.redhat.lightblue.rest.health.LightblueHealthCheckServletContextListener</listener-class>
+	</listener>
+	<servlet>
+		<servlet-name>healthCheck</servlet-name>
+		<servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>healthCheck</servlet-name>
+		<url-pattern>/healthcheck</url-pattern>
+	</servlet-mapping>
+
 </web-app>
