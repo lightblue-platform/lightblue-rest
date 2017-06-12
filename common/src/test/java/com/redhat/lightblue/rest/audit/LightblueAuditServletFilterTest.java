@@ -7,7 +7,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.impl.SimpleLogger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -54,11 +53,11 @@ public class LightblueAuditServletFilterTest {
         err = TeeInMemoryStringPrintStream.teeTo(System.err);
         System.setErr(err);
 
-        simpleLoggerOutField = SimpleLogger.class.getDeclaredField("TARGET_STREAM");
-        simpleLoggerOutField.setAccessible(true);
-        simpleLoggerPrintStream = (PrintStream) simpleLoggerOutField.get(null);
-        simpleLoggerPrintStream.flush();
-        simpleLoggerOutField.set(null, err); // Using the default configuration, SimpleLogger will use the err. Either way, we are going to reset to the original value after this set of tests
+//        simpleLoggerOutField = SimpleLogger.class.getDeclaredField("TARGET_STREAM");
+//        simpleLoggerOutField.setAccessible(true);
+//        simpleLoggerPrintStream = (PrintStream) simpleLoggerOutField.get(null);
+//        simpleLoggerPrintStream.flush();
+//        simpleLoggerOutField.set(null, err); // Using the default configuration, SimpleLogger will use the err. Either way, we are going to reset to the original value after this set of tests
     }
 
     @AfterClass

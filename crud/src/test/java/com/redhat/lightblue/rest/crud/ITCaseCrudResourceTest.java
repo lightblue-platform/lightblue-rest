@@ -18,6 +18,7 @@
  */
 package com.redhat.lightblue.rest.crud;
 
+import com.codahale.metrics.servlets.HealthCheckServlet;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
@@ -34,17 +35,26 @@ import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
+import de.flapdoodle.embed.mongo.config.DownloadConfigBuilder;
+import de.flapdoodle.embed.mongo.config.ExtractedArtifactStoreBuilder;
 import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
+import de.flapdoodle.embed.process.config.store.ITimeoutConfig;
+import de.flapdoodle.embed.process.config.store.TimeoutConfigBuilder;
 import de.flapdoodle.embed.process.io.IStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.runtime.Network;
+import de.flapdoodle.embed.process.store.ArtifactStoreBuilder;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.shrinkwrap.api.GenericArchive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
@@ -56,14 +66,30 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import javax.inject.Inject;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 
 /**
  *
@@ -120,10 +146,19 @@ public class ITCaseCrudResourceTest {
             IStreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
             IStreamProcessor commandsOutput = Processors.namedConsole("[console>]");
 
+            Command mongoD = Command.MongoD;
             IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                    .defaults(Command.MongoD)
-                    .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-                    .build();
+                .defaults(mongoD)
+                .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
+                .artifactStore(new ExtractedArtifactStoreBuilder()
+                    .defaults(mongoD)
+                    .download(new DownloadConfigBuilder()
+                        .defaultsForCommand(mongoD)
+                        .timeoutConfig(new TimeoutConfigBuilder()
+                            .connectionTimeout(1000 * 60 * 60)
+                            .readTimeout(1000 * 60 * 60)
+                            .build())))
+                .build();
 
             MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
             mongodExe = runtime.prepare(
@@ -189,16 +224,41 @@ public class ITCaseCrudResourceTest {
     }
 
     @Deployment
-    public static WebArchive createDeployment() {
+    public static WebArchive createDeployment() throws Exception {
         File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeDependencies().resolve().withTransitivity().asFile();
         final String PATH_BASE = "src/test/resources/" + ITCaseCrudResourceTest.class.getSimpleName() + "/config/";
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
+        Document webXml = docBuilder.parse(Paths.get("src/main/webapp/WEB-INF/web.xml").toFile());
+        Element listener = webXml.createElement("listener");
+        Element listenerClass = webXml.createElement("listener-class");
+        listenerClass.appendChild(webXml.createTextNode("org.jboss.weld.environment.servlet.Listener"));
+        listener.appendChild(listenerClass);
+        webXml.getFirstChild().appendChild(listener);
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        transformer.transform(new DOMSource(webXml), new StreamResult(out));
 
         WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(new File(PATH_BASE + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
-                .addAsResource(new File(PATH_BASE + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
-                .addAsResource(new File(PATH_BASE + RestConfiguration.DATASOURCE_FILENAME), RestConfiguration.DATASOURCE_FILENAME)
-                .addAsResource(new File(PATH_BASE + "config.properties"), "config.properties");
+            .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+            .addAsWebInfResource(new Asset() {
+                @Override
+                public InputStream openStream() {
+                    return new ByteArrayInputStream(out.toByteArray());
+                }
+            }, "web.xml")
+            .addAsLibraries(
+                Maven.configureResolver()
+                    .workOffline()
+                    .loadPomFromFile("pom.xml")
+                    .resolve("org.jboss.weld.servlet:weld-servlet")
+                    .withTransitivity()
+                    .asFile())
+            .addPackages(true, CrudResource.class.getPackage())
+            .addAsResource(new File(PATH_BASE + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
+            .addAsResource(new File(PATH_BASE + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
+            .addAsResource(new File(PATH_BASE + RestConfiguration.DATASOURCE_FILENAME), RestConfiguration.DATASOURCE_FILENAME)
+            .addAsResource(new File(PATH_BASE + "config.properties"), "config.properties");
         for (File file : libs) {
             if (file.toString().indexOf("lightblue-") == -1) {
                 archive.addAsLibrary(file);
@@ -211,6 +271,10 @@ public class ITCaseCrudResourceTest {
         return archive;
     }
 
+    public static class MyBean {
+
+    }
+
     private String readFile(String filename) throws IOException, URISyntaxException {
         return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
     }
@@ -218,6 +282,9 @@ public class ITCaseCrudResourceTest {
     private String readConfigFile(String filename) throws IOException, URISyntaxException {
         return readFile("config/" + filename);
     }
+
+    @Inject
+    private MyBean myBean;
 
     @Inject
     private CrudResource cutCrudResource; //class under test
@@ -415,6 +482,11 @@ public class ITCaseCrudResourceTest {
         String result = cutCrudResource.getSearchesForEntity("country",null,null).getEntity().toString();
         Assert.assertTrue(result.indexOf("\"matchCount\":1")!=-1);
         System.out.println("result:" + result);
+
+    }
+
+    @Test
+    public void testHealthCheck() {
 
     }
 }
