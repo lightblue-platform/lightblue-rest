@@ -482,7 +482,10 @@ public class ITCaseCrudResourceTest {
     @Test
     @RunAsClient
     public void testHealthCheck(@ArquillianResource URL url) throws Exception {
-        ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI()).path("healthcheck").build().toString());
+        ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
+                .path("healthcheck")
+                .build()
+                .toString());
         request.accept(MediaType.APPLICATION_JSON);
         ClientResponse<String> response = request.get(String.class);
         ObjectNode jsonNode = (ObjectNode) new ObjectMapper().readTree(response.getEntity());
