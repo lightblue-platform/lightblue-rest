@@ -35,6 +35,7 @@
             com.restcompress.provider.LZFEncodingInterceptor,com.restcompress.provider.LZFDecodingInterceptor
         </param-value>
     </context-param>
+
     <listener>
         <listener-class>
             com.redhat.lightblue.rest.health.LightblueHealthCheckServletContextListener

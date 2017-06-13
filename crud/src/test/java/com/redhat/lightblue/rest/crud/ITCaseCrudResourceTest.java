@@ -34,6 +34,8 @@ import com.redhat.lightblue.mongo.config.MongoConfiguration;
 import com.redhat.lightblue.mongo.crud.js.Str;
 import com.redhat.lightblue.mongo.metadata.MongoMetadata;
 import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.crud.testsupport.Assets;
+import com.redhat.lightblue.rest.crud.testsupport.CrudWebXmls;
 import com.redhat.lightblue.rest.test.RestConfigurationRule;
 import com.redhat.lightblue.util.JsonUtils;
 import com.redhat.lightblue.util.test.FileUtil;
@@ -101,7 +103,9 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 
 /**
  *
@@ -167,8 +171,8 @@ public class ITCaseCrudResourceTest {
                     .download(new DownloadConfigBuilder()
                         .defaultsForCommand(mongoD)
                         .timeoutConfig(new TimeoutConfigBuilder()
-                            .connectionTimeout(1000 * 60 * 60)
-                            .readTimeout(1000 * 60 * 60)
+                            .connectionTimeout((int) Duration.ofMinutes(1).toMillis())
+                            .readTimeout((int) Duration.ofMinutes(5).toMillis())
                             .build())))
                 .build();
 
@@ -237,77 +241,43 @@ public class ITCaseCrudResourceTest {
 
     @Deployment
     public static WebArchive createDeployment() throws Exception {
-        File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeDependencies().resolve().withTransitivity().asFile();
-        final String PATH_BASE = "src/test/resources/" + ITCaseCrudResourceTest.class.getSimpleName() + "/config/";
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document webXml = docBuilder.parse(Paths.get("src/main/webapp/WEB-INF/web.xml").toFile());
-        Element listener = webXml.createElement("listener");
-        Element listenerClass = webXml.createElement("listener-class");
-        listenerClass.appendChild(webXml.createTextNode("org.jboss.weld.environment.servlet.Listener"));
-        listener.appendChild(listenerClass);
-        Node webApp = webXml.getFirstChild();
-        webApp.appendChild(listener);
+        File[] libs = Maven.resolver()
+                .loadPomFromFile("pom.xml")
+                .importRuntimeDependencies()
+                .resolve()
+                .withTransitivity()
+                .asFile();
 
-        Node servlet = webApp.appendChild(webXml.createElement("servlet"));
-        servlet.appendChild(webXml.createElement("servlet-name"))
-                .appendChild(webXml.createTextNode("RESTeasy"));
-        servlet.appendChild(webXml.createElement("servlet-class"))
-                .appendChild(webXml.createTextNode(HttpServletDispatcher.class.getName()));
-        Node initParam = servlet.appendChild(webXml.createElement("init-param"));
-        initParam.appendChild(webXml.createElement("param-name")
-                .appendChild(webXml.createTextNode("javax.ws.rs.Application")));
-        initParam.appendChild(webXml.createElement("param-value")
-                .appendChild(webXml.createTextNode(RestApplication.class.getName())));
+        Path configBase = Paths.get("src/test/resources/",
+                ITCaseCrudResourceTest.class.getSimpleName(),
+                "/config/");
 
-        Node servletMapping = webApp.appendChild(webXml.createElement("servlet-mapping"));
-        servletMapping.appendChild(webXml.createElement("servlet-name"))
-                .appendChild(webXml.createTextNode("RESTeasy"));
-        servletMapping.appendChild(webXml.createElement("url-pattern"))
-                .appendChild(webXml.createTextNode("/*"));
-
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        transformer.transform(new DOMSource(webXml), new StreamResult(out));
-
-        WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
+        WebArchive archive = ShrinkWrap.create(WebArchive.class, "lightblue.war")
             .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-            .addAsWebInfResource(new Asset() {
-                @Override
-                public InputStream openStream() {
-                    return new ByteArrayInputStream(out.toByteArray());
-                }
-            }, "web.xml")
-            .addAsLibraries(
-                Maven.configureResolver()
+            .addAsWebInfResource(Assets.forDocument(CrudWebXmls.forNonEE6Container()), "web.xml")
+            .addAsLibraries(Maven.configureResolver()
                     .workOffline()
                     .loadPomFromFile("pom.xml")
                     .resolve("org.jboss.weld.servlet:weld-servlet")
                     .withTransitivity()
                     .asFile())
-            .addPackages(true, CrudResource.class.getPackage())
-            .addAsResource(new File(PATH_BASE + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
-            .addAsResource(new File(PATH_BASE + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
-            .addAsResource(new File(PATH_BASE + RestConfiguration.DATASOURCE_FILENAME), RestConfiguration.DATASOURCE_FILENAME)
-            .addAsResource(new File(PATH_BASE + "config.properties"), "config.properties");
+            .addPackages(true, "com.redhat.lightblue")
+            .addAsResource(configBase.resolve(MetadataConfiguration.FILENAME).toFile())
+            .addAsResource(configBase.resolve(CrudConfiguration.FILENAME).toFile())
+            .addAsResource(configBase.resolve(RestConfiguration.DATASOURCE_FILENAME).toFile())
+            .addAsResource(configBase.resolve("config.properties").toFile());
+
         for (File file : libs) {
-            if (file.toString().indexOf("lightblue-") == -1) {
+            if (!file.toString().contains("lightblue-")) {
                 archive.addAsLibrary(file);
             }
         }
-        archive.addPackages(true, "com.redhat.lightblue");
-        for (Object x : archive.getContent().keySet()) {
-            System.out.println(x.toString());
-        }
+
         return archive;
     }
 
     private String readFile(String filename) throws IOException, URISyntaxException {
         return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
-    }
-
-    private String readConfigFile(String filename) throws IOException, URISyntaxException {
-        return readFile("config/" + filename);
     }
 
     @Inject
