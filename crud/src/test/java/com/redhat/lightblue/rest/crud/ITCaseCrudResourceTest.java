@@ -18,32 +18,46 @@
  */
 package com.redhat.lightblue.rest.crud;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.Mongo;
+import static org.junit.Assert.assertTrue;
+
 import com.redhat.lightblue.config.CrudConfiguration;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.metadata.EntityMetadata;
 import com.redhat.lightblue.mongo.config.MongoConfiguration;
 import com.redhat.lightblue.mongo.metadata.MongoMetadata;
 import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.rest.crud.testsupport.Assets;
+import com.redhat.lightblue.rest.crud.testsupport.CrudWebXmls;
 import com.redhat.lightblue.rest.test.RestConfigurationRule;
 import com.redhat.lightblue.util.JsonUtils;
 import com.redhat.lightblue.util.test.FileUtil;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.Mongo;
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
+import de.flapdoodle.embed.mongo.config.DownloadConfigBuilder;
+import de.flapdoodle.embed.mongo.config.ExtractedArtifactStoreBuilder;
 import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
+import de.flapdoodle.embed.process.config.store.TimeoutConfigBuilder;
 import de.flapdoodle.embed.process.io.IStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.runtime.Network;
 import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
@@ -58,12 +72,18 @@ import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
 
 /**
  *
@@ -120,10 +140,19 @@ public class ITCaseCrudResourceTest {
             IStreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
             IStreamProcessor commandsOutput = Processors.namedConsole("[console>]");
 
+            Command mongoD = Command.MongoD;
             IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                    .defaults(Command.MongoD)
-                    .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-                    .build();
+                .defaults(mongoD)
+                .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
+                .artifactStore(new ExtractedArtifactStoreBuilder()
+                    .defaults(mongoD)
+                    .download(new DownloadConfigBuilder()
+                        .defaultsForCommand(mongoD)
+                        .timeoutConfig(new TimeoutConfigBuilder()
+                            .connectionTimeout((int) Duration.ofMinutes(1).toMillis())
+                            .readTimeout((int) Duration.ofMinutes(5).toMillis())
+                            .build())))
+                .build();
 
             MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
             mongodExe = runtime.prepare(
@@ -189,34 +218,44 @@ public class ITCaseCrudResourceTest {
     }
 
     @Deployment
-    public static WebArchive createDeployment() {
-        File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeDependencies().resolve().withTransitivity().asFile();
-        final String PATH_BASE = "src/test/resources/" + ITCaseCrudResourceTest.class.getSimpleName() + "/config/";
+    public static WebArchive createDeployment() throws Exception {
+        File[] libs = Maven.resolver()
+                .loadPomFromFile("pom.xml")
+                .importRuntimeDependencies()
+                .resolve()
+                .withTransitivity()
+                .asFile();
 
-        WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(new File(PATH_BASE + MetadataConfiguration.FILENAME), MetadataConfiguration.FILENAME)
-                .addAsResource(new File(PATH_BASE + CrudConfiguration.FILENAME), CrudConfiguration.FILENAME)
-                .addAsResource(new File(PATH_BASE + RestConfiguration.DATASOURCE_FILENAME), RestConfiguration.DATASOURCE_FILENAME)
-                .addAsResource(new File(PATH_BASE + "config.properties"), "config.properties");
+        Path configBase = Paths.get("src/test/resources/",
+                ITCaseCrudResourceTest.class.getSimpleName(),
+                "/config/");
+
+        WebArchive archive = ShrinkWrap.create(WebArchive.class, "lightblue.war")
+            .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+            .addAsWebInfResource(Assets.forDocument(CrudWebXmls.forNonEE6Container()), "web.xml")
+            .addAsLibraries(Maven.configureResolver()
+                    .workOffline()
+                    .loadPomFromFile("pom.xml")
+                    .resolve("org.jboss.weld.servlet:weld-servlet")
+                    .withTransitivity()
+                    .asFile())
+            .addPackages(true, "com.redhat.lightblue")
+            .addAsResource(configBase.resolve(MetadataConfiguration.FILENAME).toFile())
+            .addAsResource(configBase.resolve(CrudConfiguration.FILENAME).toFile())
+            .addAsResource(configBase.resolve(RestConfiguration.DATASOURCE_FILENAME).toFile())
+            .addAsResource(configBase.resolve("config.properties").toFile());
+
         for (File file : libs) {
-            if (file.toString().indexOf("lightblue-") == -1) {
+            if (!file.toString().contains("lightblue-")) {
                 archive.addAsLibrary(file);
             }
         }
-        archive.addPackages(true, "com.redhat.lightblue");
-        for (Object x : archive.getContent().keySet()) {
-            System.out.println(x.toString());
-        }
+
         return archive;
     }
 
     private String readFile(String filename) throws IOException, URISyntaxException {
         return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
-    }
-
-    private String readConfigFile(String filename) throws IOException, URISyntaxException {
-        return readFile("config/" + filename);
     }
 
     @Inject
@@ -389,7 +428,7 @@ public class ITCaseCrudResourceTest {
 
         // Run saved search
         String result = cutCrudResource.runSavedSearch("country","1.0.0","test",null,null,null,null,null,"{'iso':'CA'}".replaceAll("'","\"")).getEntity().toString();
-        Assert.assertTrue(result.indexOf("\"matchCount\":1")!=-1);
+        assertTrue(result.indexOf("\"matchCount\":1")!=-1);
         System.out.println("result:" + result);
 
     }
@@ -413,8 +452,21 @@ public class ITCaseCrudResourceTest {
 
         // get saved search
         String result = cutCrudResource.getSearchesForEntity("country",null,null).getEntity().toString();
-        Assert.assertTrue(result.indexOf("\"matchCount\":1")!=-1);
+        assertTrue(result.indexOf("\"matchCount\":1")!=-1);
         System.out.println("result:" + result);
 
+    }
+
+    @Test
+    @RunAsClient
+    public void testHealthCheck(@ArquillianResource URL url) throws Exception {
+        ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
+                .path("healthcheck")
+                .build()
+                .toString());
+        request.accept(MediaType.APPLICATION_JSON);
+        ClientResponse<String> response = request.get(String.class);
+        ObjectNode jsonNode = (ObjectNode) new ObjectMapper().readTree(response.getEntity());
+        assertTrue(jsonNode.elements().next().get("healthy").asBoolean());
     }
 }
