@@ -18,7 +18,12 @@
  */
 package com.redhat.lightblue.rest.crud;
 
+import static org.junit.Assert.assertTrue;
+
 import com.codahale.metrics.servlets.HealthCheckServlet;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
@@ -26,6 +31,7 @@ import com.redhat.lightblue.config.CrudConfiguration;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.metadata.EntityMetadata;
 import com.redhat.lightblue.mongo.config.MongoConfiguration;
+import com.redhat.lightblue.mongo.crud.js.Str;
 import com.redhat.lightblue.mongo.metadata.MongoMetadata;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.test.RestConfigurationRule;
@@ -52,6 +58,9 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.jboss.shrinkwrap.api.GenericArchive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -68,9 +77,12 @@ import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -234,7 +246,26 @@ public class ITCaseCrudResourceTest {
         Element listenerClass = webXml.createElement("listener-class");
         listenerClass.appendChild(webXml.createTextNode("org.jboss.weld.environment.servlet.Listener"));
         listener.appendChild(listenerClass);
-        webXml.getFirstChild().appendChild(listener);
+        Node webApp = webXml.getFirstChild();
+        webApp.appendChild(listener);
+
+        Node servlet = webApp.appendChild(webXml.createElement("servlet"));
+        servlet.appendChild(webXml.createElement("servlet-name"))
+                .appendChild(webXml.createTextNode("RESTeasy"));
+        servlet.appendChild(webXml.createElement("servlet-class"))
+                .appendChild(webXml.createTextNode(HttpServletDispatcher.class.getName()));
+        Node initParam = servlet.appendChild(webXml.createElement("init-param"));
+        initParam.appendChild(webXml.createElement("param-name")
+                .appendChild(webXml.createTextNode("javax.ws.rs.Application")));
+        initParam.appendChild(webXml.createElement("param-value")
+                .appendChild(webXml.createTextNode(RestApplication.class.getName())));
+
+        Node servletMapping = webApp.appendChild(webXml.createElement("servlet-mapping"));
+        servletMapping.appendChild(webXml.createElement("servlet-name"))
+                .appendChild(webXml.createTextNode("RESTeasy"));
+        servletMapping.appendChild(webXml.createElement("url-pattern"))
+                .appendChild(webXml.createTextNode("/*"));
+
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         transformer.transform(new DOMSource(webXml), new StreamResult(out));
@@ -271,10 +302,6 @@ public class ITCaseCrudResourceTest {
         return archive;
     }
 
-    public static class MyBean {
-
-    }
-
     private String readFile(String filename) throws IOException, URISyntaxException {
         return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
     }
@@ -282,9 +309,6 @@ public class ITCaseCrudResourceTest {
     private String readConfigFile(String filename) throws IOException, URISyntaxException {
         return readFile("config/" + filename);
     }
-
-    @Inject
-    private MyBean myBean;
 
     @Inject
     private CrudResource cutCrudResource; //class under test
@@ -456,7 +480,7 @@ public class ITCaseCrudResourceTest {
 
         // Run saved search
         String result = cutCrudResource.runSavedSearch("country","1.0.0","test",null,null,null,null,null,"{'iso':'CA'}".replaceAll("'","\"")).getEntity().toString();
-        Assert.assertTrue(result.indexOf("\"matchCount\":1")!=-1);
+        assertTrue(result.indexOf("\"matchCount\":1")!=-1);
         System.out.println("result:" + result);
 
     }
@@ -480,13 +504,18 @@ public class ITCaseCrudResourceTest {
 
         // get saved search
         String result = cutCrudResource.getSearchesForEntity("country",null,null).getEntity().toString();
-        Assert.assertTrue(result.indexOf("\"matchCount\":1")!=-1);
+        assertTrue(result.indexOf("\"matchCount\":1")!=-1);
         System.out.println("result:" + result);
 
     }
 
     @Test
-    public void testHealthCheck() {
-
+    @RunAsClient
+    public void testHealthCheck(@ArquillianResource URL url) throws Exception {
+        ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI()).path("healthcheck").build().toString());
+        request.accept(MediaType.APPLICATION_JSON);
+        ClientResponse<String> response = request.get(String.class);
+        ObjectNode jsonNode = (ObjectNode) new ObjectMapper().readTree(response.getEntity());
+        assertTrue(jsonNode.elements().next().get("healthy").asBoolean());
     }
 }
