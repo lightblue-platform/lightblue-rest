@@ -317,12 +317,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <artifactId>arquillian-junit-container</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.jboss.arquillian.container</groupId>-->
-            <!--<artifactId>arquillian-weld-ee-embedded-1.1</artifactId>-->
-            <!--<version>1.0.0.CR8</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.jboss.weld</groupId>
             <artifactId>weld-core</artifactId>
@@ -334,50 +328,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.jboss.arquillian.container</groupId>-->
-            <!--<artifactId>undertow-embedded</artifactId>-->
-            <!--<version>1.0.0.Alpha2</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.jboss.arquillian.container</groupId>-->
-            <!--<artifactId>arquillian-tomcat-embedded-8</artifactId>-->
-            <!--<version>1.0.0</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.tomcat.embed</groupId>-->
-            <!--<artifactId>tomcat-embed-core</artifactId>-->
-            <!--<version>8.0.39</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.tomcat.embed</groupId>-->
-            <!--<artifactId>tomcat-embed-jasper</artifactId>-->
-            <!--<version>8.0.39</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.apache.tomcat.embed</groupId>-->
-            <!--<artifactId>tomcat-embed-logging-juli</artifactId>-->
-            <!--<version>8.0.39</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>org.eclipse.jdt.core.compiler</groupId>-->
-            <!--<artifactId>ecj</artifactId>-->
-            <!--<version>4.6.1</version>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
-
-        <!--&lt;!&ndash; Weld servlet for testing CDI injections &ndash;&gt;-->
-        <!--<dependency>-->
-            <!--<groupId>org.jboss.weld.servlet</groupId>-->
-            <!--<artifactId>weld-servlet</artifactId>-->
-            <!--<version>1.1.28.Final</version>-->
-            <!--<scope>provided</scope>-->
-        <!--</dependency>-->
     </dependencies>
     <modules>
         <module>common</module>
