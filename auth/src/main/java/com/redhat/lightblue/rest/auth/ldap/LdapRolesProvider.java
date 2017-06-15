@@ -208,7 +208,7 @@ public class LdapRolesProvider implements RolesProvider {
         }
 
         details = new StringBuilder("LDAPConnection [DN: ").append(ldapConfiguration.getBindDn()).append(", Status: ")
-                .append(isHealthy).toString();
+                .append(isHealthy).append("]").toString();
 
         return new LdapAuthHealth(isHealthy, details);
     }
