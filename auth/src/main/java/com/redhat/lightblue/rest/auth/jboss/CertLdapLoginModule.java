@@ -85,6 +85,10 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
 
     // LightblueRoleProvider singleton
     private static volatile RolesProvider lbLdap = null;
+    
+    public static RolesProvider getRolesProvider(){
+        return lbLdap;
+    }
 
     public CertLdapLoginModule() {
 

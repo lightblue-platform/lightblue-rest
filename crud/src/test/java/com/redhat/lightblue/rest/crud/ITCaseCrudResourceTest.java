@@ -26,9 +26,9 @@ import com.redhat.lightblue.metadata.EntityMetadata;
 import com.redhat.lightblue.mongo.config.MongoConfiguration;
 import com.redhat.lightblue.mongo.metadata.MongoMetadata;
 import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.rest.crud.testsupport.Assets;
-import com.redhat.lightblue.rest.crud.testsupport.CrudWebXmls;
 import com.redhat.lightblue.rest.test.RestConfigurationRule;
+import com.redhat.lightblue.rest.test.support.Assets;
+import com.redhat.lightblue.rest.test.support.CrudWebXmls;
 import com.redhat.lightblue.util.JsonUtils;
 import com.redhat.lightblue.util.test.FileUtil;
 
@@ -232,7 +232,7 @@ public class ITCaseCrudResourceTest {
 
         WebArchive archive = ShrinkWrap.create(WebArchive.class, "lightblue.war")
             .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-            .addAsWebInfResource(Assets.forDocument(CrudWebXmls.forNonEE6Container()), "web.xml")
+            .addAsWebInfResource(Assets.forDocument(CrudWebXmls.forNonEE6Container(RestApplication.class)), "web.xml")
             .addAsLibraries(Maven.configureResolver()
                     .workOffline()
                     .loadPomFromFile("pom.xml")
@@ -467,6 +467,8 @@ public class ITCaseCrudResourceTest {
         request.accept(MediaType.APPLICATION_JSON);
         ClientResponse<String> response = request.get(String.class);
         ObjectNode jsonNode = (ObjectNode) new ObjectMapper().readTree(response.getEntity());
+        
+        System.out.println("HealthCheckMessage: " + jsonNode.elements().next().get("message").asText());
         assertTrue(jsonNode.elements().next().get("healthy").asBoolean());
     }
 }

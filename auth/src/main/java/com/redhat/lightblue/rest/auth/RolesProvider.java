@@ -20,6 +20,8 @@ package com.redhat.lightblue.rest.auth;
 
 import java.util.Set;
 
+import com.redhat.lightblue.rest.auth.health.LdapAuthHealth;
+
 /**
  * Roles provider.
  *
@@ -37,4 +39,5 @@ public interface RolesProvider {
      */
     public Set<String> getUserRoles(String username) throws Exception;
 
+    public LdapAuthHealth checkHealth();
 }

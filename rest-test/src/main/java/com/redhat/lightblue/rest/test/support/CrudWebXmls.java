@@ -1,12 +1,11 @@
-package com.redhat.lightblue.rest.crud.testsupport;
-
-import com.redhat.lightblue.rest.crud.RestApplication;
+package com.redhat.lightblue.rest.test.support;
 
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.ws.rs.core.Application;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,7 +21,7 @@ public abstract class CrudWebXmls {
      * Uses the production web.xml, but enriches it with standalone Weld and RESTEasy so it may run
      * more portably in non full EE profile containers like Jetty or Tomcat.
      */
-    public static Document forNonEE6Container() throws ParserConfigurationException, IOException, SAXException {
+    public static Document forNonEE6Container(Class<? extends Application> restApplicationClass) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilder docBuilder = documentBuilder();
         Document webXml = docBuilder.parse(Paths.get("src/main/webapp/WEB-INF/web.xml").toFile());
         Node webApp = webXml.getFirstChild();
@@ -40,7 +39,7 @@ public abstract class CrudWebXmls {
         restEasyParams.appendChild(webXml.createElement("param-name")
                 .appendChild(webXml.createTextNode("javax.ws.rs.Application")));
         restEasyParams.appendChild(webXml.createElement("param-value")
-                .appendChild(webXml.createTextNode(RestApplication.class.getName())));
+                .appendChild(webXml.createTextNode(restApplicationClass.getName())));
 
         Node restEasyMapping = webApp.appendChild(webXml.createElement("servlet-mapping"));
         restEasyMapping.appendChild(webXml.createElement("servlet-name"))

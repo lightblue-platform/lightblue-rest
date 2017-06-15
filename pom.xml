@@ -228,17 +228,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-core</artifactId>
-                <version>3.2.2</version>
+                <version>${dropwizard.metrics.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-healthchecks</artifactId>
-                <version>3.2.2</version>
+                <version>${dropwizard.metrics.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-servlets</artifactId>
-                <version>3.2.2</version>
+                <version>${dropwizard.metrics.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -359,6 +359,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <lightblue.mongo.version>1.28.0-SNAPSHOT</lightblue.mongo.version>
         <lightblue.ldap.version>1.12.0-SNAPSHOT</lightblue.ldap.version>
         <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
+        <dropwizard.metrics.version>3.2.2</dropwizard.metrics.version>
     </properties>
     <build>
         <plugins>

@@ -1,4 +1,4 @@
-package com.redhat.lightblue.rest.crud.testsupport;
+package com.redhat.lightblue.rest.test.support;
 
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.ByteArrayAsset;

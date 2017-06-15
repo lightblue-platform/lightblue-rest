@@ -5,6 +5,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.redhat.lightblue.rest.auth.health.LdapAuthHealth;
+
 /**
  * Caches results from {@link RolesProvider} and supports fallback to cache.
  * See {@link RolesCache} for more details.
@@ -70,6 +72,11 @@ public class CachedRolesProvider implements RolesProvider {
         // was able to use the cache or use the LDAP server on the second retry
         LOGGER.debug("User "+username+" found in failoverCache");
         return roles;
+    }
+
+    @Override
+    public LdapAuthHealth checkHealth() {
+        return rolesProvider.checkHealth();
     }
 
 }

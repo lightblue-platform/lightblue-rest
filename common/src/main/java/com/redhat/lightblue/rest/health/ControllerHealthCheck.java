@@ -1,28 +1,31 @@
 package com.redhat.lightblue.rest.health;
 
+import java.util.concurrent.TimeUnit;
+
 import com.codahale.metrics.health.HealthCheck;
+import com.codahale.metrics.health.annotation.Async;
 import com.redhat.lightblue.crud.CRUDController;
-import com.redhat.lightblue.crud.LightblueHealth;
+import com.redhat.lightblue.crud.CRUDHealth;
 
 /**
- * @author ssaurabh
  * Metrics Health check class for CRUD Controller health
  *
  */
+@Async(period = 15, unit = TimeUnit.MINUTES)
 public class ControllerHealthCheck extends HealthCheck {
-	private final CRUDController controller;
+    private final CRUDController controller;
 
-	public ControllerHealthCheck(CRUDController controller) {
-		this.controller = controller;
-	}
+    public ControllerHealthCheck(CRUDController controller) {
+        this.controller = controller;
+    }
 
-	@Override
-	protected Result check() throws Exception {
-		LightblueHealth health = controller.checkHealth();
-		if (health.isHealthy()) {
-			return Result.healthy(health.details());
-		} else {
-			return Result.unhealthy(health.details());
-		}
-	}
+    @Override
+    protected Result check() throws Exception {
+        CRUDHealth health = controller.checkHealth();
+        if (health.isHealthy()) {
+            return Result.healthy(health.details());
+        } else {
+            return Result.unhealthy(health.details());
+        }
+    }
 }

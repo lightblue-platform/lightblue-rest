@@ -37,6 +37,18 @@
             <version>3.1.1</version>
         </dependency>
         <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-healthchecks</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-servlets</artifactId>
+            </dependency>
+        <dependency>
             <groupId>com.redhat.lightblue.ldap</groupId>
             <artifactId>lightblue-ldap-test</artifactId>
             <scope>test</scope>

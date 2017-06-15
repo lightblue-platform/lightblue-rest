@@ -71,5 +71,19 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
     <param-name>resteasy.providers</param-name>
     <param-value>com.restcompress.provider.LZFEncodingInterceptor,com.restcompress.provider.LZFDecodingInterceptor</param-value>
   </context-param>
+  
+  <listener>
+        <listener-class>
+            com.redhat.lightblue.rest.auth.health.LightblueAuthHealthCheckServletContextListener
+        </listener-class>
+    </listener>
+    <servlet>
+        <servlet-name>healthCheck</servlet-name>
+        <servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>healthCheck</servlet-name>
+        <url-pattern>/healthcheck</url-pattern>
+    </servlet-mapping>
 
 </web-app>

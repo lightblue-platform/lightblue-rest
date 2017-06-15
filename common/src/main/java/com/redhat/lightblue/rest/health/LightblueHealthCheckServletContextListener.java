@@ -7,32 +7,27 @@ import com.redhat.lightblue.crud.CRUDController;
 import com.redhat.lightblue.rest.RestConfiguration;
 
 /**
- * @author ssaurabh
- * 
- * Listener to register Health Check classes to Metrics Health check registery
- *
+ * Listener to register Health Check classes to Metrics Health check registry
  */
 public class LightblueHealthCheckServletContextListener extends HealthCheckServlet.ContextListener {
 
-	public static HealthCheckRegistry HEALTH_CHECK_REGISTRY = new HealthCheckRegistry();
+    @Override
+    protected HealthCheckRegistry getHealthCheckRegistry() {
+        
+        HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
+        
+        LightblueFactory factory = RestConfiguration.getFactory();
+        CRUDController[] crudControllers = null;
+        try {
+            crudControllers = factory.getFactory().getCRUDControllers();
+        } catch (Exception e) {
+        }
 
-	static {
-
-		LightblueFactory factory = RestConfiguration.getFactory();
-		CRUDController[] crudControllers = null;
-		try {
-			crudControllers = factory.getFactory().getCRUDControllers();
-		} catch (Exception e) {
-		}
-
-		for (CRUDController crudController : crudControllers) {
-			HEALTH_CHECK_REGISTRY.register(crudController.toString(), new ControllerHealthCheck(crudController));
-		}
-	}
-
-	@Override
-	protected HealthCheckRegistry getHealthCheckRegistry() {
-		return HEALTH_CHECK_REGISTRY;
-	}
+        for (CRUDController crudController : crudControllers) {
+            healthCheckRegistry.register(crudController.toString(), new ControllerHealthCheck(crudController));
+        }
+        
+        return healthCheckRegistry;
+    }
 
 }
