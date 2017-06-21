@@ -9,9 +9,8 @@ import com.redhat.lightblue.crud.CRUDHealth;
 
 /**
  * Metrics Health check class for CRUD Controller health
- *
  */
-@Async(period = 15, unit = TimeUnit.MINUTES)
+@Async(period = 10, unit = TimeUnit.SECONDS)
 public class ControllerHealthCheck extends HealthCheck {
     private final CRUDController controller;
 

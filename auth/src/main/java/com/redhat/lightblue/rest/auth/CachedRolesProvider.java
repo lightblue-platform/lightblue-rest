@@ -5,7 +5,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.redhat.lightblue.rest.auth.health.LdapAuthHealth;
+import com.redhat.lightblue.rest.auth.health.RolesProviderHealth;
 
 /**
  * Caches results from {@link RolesProvider} and supports fallback to cache.
@@ -75,7 +75,7 @@ public class CachedRolesProvider implements RolesProvider {
     }
 
     @Override
-    public LdapAuthHealth checkHealth() {
+    public RolesProviderHealth checkHealth() {
         return rolesProvider.checkHealth();
     }
 

@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redhat.lightblue.rest.auth.RolesProvider;
-import com.redhat.lightblue.rest.auth.health.LdapAuthHealth;
+import com.redhat.lightblue.rest.auth.health.RolesProviderHealth;
 import com.unboundid.ldap.sdk.BindRequest;
 import com.unboundid.ldap.sdk.BindResult;
 import com.unboundid.ldap.sdk.DN;
@@ -192,10 +192,11 @@ public class LdapRolesProvider implements RolesProvider {
     }
 
     @Override
-    public LdapAuthHealth checkHealth() {
+    public RolesProviderHealth checkHealth() {
 
         boolean isHealthy = true;
         String details = null;
+        
         try {
             LDAPConnection ldapConnection = connectionPool.getConnection();
 
@@ -210,6 +211,6 @@ public class LdapRolesProvider implements RolesProvider {
         details = new StringBuilder("LDAPConnection [DN: ").append(ldapConfiguration.getBindDn()).append(", Status: ")
                 .append(isHealthy).append("]").toString();
 
-        return new LdapAuthHealth(isHealthy, details);
+        return new RolesProviderHealth(isHealthy, details);
     }
 }

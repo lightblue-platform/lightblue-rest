@@ -38,7 +38,7 @@
 
     <listener>
         <listener-class>
-            com.redhat.lightblue.rest.health.LightblueHealthCheckServletContextListener
+            com.redhat.lightblue.rest.crud.health.CrudHealthCheckServletContextListener
         </listener-class>
     </listener>
     <servlet>

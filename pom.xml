@@ -123,6 +123,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <version>${lightblue.core.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.redhat.lightblue</groupId>
+                <artifactId>lightblue-core-crud</artifactId>
+                <version>${lightblue.core.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo</artifactId>
                 <version>${lightblue.mongo.version}</version>

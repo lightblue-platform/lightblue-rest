@@ -7,22 +7,21 @@ import com.codahale.metrics.health.annotation.Async;
 import com.redhat.lightblue.rest.auth.RolesProvider;
 
 /**
- * Metrics Health check class for Ldap Auth health
- *
+ * Metrics Health check class for Roles Provider health
  */
-@Async(period = 15, unit = TimeUnit.MINUTES)
-public class LdapAuthHealthCheck extends HealthCheck {
+@Async(period = 10, unit = TimeUnit.SECONDS)
+public class RolesProviderHealthCheck extends HealthCheck {
 
     private final RolesProvider rolesProvider;
 
-    public LdapAuthHealthCheck(RolesProvider rolesProvider) {
+    public RolesProviderHealthCheck(RolesProvider rolesProvider) {
         this.rolesProvider = rolesProvider;
     }
 
     @Override
     protected Result check() throws Exception {
 
-        LdapAuthHealth health = rolesProvider.checkHealth();
+        RolesProviderHealth health = rolesProvider.checkHealth();
 
         if (health.isHealthy()) {
             return Result.healthy(health.details());

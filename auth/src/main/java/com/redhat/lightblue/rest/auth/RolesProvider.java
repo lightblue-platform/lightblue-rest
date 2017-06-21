@@ -20,7 +20,7 @@ package com.redhat.lightblue.rest.auth;
 
 import java.util.Set;
 
-import com.redhat.lightblue.rest.auth.health.LdapAuthHealth;
+import com.redhat.lightblue.rest.auth.health.RolesProviderHealth;
 
 /**
  * Roles provider.
@@ -39,5 +39,10 @@ public interface RolesProvider {
      */
     public Set<String> getUserRoles(String username) throws Exception;
 
-    public LdapAuthHealth checkHealth();
+    /**
+     * Checks the Roles Provider health. The respective implementations should
+     * provide the health of lightblue Roles Provider which is further exposed by
+     * dropwizard metrics HealthCheckServlet REST endpoint
+     */
+    public RolesProviderHealth checkHealth();
 }

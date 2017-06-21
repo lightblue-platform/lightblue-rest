@@ -33,7 +33,7 @@ import org.junit.runners.MethodSorters;
 
 import com.redhat.lightblue.ldap.test.LdapServerExternalResource;
 import com.redhat.lightblue.ldap.test.LdapServerExternalResource.InMemoryLdapServer;
-import com.redhat.lightblue.rest.auth.health.LdapAuthHealth;
+import com.redhat.lightblue.rest.auth.health.RolesProviderHealth;
 import com.unboundid.ldap.sdk.Attribute;
 
 
@@ -106,7 +106,7 @@ public class LdapRoleProviderIntegrationTest {
     @Test
     public void testHealthCheck() throws Exception {
         
-        LdapAuthHealth health = provider.checkHealth();
+        RolesProviderHealth health = provider.checkHealth();
         System.out.println(health.details());
         assertTrue(health.isHealthy());
     }
