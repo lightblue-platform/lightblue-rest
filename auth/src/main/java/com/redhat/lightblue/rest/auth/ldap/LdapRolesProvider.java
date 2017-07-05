@@ -195,8 +195,9 @@ public class LdapRolesProvider implements RolesProvider {
     public RolesProviderHealth checkHealth() {
 
         boolean isHealthy = true;
-        String details = null;
-        
+        StringBuilder details = null;
+        String failureReason = null;
+
         try {
             LDAPConnection ldapConnection = connectionPool.getConnection();
 
@@ -204,13 +205,22 @@ public class LdapRolesProvider implements RolesProvider {
                 isHealthy = false;
             }
 
+            connectionPool.getHealthCheck().ensureConnectionValidForContinuedUse(ldapConnection);
+
         } catch (LDAPException e) {
+            failureReason = e.getExceptionMessage();
             isHealthy = false;
         }
 
         details = new StringBuilder("LDAPConnection [DN: ").append(ldapConfiguration.getBindDn()).append(", Status: ")
-                .append(isHealthy).append("]").toString();
+                .append(isHealthy);
 
-        return new RolesProviderHealth(isHealthy, details);
+        if (failureReason != null) {
+            details.append(ldapConfiguration.getBindDn()).append(", Failure Reason: ").append(failureReason);
+        }
+
+        details.append("]");
+
+        return new RolesProviderHealth(isHealthy, details.toString());
     }
 }

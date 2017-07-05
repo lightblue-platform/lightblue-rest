@@ -80,7 +80,7 @@ public class CachedRolesProviderTest {
     @Test
     public void isHealthyIfDelegateRolesProviderIsHealthy() throws Exception {
 
-        // Mock healthy
+        // Mock RolesProvider healthy
         Mockito.when(rolesProvider.checkHealth()).thenReturn(new RolesProviderHealth(true, "Return healthy for mock test"));
         
         System.out.println(cachedRolesProvider.checkHealth().details());        
@@ -91,7 +91,7 @@ public class CachedRolesProviderTest {
     @Test
     public void isUnhealthyIfDelegateRolesProviderIsUnhealthy() throws Exception {
 
-        // Mock healthy
+        // Mock RolesProvider unhealthy
         Mockito.when(rolesProvider.checkHealth()).thenReturn(new RolesProviderHealth(false, "Return unhealthy for mock test"));
         
         System.out.println(cachedRolesProvider.checkHealth().details());        
