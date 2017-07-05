@@ -461,7 +461,7 @@ public class ITCaseCrudResourceTest {
     @RunAsClient
     public void testHealthCheck(@ArquillianResource URL url) throws Exception {
         ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
-                .path("healthcheck")
+                .path("health")
                 .build()
                 .toString());
         request.accept(MediaType.APPLICATION_JSON);

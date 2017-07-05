@@ -12,12 +12,12 @@
     </filter-mapping>
 
     <servlet>
-        <servlet-name>health</servlet-name>
-        <jsp-file>/health.jsp</jsp-file>
+        <servlet-name>version</servlet-name>
+        <jsp-file>/version.jsp</jsp-file>
     </servlet>
     <servlet-mapping>
-        <servlet-name>health</servlet-name>
-        <url-pattern>/health</url-pattern>
+        <servlet-name>version</servlet-name>
+        <url-pattern>/version</url-pattern>
     </servlet-mapping>
 
     <listener>
@@ -42,12 +42,12 @@
         </listener-class>
     </listener>
     <servlet>
-        <servlet-name>healthCheck</servlet-name>
+        <servlet-name>health</servlet-name>
         <servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>healthCheck</servlet-name>
-        <url-pattern>/healthcheck</url-pattern>
+        <servlet-name>health</servlet-name>
+        <url-pattern>/health</url-pattern>
     </servlet-mapping>
 
 </web-app>
