@@ -39,9 +39,11 @@ public class CrudCertAuthHealthCheckServletContextListener extends HealthCheckSe
             }
         }
         
-        healthCheckRegistry.register("ldap-auth-healthcheck",
-                new RolesProviderHealthCheck(CertLdapLoginModule.getRolesProvider()));
-
+        if (CertLdapLoginModule.getRolesProvider() != null) {
+            healthCheckRegistry.register("ldap-auth-healthcheck",
+                    new RolesProviderHealthCheck(CertLdapLoginModule.getRolesProvider()));
+        }
+        
         return healthCheckRegistry;
     }
 }
