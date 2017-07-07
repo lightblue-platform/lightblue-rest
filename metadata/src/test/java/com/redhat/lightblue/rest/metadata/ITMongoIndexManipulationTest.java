@@ -23,8 +23,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.mongo.test.EmbeddedMongo;
-import com.redhat.lightblue.rest.test.support.Assets;
-import com.redhat.lightblue.rest.test.support.CrudWebXmls;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -66,19 +64,11 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Deployment
-    public static WebArchive createDeployment() throws Exception {
+    public static WebArchive createDeployment() {
         File[] libs = Maven.resolver().loadPomFromFile("pom.xml").importRuntimeDependencies().resolve().withTransitivity().asFile();
 
-        WebArchive archive = ShrinkWrap.create(WebArchive.class, "lightblue.war")
+        WebArchive archive = ShrinkWrap.create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsWebInfResource(Assets.forDocument(CrudWebXmls.forNonEE6Container(RestApplication.class)), "web.xml")
-                .addAsLibraries(Maven.configureResolver()
-                        .workOffline()
-                        .loadPomFromFile("pom.xml")
-                        .resolve("org.jboss.weld.servlet:weld-servlet")
-                        .withTransitivity()
-                        .asFile())
-                .addPackages(true, "com.redhat.lightblue")
                 .addAsResource(new File("src/test/resources/lightblue-metadata.json"), MetadataConfiguration.FILENAME)
                 .addAsResource(new File("src/test/resources/datasources.json"), "datasources.json")
                 .addAsResource(EmptyAsset.INSTANCE, "resources/test.properties");
@@ -86,6 +76,7 @@ public class ITMongoIndexManipulationTest {
         for (File file : libs) {
             archive.addAsLibrary(file);
         }
+        archive.addPackages(true, "com.redhat.lightblue");
         return archive;
     }
 
