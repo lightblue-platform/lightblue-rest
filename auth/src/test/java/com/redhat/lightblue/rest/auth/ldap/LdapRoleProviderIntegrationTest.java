@@ -33,7 +33,6 @@ import org.junit.runners.MethodSorters;
 
 import com.redhat.lightblue.ldap.test.LdapServerExternalResource;
 import com.redhat.lightblue.ldap.test.LdapServerExternalResource.InMemoryLdapServer;
-import com.redhat.lightblue.rest.auth.health.RolesProviderHealth;
 import com.unboundid.ldap.sdk.Attribute;
 
 
@@ -103,11 +102,4 @@ public class LdapRoleProviderIntegrationTest {
         assertTrue(provider.getUserRoles("idontexist").isEmpty());
     }
 
-    @Test
-    public void testHealthCheck() throws Exception {
-        
-        RolesProviderHealth health = provider.checkHealth();
-        System.out.println(health.details());
-        assertTrue(health.isHealthy());
-    }
 }

@@ -13,7 +13,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.redhat.lightblue.rest.auth.health.RolesProviderHealth;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 
@@ -74,28 +73,6 @@ public class CachedRolesProviderTest {
         Set<String> returnedRoles = cachedRolesProvider.getUserRoles("user");
         Assert.assertEquals(roles, returnedRoles);
         Mockito.verify(rolesCache, Mockito.times(1)).getFromFallback("user");
-
-    }
-    
-    @Test
-    public void isHealthyIfDelegateRolesProviderIsHealthy() throws Exception {
-
-        // Mock RolesProvider healthy
-        Mockito.when(rolesProvider.checkHealth()).thenReturn(new RolesProviderHealth(true, "Return healthy for mock test"));
-        
-        System.out.println(cachedRolesProvider.checkHealth().details());        
-        Assert.assertTrue(cachedRolesProvider.checkHealth().isHealthy());
-
-    }
-    
-    @Test
-    public void isUnhealthyIfDelegateRolesProviderIsUnhealthy() throws Exception {
-
-        // Mock RolesProvider unhealthy
-        Mockito.when(rolesProvider.checkHealth()).thenReturn(new RolesProviderHealth(false, "Return unhealthy for mock test"));
-        
-        System.out.println(cachedRolesProvider.checkHealth().details());        
-        Assert.assertFalse(cachedRolesProvider.checkHealth().isHealthy());
 
     }
 }

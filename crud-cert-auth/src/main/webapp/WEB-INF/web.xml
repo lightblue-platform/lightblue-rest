@@ -1,6 +1,11 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+
+  <servlet-mapping>
+     <servlet-name>com.redhat.lightblue.rest.crud.RestApplication</servlet-name>
+     <url-pattern>/*</url-pattern>
+  </servlet-mapping>
   
   <filter>
      <filter-name>LoggingFilter</filter-name>
@@ -26,8 +31,8 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>Version servlet (Unauth)</web-resource-name>
-      <url-pattern>/version</url-pattern>
+      <web-resource-name>Health check servlet (Unauth)</web-resource-name>
+      <url-pattern>/health</url-pattern>
     </web-resource-collection>
   </security-constraint>
 
@@ -51,12 +56,12 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
   </servlet-mapping>
   
   <servlet>
-      <servlet-name>version</servlet-name>
-      <jsp-file>/version.jsp</jsp-file>
+      <servlet-name>health</servlet-name>
+      <jsp-file>/health.jsp</jsp-file>
   </servlet>
   <servlet-mapping>
-      <servlet-name>version</servlet-name>
-      <url-pattern>/version</url-pattern>
+      <servlet-name>health</servlet-name>
+      <url-pattern>/health</url-pattern>
   </servlet-mapping>
 
   <listener>
@@ -71,19 +76,5 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
     <param-name>resteasy.providers</param-name>
     <param-value>com.restcompress.provider.LZFEncodingInterceptor,com.restcompress.provider.LZFDecodingInterceptor</param-value>
   </context-param>
-  
-  <listener>
-    <listener-class>
-      com.redhat.lightblue.rest.crud.cert.auth.health.CrudCertAuthHealthCheckServletContextListener
-    </listener-class>
-  </listener>
-  <servlet>
-    <servlet-name>health</servlet-name>
-    <servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>health</servlet-name>
-    <url-pattern>/health</url-pattern>
-  </servlet-mapping>
 
 </web-app>
