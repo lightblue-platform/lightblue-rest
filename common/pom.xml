@@ -72,9 +72,9 @@
              <groupId>io.dropwizard.metrics</groupId>
              <artifactId>metrics-servlet</artifactId>
          </dependency>
-		<dependency>
-		  <groupId>io.dropwizard.metrics</groupId>
-		  <artifactId>metrics-jvm</artifactId>
-		</dependency>           
+         <dependency>
+			<groupId>io.dropwizard.metrics</groupId>
+			<artifactId>metrics-jvm</artifactId>
+		 </dependency>           
     </dependencies>
 </project>

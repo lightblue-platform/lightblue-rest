@@ -39,9 +39,7 @@
     </context-param>
 
 	<listener>
-	        <listener-class>
-	        	com.redhat.lightblue.rest.crud.metrics.JVMMetricsServletContextListener
-	        </listener-class>
+	        <listener-class>com.redhat.lightblue.rest.crud.metrics.JVMMetricsServletContextListener</listener-class>
 	</listener>
 
 	<servlet>
@@ -54,16 +52,12 @@
 	</servlet-mapping>
 	
     <listener>
-        <listener-class>
-        	com.redhat.lightblue.rest.crud.metrics.RestResourceInstrumentedFilterContextListener
-        </listener-class>
+        <listener-class>com.redhat.lightblue.rest.crud.metrics.RestResourceInstrumentedFilterContextListener</listener-class>
     </listener>	
 
 	<filter>
 	    <filter-name>SearchFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>search</param-value>
@@ -76,9 +70,7 @@
 
 	<filter>
 	    <filter-name>LockFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>lock</param-value>
@@ -91,9 +83,7 @@
 	
 	<filter>
 	    <filter-name>InsertFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>insert</param-value>
@@ -106,9 +96,7 @@
 	
 	<filter>
 	    <filter-name>SaveFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>save</param-value>
@@ -121,9 +109,7 @@
 	 	
 	<filter>
 	    <filter-name>UpdateFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>update</param-value>
@@ -136,9 +122,7 @@
 	
 	<filter>
 	    <filter-name>DeleteFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>delete</param-value>
@@ -151,9 +135,7 @@
 			
 	<filter>
 	    <filter-name>FindFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>find</param-value>
@@ -166,9 +148,7 @@
 	
 	<filter>
 	    <filter-name>ExplainFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>explain</param-value>
@@ -181,9 +161,7 @@
 	
 	<filter>
 	    <filter-name>GenerateFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>generate</param-value>
@@ -196,9 +174,7 @@
 	
 	<filter>
 	    <filter-name>BulkFilter</filter-name>
-	    <filter-class>
-	        com.codahale.metrics.servlet.InstrumentedFilter
-	    </filter-class>
+	    <filter-class>com.codahale.metrics.servlet.InstrumentedFilter</filter-class>
 	    <init-param>
 	        <param-name>name-prefix</param-name>
 	        <param-value>bulk</param-value>
