@@ -229,6 +229,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <version>0.0.3</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${dropwizard.metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-servlets</artifactId>
+                <version>${dropwizard.metrics.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-servlet</artifactId>
+                <version>${dropwizard.metrics.version}</version>
+            </dependency>
+            <dependency>
+            	<groupId>io.dropwizard.metrics</groupId>
+            	<artifactId>metrics-jvm</artifactId>
+            	<version>${dropwizard.metrics.version}</version>
+            </dependency>                     
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -321,6 +341,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <lightblue.ldap.version>1.12.0-SNAPSHOT</lightblue.ldap.version>
         <lightblue.audithook.version>1.11.0-SNAPSHOT</lightblue.audithook.version>
         <lightblue.notificationhook.version>0.1.4-SNAPSHOT</lightblue.notificationhook.version>
+        <dropwizard.metrics.version>3.2.2</dropwizard.metrics.version>
     </properties>
     <build>
         <plugins>
