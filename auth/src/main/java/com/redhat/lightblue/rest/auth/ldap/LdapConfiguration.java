@@ -1,8 +1,19 @@
 package com.redhat.lightblue.rest.auth.ldap;
 
+import java.io.Serializable;
 
-public class LdapConfiguration {
+import com.fasterxml.jackson.databind.JsonNode;
+import com.redhat.lightblue.util.JsonInitializable;
 
+public class LdapConfiguration implements JsonInitializable, Serializable{
+
+    private static final long serialVersionUID = 1L;
+    
+    /**
+     * The file on classpath that this configuration can be loaded from.
+     */
+    public static final transient String FILENAME = "ldap-healthcheck-config.json";
+    
     private String server;
     private Integer port;
     private String bindDn;
@@ -132,5 +143,104 @@ public class LdapConfiguration {
     public LdapConfiguration poolMaxConnectionAgeMS(Integer poolMaxConnectionAgeMS) {
         this.poolMaxConnectionAgeMS = poolMaxConnectionAgeMS;
         return this;
+    }
+
+    @Override
+    public void initializeFromJson(JsonNode root) {
+        try {
+            if (root != null) {
+                JsonNode node = root.get("ldap-config");
+
+                if (node != null) {
+                    JsonNode x = node.get("server");
+                    if (x != null) {
+                        server = x.asText();
+                    }
+                    x = node.get("port");
+                    if (x != null) {
+                        port = x.asInt();
+                    }
+                    x = node.get("username");
+                    if (x != null) {
+                        bindDn = x.asText();
+                    }
+                    x = node.get("password");
+                    if (x != null) {
+                        bindDNPwd = x.asText();
+                    }
+                    x = node.get("pool_size");
+                    if (x != null) {
+                        poolSize = x.asInt();
+                    }
+                    x = node.get("use_tls");
+                    if (x != null) {
+                        useSSL = x.asBoolean();
+                    }
+                    x = node.get("truststore");
+                    if (x != null) {
+                        trustStore = x.asText();
+                    }
+                    x = node.get("truststore_password");
+                    if (x != null) {
+                        trustStorePassword = x.asText();
+                    }
+                    x = node.get("connectionTimeoutMS");
+                    if (x != null) {
+                        connectionTimeoutMS = x.asInt();
+                    }
+                    x = node.get("responseTimeoutMS");
+                    if (x != null) {
+                        responseTimeoutMS = x.asInt();
+                    }
+                    x = node.get("debug");
+                    if (x != null) {
+                        debug = x.asBoolean();
+                    }
+                    x = node.get("keepAlive");
+                    if (x != null) {
+                        keepAlive = x.asBoolean();
+                    }
+                    x = node.get("poolMaxConnectionAgeMS");
+                    if (x != null) {
+                        poolMaxConnectionAgeMS = x.asInt();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("LdapConfiguration [server=");
+        builder.append(server);
+        builder.append(", port=");
+        builder.append(port);
+        builder.append(", bindDn=");
+        builder.append(bindDn);
+        builder.append(", bindDNPwd=");
+        builder.append(bindDNPwd);
+        builder.append(", useSSL=");
+        builder.append(useSSL);
+        builder.append(", trustStore=");
+        builder.append(trustStore);
+        builder.append(", trustStorePassword=");
+        builder.append(trustStorePassword);
+        builder.append(", poolSize=");
+        builder.append(poolSize);
+        builder.append(", poolMaxConnectionAgeMS=");
+        builder.append(poolMaxConnectionAgeMS);
+        builder.append(", connectionTimeoutMS=");
+        builder.append(connectionTimeoutMS);
+        builder.append(", responseTimeoutMS=");
+        builder.append(responseTimeoutMS);
+        builder.append(", debug=");
+        builder.append(debug);
+        builder.append(", keepAlive=");
+        builder.append(keepAlive);
+        builder.append("]");
+        return builder.toString();
     }
 }
