@@ -354,6 +354,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <module>metadata-basic-auth</module>
         <module>metadata-cert-auth</module>
         <module>lightblue-rest-integration-test</module>
+        <module>metrics</module>
     </modules>
     <properties>
         <sonar.exclusions>**/*Test.java,**/*Exception.java</sonar.exclusions>
