@@ -35,7 +35,9 @@ import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.ResultMetadata;
 import com.redhat.lightblue.crud.FindRequest;
+import com.redhat.lightblue.crud.DocCtx;
 import com.redhat.lightblue.mediator.Mediator;
+import com.redhat.lightblue.mediator.StreamingResponse;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.JsonUtils;
@@ -54,7 +56,7 @@ public class FindCommand extends AbstractRestCommand {
     private final String request;
     private final boolean stream;
 
-    private Response streamResponse;
+    private StreamingResponse streamResponse;
 
     public FindCommand(String entity, String version, String request) {
         this(null,entity,version,request,false);
@@ -95,46 +97,31 @@ public class FindCommand extends AbstractRestCommand {
      * </pre>
      */
     public StreamingOutput getResponseStream() {
-        return new StreamingOutput() {
-            ObjectNode chunkNode;
-            ArrayNode resultNode;
-            ArrayNode rmdNode;
-            
+        return new StreamingOutput() {            
             @Override
             public void write(OutputStream os) throws IOException {
-                // clear out the streamed results from the response
-                // We will stream entitydata and resultMetadata
-                JsonNode entityDataNode=streamResponse.getEntityData();
-                streamResponse.setEntityData(null);
-                
-                ArrayNode entityData;
-                if(entityDataNode instanceof ArrayNode) {
-                    entityData=(ArrayNode)entityDataNode;
-                } else {
-                    entityData=JsonNodeFactory.instance.arrayNode();
-                    if (entityDataNode instanceof ObjectNode) {
-                        entityData.add(entityDataNode);
-                    }
-                } 
-                List<ResultMetadata> rmd=streamResponse.getResultMetadata();
-                streamResponse.setResultMetadata(null);
-                
-                // Send the response to output as the first chunk
+                // Send the header
                 Writer writer=new OutputStreamWriter(os);
                 writer.write(streamResponse.toJson().toString());
                 writer.flush();
-                
-                for(int i=0;i<entityData.size();i++) {
-                    ObjectNode chunkNode=JsonNodeFactory.instance.objectNode();
-                    if(i==entityData.size()-1) {
-                        chunkNode.set("last",JsonNodeFactory.instance.booleanNode(true));
+
+                try {
+                    // Send the docs
+                    while(streamResponse.documentStream.hasNext()) {
+                        DocCtx doc=streamResponse.documentStream.next();
+                        ObjectNode chunkNode=JsonNodeFactory.instance.objectNode();
+                        if(!streamResponse.documentStream.hasNext()) {
+                            chunkNode.set("last",JsonNodeFactory.instance.booleanNode(true));
+                        }
+                        chunkNode.set("processed",doc.getRoot());
+                        if(doc.getResultMetadata()!=null)
+                            chunkNode.set("resultMetadata",doc.getResultMetadata().toJson());
+                        writer.write(chunkNode.toString());
                     }
-                    chunkNode.set("processed",entityData.get(i));
-                    if(i<rmd.size())
-                        chunkNode.set("resultMetadata",rmd.get(i).toJson());
-                    writer.write(chunkNode.toString());
+                    writer.flush();
+                } finally {
+                    streamResponse.documentStream.close();
                 }
-                writer.flush();
             }
         };
     }
@@ -164,11 +151,12 @@ public class FindCommand extends AbstractRestCommand {
             addCallerId(ireq);
             // Until streaming is supported in mediator, we'll get the
             // results and stream them
-            Response r = getMediator().find(ireq);
             if(stream) {
-                streamResponse=r;
+                streamResponse=getMediator().findAndStream(ireq);
+                return new CallStatus(new Response());
+            } else {
+                return new CallStatus(getMediator().find(ireq));
             }
-            return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("find:generic_error failure: {}", e);
             return new CallStatus(e);
