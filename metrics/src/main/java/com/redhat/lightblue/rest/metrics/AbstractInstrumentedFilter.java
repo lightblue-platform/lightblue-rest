@@ -10,11 +10,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
@@ -118,14 +128,24 @@ public abstract class AbstractInstrumentedFilter implements Filter {
 	}
 
 	/**
-	 * TODO : Implement logic to check if this is the last chunk of streaming
-	 * response
 	 * 
 	 * @param wrappedResponse
 	 * @return boolean
 	 */
-	public boolean checkIfStreamEnding(ServletResponse wrappedResponse) {
-		boolean isStreamEnding = true;
+	public boolean checkIfStreamEnding(WrappedServletResponse wrappedResponse) {
+		boolean isStreamEnding = false;
+		try {
+			byte[] response = wrappedResponse.getResponseCopy();
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode jsonObj = mapper.readValue(new String(response, wrappedResponse.getCharacterEncoding()),
+					JsonNode.class);
+			JsonNode lastNode = jsonObj.get("last");
+			if (null != lastNode && lastNode.booleanValue()) {
+				isStreamEnding = true;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return isStreamEnding;
 	}
 
@@ -137,8 +157,7 @@ public abstract class AbstractInstrumentedFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		final StatusExposingServletResponse wrappedResponse = new StatusExposingServletResponse(
-				(HttpServletResponse) response);
+		final WrappedServletResponse wrappedResponse = new WrappedServletResponse((HttpServletResponse) response);
 
 		String requrestUrl = getCurrentUrlFromRequest(request);
 		String metricNamespace = api_prefix + requrestUrl.replaceAll("/", ".");
@@ -149,6 +168,7 @@ public abstract class AbstractInstrumentedFilter implements Filter {
 		boolean error = false;
 		try {
 			chain.doFilter(request, wrappedResponse);
+			wrappedResponse.flushBuffer();
 		} catch (IOException | ServletException | RuntimeException e) {
 			error = true;
 			throw e;
@@ -179,12 +199,45 @@ public abstract class AbstractInstrumentedFilter implements Filter {
 		}
 	}
 
-	private static class StatusExposingServletResponse extends HttpServletResponseWrapper {
+	private static class CopyServletOutputStream extends ServletOutputStream {
+		private OutputStream outputStream;
+		private ByteArrayOutputStream baos;
+
+		public CopyServletOutputStream(OutputStream outputStream) {
+			this.outputStream = outputStream;
+			this.baos = new ByteArrayOutputStream(1024);
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			outputStream.write(b);
+			baos.write(b);
+		}
+
+		public byte[] getResponseCopy() {
+			return baos.toByteArray();
+		}
+
+		@Override
+		public boolean isReady() {
+			return false;
+		}
+
+		@Override
+		public void setWriteListener(WriteListener writeListener) {
+		}
+
+	}
+
+	private static class WrappedServletResponse extends HttpServletResponseWrapper {
 		// The Servlet spec says: calling setStatus is optional, if no status is
 		// set, the default is 200.
 		private int httpStatus = 200;
+		private ServletOutputStream servletOutputStream;
+		private PrintWriter printWriter;
+		private CopyServletOutputStream copyServletOuptputStream;
 
-		public StatusExposingServletResponse(HttpServletResponse response) {
+		public WrappedServletResponse(HttpServletResponse response) {
 			super(response);
 		}
 
@@ -215,6 +268,42 @@ public abstract class AbstractInstrumentedFilter implements Filter {
 
 		public int getStatus() {
 			return httpStatus;
+		}
+
+		@Override
+		public ServletOutputStream getOutputStream() throws IOException {
+			if (servletOutputStream == null) {
+				servletOutputStream = getResponse().getOutputStream();
+				copyServletOuptputStream = new CopyServletOutputStream(servletOutputStream);
+			}
+			return copyServletOuptputStream;
+		}
+
+		@Override
+		public PrintWriter getWriter() throws IOException {
+			if (printWriter == null) {
+				copyServletOuptputStream = new CopyServletOutputStream(getResponse().getOutputStream());
+				printWriter = new PrintWriter(
+						new OutputStreamWriter(copyServletOuptputStream, getResponse().getCharacterEncoding()), true);
+			}
+			return printWriter;
+		}
+
+		@Override
+		public void flushBuffer() throws IOException {
+			if (printWriter != null) {
+				printWriter.flush();
+			} else if (servletOutputStream != null) {
+				copyServletOuptputStream.flush();
+			}
+		}
+
+		public byte[] getResponseCopy() {
+			if (copyServletOuptputStream != null) {
+				return copyServletOuptputStream.getResponseCopy();
+			} else {
+				return new byte[0];
+			}
 		}
 	}
 
