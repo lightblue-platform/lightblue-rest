@@ -20,6 +20,15 @@
         <url-pattern>/version</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>health</servlet-name>
+        <jsp-file>/version.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>health</servlet-name>
+        <url-pattern>/health</url-pattern>
+    </servlet-mapping>
+
     <listener>
         <listener-class>com.redhat.lightblue.rest.cors.CorsInitializingServletContextListener
         </listener-class>
@@ -42,12 +51,12 @@
         </listener-class>
     </listener>
     <servlet>
-        <servlet-name>health</servlet-name>
+        <servlet-name>diagnostics</servlet-name>
         <servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>health</servlet-name>
-        <url-pattern>/health</url-pattern>
+        <servlet-name>diagnostics</servlet-name>
+        <url-pattern>/diagnostics</url-pattern>
     </servlet-mapping>
 
 </web-app>
