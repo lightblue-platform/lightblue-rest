@@ -18,8 +18,11 @@
  */
 package com.redhat.lightblue.rest.crud;
 
-import static org.junit.Assert.assertTrue;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.Mongo;
 import com.redhat.lightblue.config.CrudConfiguration;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.metadata.EntityMetadata;
@@ -31,12 +34,6 @@ import com.redhat.lightblue.rest.test.support.Assets;
 import com.redhat.lightblue.rest.test.support.CrudWebXmls;
 import com.redhat.lightblue.util.JsonUtils;
 import com.redhat.lightblue.util.test.FileUtil;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.Mongo;
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -84,6 +81,8 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -461,7 +460,7 @@ public class ITCaseCrudResourceTest {
     @RunAsClient
     public void testHealthCheck(@ArquillianResource URL url) throws Exception {
         ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
-                .path("health")
+                .path("diagnostics")
                 .build()
                 .toString());
         request.accept(MediaType.APPLICATION_JSON);
