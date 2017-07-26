@@ -24,14 +24,30 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
       <servlet-name>version</servlet-name>
       <url-pattern>/version</url-pattern>
   </servlet-mapping>
-  
+
+  <servlet>
+      <servlet-name>health</servlet-name>
+      <jsp-file>/version.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>health</servlet-name>
+      <url-pattern>/health</url-pattern>
+  </servlet-mapping>
+
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Version servlet (Unauth)</web-resource-name>
       <url-pattern>/version</url-pattern>
     </web-resource-collection>
   </security-constraint>
-  
+
+  <security-constraint>
+      <web-resource-collection>
+          <web-resource-name>Health servlet (Unauth)</web-resource-name>
+          <url-pattern>/health</url-pattern>
+      </web-resource-collection>
+  </security-constraint>
+
   <security-constraint>
       <web-resource-collection>
           <web-resource-name>rest-crud services</web-resource-name>

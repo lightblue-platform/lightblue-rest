@@ -31,6 +31,13 @@
 		</web-resource-collection>
 	</security-constraint>
 
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Health servlet (Unauth)</web-resource-name>
+      <url-pattern>/health</url-pattern>
+    </web-resource-collection>
+  </security-constraint>
+
 	<login-config>
 		<auth-method>CLIENT-CERT</auth-method>
 	</login-config>
@@ -51,13 +58,22 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>version</servlet-name>
-		<jsp-file>/version.jsp</jsp-file>
+	    <servlet-name>version</servlet-name>
+	    <jsp-file>/version.jsp</jsp-file>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>version</servlet-name>
-		<url-pattern>/version</url-pattern>
+	    <servlet-name>version</servlet-name>
+	    <url-pattern>/version</url-pattern>
 	</servlet-mapping>
+
+  <servlet>
+    <servlet-name>health</servlet-name>
+    <jsp-file>/version.jsp</jsp-file>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>health</servlet-name>
+    <url-pattern>/health</url-pattern>
+  </servlet-mapping>
 
 	<listener>
 		<listener-class>com.redhat.lightblue.rest.cors.CorsInitializingServletContextListener</listener-class>
@@ -77,12 +93,12 @@
 	</listener>
 
 	<servlet>
-		<servlet-name>health</servlet-name>
+    <servlet-name>diagnostics</servlet-name>
 		<servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>health</servlet-name>
-		<url-pattern>/health</url-pattern>
+    <servlet-name>diagnostics</servlet-name>
+    <url-pattern>/diagnostics</url-pattern>
 	</servlet-mapping>
 
 	<listener>
