@@ -18,6 +18,7 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -27,6 +28,9 @@ import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.SimpleJsonObject;
+
+import static com.codahale.metrics.MetricRegistry.name;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +50,15 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
         this.domain = domain;
         this.resource = resource;
         this.caller = caller;
+        this.metricNamespace=getMetricsNamespace("lock", domain, resource+"."+caller);
+        initializeMetrics(metricNamespace);
     }
+
+    @Override
+	public void initializeMetrics(String merticNamespace) {
+	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
+	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+	}
 
     public static AbstractLockCommand getLockCommand(String request) {
         AbstractLockCommand command = null;
@@ -86,6 +98,8 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
+        activeRequests.inc();
+        final Timer.Context timer = requestTimer.time();    	
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();
         Error.push("rest");
@@ -98,13 +112,29 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             o.set("result", result);
             return new CallStatus(new SimpleJsonObject(o));
         } catch (Error e) {
+            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
             LOGGER.error("failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
             LOGGER.error("failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
+        } finally {
+            timer.stop();
+            activeRequests.dec();
         }
     }
 
     protected abstract JsonNode runLockCommand(Locking locking);
+    
+	@Override
+	public String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
+		return operationName + "." + entityName + "." + entityVersion;
+	}
+
+	@Override
+	public String getErrorNamespace(String metricNamespace, Throwable exception) {
+		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
+	    return metricNamespace + ".exception." + actualExceptionClass.getName();
+	}    
 }

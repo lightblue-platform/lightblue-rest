@@ -18,7 +18,6 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
@@ -26,7 +25,6 @@ import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.rest.crud.metrics.MetricsInstrumentator;
 import com.redhat.lightblue.util.JsonUtils;
 
 import static com.codahale.metrics.MetricRegistry.name;
@@ -34,16 +32,12 @@ import static com.codahale.metrics.MetricRegistry.name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExplainCommand extends AbstractRestCommand implements MetricsInstrumentator{
+public class ExplainCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExplainCommand.class);
 
     private final String entity;
     private final String version;
     private final String request;
-
-    private String metricNamespace;
-    private Counter activeRequests;
-    private Timer requestTimer;
 	
     public ExplainCommand(String entity, String version, String request) {
         this(null, entity, version, request);
@@ -54,7 +48,7 @@ public class ExplainCommand extends AbstractRestCommand implements MetricsInstru
         this.entity = entity;
         this.version = version;
         this.request = request;
-        this.metricNamespace=getSuccessMetricsNamespace("explain", entity, version);
+        this.metricNamespace=getMetricsNamespace("explain", entity, version);
         initializeMetrics(metricNamespace);
     }
 
@@ -78,7 +72,7 @@ public class ExplainCommand extends AbstractRestCommand implements MetricsInstru
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
+                metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
                 LOGGER.error("explain:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
@@ -86,7 +80,7 @@ public class ExplainCommand extends AbstractRestCommand implements MetricsInstru
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
-                metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
+                metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
                 LOGGER.error("explain:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
@@ -94,26 +88,26 @@ public class ExplainCommand extends AbstractRestCommand implements MetricsInstru
             Response r = getMediator().explain(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
+            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
             LOGGER.error("explain:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
+            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
             LOGGER.error("explain:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
-		} finally {
+        } finally {
             timer.stop();
             activeRequests.dec();
         }
     }
     
 	@Override
-	public String getSuccessMetricsNamespace(String operationName, String entityName, String entityVersion) {
+	public String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
 		return operationName + "." + entityName + "." + entityVersion;
 	}
 
 	@Override
-	public String getErrorMetricsNamespace(String metricNamespace, Throwable exception) {
+	public String getErrorNamespace(String metricNamespace, Throwable exception) {
 		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
 		return metricNamespace + ".exception." + actualExceptionClass.getName();
 	}

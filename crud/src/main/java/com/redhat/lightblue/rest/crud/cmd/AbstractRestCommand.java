@@ -18,10 +18,18 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import static com.codahale.metrics.MetricRegistry.name;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.UndeclaredThrowableException;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.redhat.lightblue.ClientIdentification;
 import com.redhat.lightblue.EntityVersion;
@@ -31,6 +39,7 @@ import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.rest.crud.metrics.MetricRegistryFactory;
 import com.redhat.lightblue.util.Error;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +57,13 @@ public abstract class AbstractRestCommand {
 
     private final Mediator mediator;
     private final HttpServletRequest httpServletRequest;
+    
+    protected String metricNamespace;
+    protected Counter activeRequests;
+    protected Timer requestTimer;
 
+    final MetricRegistry metricsRegistry = MetricRegistryFactory.getMetricRegistry();
+    
     public AbstractRestCommand(Mediator mediator) {
         this.mediator = mediator;
         this.httpServletRequest = ResteasyProviderFactory.getContextData(HttpServletRequest.class);
@@ -132,4 +147,27 @@ public abstract class AbstractRestCommand {
     }
 
     public abstract CallStatus run();
+    
+	protected String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
+		return "abstractRestCommand.metrics";
+	}
+	
+	protected String getErrorNamespace(String metricNamespace, Throwable exception) {
+		return "abstractRestCommand.exception";
+	}
+	
+	protected abstract void initializeMetrics(String metricNamespace);
+	
+    /**
+     * Get to the cause we actually care about in case the bubbled up exception is a higher level
+     * framework exception that encapsulates the stuff we really care about.
+     */
+    protected Class<? extends Throwable> unravelReflectionExceptions(Throwable e) {
+      while (e.getCause() != null &&
+          (e instanceof UndeclaredThrowableException || e instanceof InvocationTargetException)) {
+        e = e.getCause();
+      }
+
+      return e.getClass();
+    }
 }

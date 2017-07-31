@@ -22,7 +22,6 @@ import static com.codahale.metrics.MetricRegistry.name;
 
 import java.util.Map;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -38,12 +37,11 @@ import com.redhat.lightblue.metadata.types.DefaultTypes;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.rest.crud.metrics.MetricsInstrumentator;
 import com.redhat.lightblue.savedsearch.FindRequestBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RunSavedSearchCommand extends AbstractRestCommand implements MetricsInstrumentator{
+public class RunSavedSearchCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(RunSavedSearchCommand.class);
 
     private final String entity;
@@ -53,10 +51,6 @@ public class RunSavedSearchCommand extends AbstractRestCommand implements Metric
     private final Sort sort;
     private final Integer from,to;
     private final Map<String,String> params;
-    
-    private String metricNamespace;
-    private Counter activeRequests;
-    private Timer requestTimer;
 	
     public RunSavedSearchCommand(String searchName,
                                  String entity,
@@ -74,7 +68,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand implements Metric
         this.from=from;
         this.to=to;
         this.params=properties;
-        this.metricNamespace=getSuccessMetricsNamespace("find", entity, version);
+        this.metricNamespace=getMetricsNamespace("savedsearch", entity, version);
         initializeMetrics(metricNamespace);
     }
     
@@ -118,11 +112,11 @@ public class RunSavedSearchCommand extends AbstractRestCommand implements Metric
             Response r = getMediator().find(req);
             return new CallStatus(r);
         } catch (Error e) {
-            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
+            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
+            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         } finally {
@@ -132,12 +126,12 @@ public class RunSavedSearchCommand extends AbstractRestCommand implements Metric
     }
     
 	@Override
-	public String getSuccessMetricsNamespace(String operationName, String entityName, String entityVersion) {
+	public String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
 		return operationName + "." + entityName + "." + entityVersion;
 	}
 
 	@Override
-	public String getErrorMetricsNamespace(String metricNamespace, Throwable exception) {
+	public String getErrorNamespace(String metricNamespace, Throwable exception) {
 		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
 		return metricNamespace + ".exception." + actualExceptionClass.getName();
 	}

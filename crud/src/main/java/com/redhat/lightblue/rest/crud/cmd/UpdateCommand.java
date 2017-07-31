@@ -18,7 +18,6 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
@@ -26,7 +25,6 @@ import com.redhat.lightblue.crud.UpdateRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.rest.crud.metrics.MetricsInstrumentator;
 import com.redhat.lightblue.util.JsonUtils;
 
 import static com.codahale.metrics.MetricRegistry.name;
@@ -38,17 +36,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author nmalik
  */
-public class UpdateCommand extends AbstractRestCommand implements MetricsInstrumentator{
+public class UpdateCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateCommand.class);
 
     private final String entity;
     private final String version;
     private final String request;
 
-    private String metricNamespace;
-    private Counter activeRequests;
-    private Timer requestTimer;
-	
     public UpdateCommand(String entity, String version, String request) {
         this(null, entity, version, request);
     }
@@ -58,7 +52,7 @@ public class UpdateCommand extends AbstractRestCommand implements MetricsInstrum
         this.entity = entity;
         this.version = version;
         this.request = request;
-        this.metricNamespace=getSuccessMetricsNamespace("find", entity, version);
+        this.metricNamespace=getMetricsNamespace("update", entity, version);
         initializeMetrics(metricNamespace);
     }
     
@@ -84,11 +78,11 @@ public class UpdateCommand extends AbstractRestCommand implements MetricsInstrum
             Response r = getMediator().update(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
+            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
             LOGGER.error("update failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
+            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
             LOGGER.error("update failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_UPDATE, e.toString()));
         } finally {
@@ -98,12 +92,12 @@ public class UpdateCommand extends AbstractRestCommand implements MetricsInstrum
     }
     
 	@Override
-	public String getSuccessMetricsNamespace(String operationName, String entityName, String entityVersion) {
+	public String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
 		return operationName + "." + entityName + "." + entityVersion;
 	}
 
 	@Override
-	public String getErrorMetricsNamespace(String metricNamespace, Throwable exception) {
+	public String getErrorNamespace(String metricNamespace, Throwable exception) {
 		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
 		return metricNamespace + ".exception." + actualExceptionClass.getName();
 	}
