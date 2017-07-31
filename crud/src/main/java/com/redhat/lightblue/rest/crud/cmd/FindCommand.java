@@ -144,7 +144,7 @@ public class FindCommand extends AbstractRestCommand implements MetricsInstrumen
     @Override
     public CallStatus run() {
         activeRequests.inc();
-        final Timer.Context context = requestTimer.time();
+        final Timer.Context timer = requestTimer.time();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -185,9 +185,9 @@ public class FindCommand extends AbstractRestCommand implements MetricsInstrumen
             LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
 		} finally {
-		    context.stop();
-		    activeRequests.dec();
-		}
+            timer.stop();
+            activeRequests.dec();
+        }
     }
 
 	@Override

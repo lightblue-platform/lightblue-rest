@@ -67,7 +67,7 @@ public class ExplainCommand extends AbstractRestCommand implements MetricsInstru
     @Override
     public CallStatus run() {
         activeRequests.inc();
-        final Timer.Context context = requestTimer.time();
+        final Timer.Context timer = requestTimer.time();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -102,9 +102,9 @@ public class ExplainCommand extends AbstractRestCommand implements MetricsInstru
             LOGGER.error("explain:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
 		} finally {
-		    context.stop();
-		    activeRequests.dec();
-		}
+            timer.stop();
+            activeRequests.dec();
+        }
     }
     
 	@Override

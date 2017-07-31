@@ -58,7 +58,7 @@ public class BulkRequestCommand extends AbstractRestCommand implements MetricsIn
     @Override
     public CallStatus run() {
         activeRequests.inc();
-        final Timer.Context context = requestTimer.time();
+        final Timer.Context timer = requestTimer.time();
         LOGGER.debug("bulk request");
         Error.reset();
         Error.push("rest");
@@ -93,9 +93,9 @@ public class BulkRequestCommand extends AbstractRestCommand implements MetricsIn
             LOGGER.error("bulk:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {
-		    context.stop();
-		    activeRequests.dec();
-		}
+            timer.stop();
+            activeRequests.dec();
+        }
     }
     
 	@Override

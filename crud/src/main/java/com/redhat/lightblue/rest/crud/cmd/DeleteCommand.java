@@ -71,7 +71,7 @@ public class DeleteCommand extends AbstractRestCommand implements MetricsInstrum
     @Override
     public CallStatus run() {
         activeRequests.inc();
-        final Timer.Context context = requestTimer.time();
+        final Timer.Context timer = requestTimer.time();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -92,9 +92,9 @@ public class DeleteCommand extends AbstractRestCommand implements MetricsInstrum
             LOGGER.error("delete failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_DELETE, e.toString()));
         } finally {
-		    context.stop();
-		    activeRequests.dec();
-		}
+            timer.stop();
+            activeRequests.dec();
+        }
     }
     
 	@Override

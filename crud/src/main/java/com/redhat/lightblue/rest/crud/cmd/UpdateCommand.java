@@ -94,7 +94,7 @@ public class UpdateCommand extends AbstractRestCommand implements MetricsInstrum
         } finally {
             timer.stop();
             activeRequests.dec();
-		}
+        }
     }
     
 	@Override

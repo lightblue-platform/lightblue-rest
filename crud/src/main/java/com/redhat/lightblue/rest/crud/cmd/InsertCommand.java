@@ -93,8 +93,8 @@ public class InsertCommand extends AbstractRestCommand implements MetricsInstrum
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_INSERT, e.toString()));
         } finally {
             timer.stop();
-		    activeRequests.dec();
-		}
+            activeRequests.dec();
+        }
     }
     
 	@Override

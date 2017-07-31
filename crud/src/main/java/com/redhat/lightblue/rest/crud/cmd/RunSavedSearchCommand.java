@@ -128,7 +128,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand implements Metric
         } finally {
             timer.stop();
             activeRequests.dec();
-		}
+        }
     }
     
 	@Override
