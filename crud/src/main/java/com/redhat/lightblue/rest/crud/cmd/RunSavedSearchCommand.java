@@ -55,8 +55,8 @@ public class RunSavedSearchCommand extends AbstractRestCommand implements Metric
     private final Map<String,String> params;
     
     private String metricNamespace;
-	private Counter activeRequests;
-	private Timer requestTimer;
+    private Counter activeRequests;
+    private Timer requestTimer;
 	
     public RunSavedSearchCommand(String searchName,
                                  String entity,
@@ -80,14 +80,14 @@ public class RunSavedSearchCommand extends AbstractRestCommand implements Metric
     
     @Override
 	public void initializeMetrics(String merticNamespace) {
-		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
+	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
 	}
 
     @Override
     public CallStatus run() {
-    	activeRequests.inc();
-    	final Timer.Context context = requestTimer.time();
+        activeRequests.inc();
+        final Timer.Context timer = requestTimer.time();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -126,8 +126,8 @@ public class RunSavedSearchCommand extends AbstractRestCommand implements Metric
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         } finally {
-			context.stop();
-			activeRequests.dec();
+            timer.stop();
+            activeRequests.dec();
 		}
     }
     

@@ -40,8 +40,8 @@ public class BulkRequestCommand extends AbstractRestCommand implements MetricsIn
     private final String request;
     
     private String metricNamespace;
-	private Counter activeRequests;
-	private Timer requestTimer;
+    private Counter activeRequests;
+    private Timer requestTimer;
 
     public BulkRequestCommand(String request) {
         this.request = request;
@@ -51,14 +51,14 @@ public class BulkRequestCommand extends AbstractRestCommand implements MetricsIn
 
     @Override
 	public void initializeMetrics(String merticNamespace) {
-		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
+	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
 	} 
 
     @Override
     public CallStatus run() {
-    	activeRequests.inc();
-    	final Timer.Context context = requestTimer.time();
+        activeRequests.inc();
+        final Timer.Context context = requestTimer.time();
         LOGGER.debug("bulk request");
         Error.reset();
         Error.push("rest");
@@ -93,8 +93,8 @@ public class BulkRequestCommand extends AbstractRestCommand implements MetricsIn
             LOGGER.error("bulk:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {
-			context.stop();
-			activeRequests.dec();
+		    context.stop();
+		    activeRequests.dec();
 		}
     }
     

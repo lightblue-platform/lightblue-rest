@@ -57,5 +57,6 @@
     <servlet-mapping>
         <servlet-name>diagnostics</servlet-name>
         <url-pattern>/diagnostics</url-pattern>
-    </servlet-mapping>   
+    </servlet-mapping>
+
 </web-app>

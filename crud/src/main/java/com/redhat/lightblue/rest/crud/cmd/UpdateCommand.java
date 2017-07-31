@@ -20,7 +20,6 @@ package com.redhat.lightblue.rest.crud.cmd;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.UpdateRequest;
@@ -47,8 +46,8 @@ public class UpdateCommand extends AbstractRestCommand implements MetricsInstrum
     private final String request;
 
     private String metricNamespace;
-	private Counter activeRequests;
-	private Timer requestTimer;
+    private Counter activeRequests;
+    private Timer requestTimer;
 	
     public UpdateCommand(String entity, String version, String request) {
         this(null, entity, version, request);
@@ -65,14 +64,14 @@ public class UpdateCommand extends AbstractRestCommand implements MetricsInstrum
     
     @Override
 	public void initializeMetrics(String merticNamespace) {
-		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
+	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
 	}
 
     @Override
     public CallStatus run() {
-    	activeRequests.inc();
-    	final Timer.Context context = requestTimer.time();
+        activeRequests.inc();
+        final Timer.Context timer = requestTimer.time();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -93,8 +92,8 @@ public class UpdateCommand extends AbstractRestCommand implements MetricsInstrum
             LOGGER.error("update failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_UPDATE, e.toString()));
         } finally {
-			context.stop();
-			activeRequests.dec();
+            timer.stop();
+            activeRequests.dec();
 		}
     }
     

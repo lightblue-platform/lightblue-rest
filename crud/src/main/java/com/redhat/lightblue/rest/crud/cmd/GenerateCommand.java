@@ -71,8 +71,8 @@ public class GenerateCommand extends AbstractRestCommand implements MetricsInstr
     private final int n;
 
     private String metricNamespace;
-	private Counter activeRequests;
-	private Timer requestTimer;
+    private Counter activeRequests;
+    private Timer requestTimer;
 	
     public GenerateCommand(String entity, String version, String field, int n) {
         super(null);
@@ -86,14 +86,14 @@ public class GenerateCommand extends AbstractRestCommand implements MetricsInstr
     
     @Override
 	public void initializeMetrics(String merticNamespace) {
-		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
+	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
 	}
 
     @Override
     public CallStatus run() {
-    	activeRequests.inc();
-    	final Timer.Context context = requestTimer.time();
+        activeRequests.inc();
+        final Timer.Context context = requestTimer.time();
     	LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -146,8 +146,8 @@ public class GenerateCommand extends AbstractRestCommand implements MetricsInstr
             metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, ex)).mark();
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_GENERATE, ex.toString()));
         } finally {
-			context.stop();
-			activeRequests.dec();
+		    context.stop();
+		    activeRequests.dec();
 		}
         com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
         r.setStatus(OperationStatus.COMPLETE);

@@ -101,12 +101,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <groupId>com.redhat.lightblue.rest</groupId>
                 <artifactId>lightblue-rest-common</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.redhat.lightblue.rest</groupId>
-                <artifactId>lightblue-rest-metrics</artifactId>
-                <version>${project.version}</version>
-            </dependency>            
+            </dependency>        
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-api</artifactId>

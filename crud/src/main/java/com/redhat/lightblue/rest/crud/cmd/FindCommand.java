@@ -60,8 +60,8 @@ public class FindCommand extends AbstractRestCommand implements MetricsInstrumen
     private StreamingResponse streamResponse;
     
     private String metricNamespace;
-	private Counter activeRequests;
-	private Timer requestTimer;
+    private Counter activeRequests;
+    private Timer requestTimer;
 
     public FindCommand(String entity, String version, String request) {
         this(null,entity,version,request,false);
@@ -87,8 +87,8 @@ public class FindCommand extends AbstractRestCommand implements MetricsInstrumen
     
     @Override
 	public void initializeMetrics(String merticNamespace) {
-		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
+	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
 	}   
 
     /**
@@ -143,8 +143,8 @@ public class FindCommand extends AbstractRestCommand implements MetricsInstrumen
     
     @Override
     public CallStatus run() {
-    	activeRequests.inc();
-    	final Timer.Context context = requestTimer.time();
+        activeRequests.inc();
+        final Timer.Context context = requestTimer.time();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -185,8 +185,8 @@ public class FindCommand extends AbstractRestCommand implements MetricsInstrumen
             LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
 		} finally {
-			context.stop();
-			activeRequests.dec();
+		    context.stop();
+		    activeRequests.dec();
 		}
     }
 
