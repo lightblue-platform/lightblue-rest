@@ -7,14 +7,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
-import com.redhat.lightblue.rest.metrics.InstrumentedFilterContextListener;
 
 /**
  * Register REST endpoint's and JVM metrics and report them via JMX
  */
-public class RestResourceInstrumentedFilterContextListener extends InstrumentedFilterContextListener {
+public class MetricRegistryFactory {
 
-	public static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
+	private static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
 
 	static {
 		METRIC_REGISTRY.register("garbage-collection", new GarbageCollectorMetricSet());
@@ -27,8 +26,7 @@ public class RestResourceInstrumentedFilterContextListener extends InstrumentedF
 		jmxReporter.start();
 	}
 
-	@Override
-	protected MetricRegistry getMetricRegistry() {
+	public static MetricRegistry getMetricRegistry() {
 		return METRIC_REGISTRY;
 	}
 }

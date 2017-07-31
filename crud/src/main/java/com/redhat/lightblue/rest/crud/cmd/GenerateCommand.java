@@ -19,17 +19,22 @@
 package com.redhat.lightblue.rest.crud.cmd;
 
 import java.util.Set;
+
+import static com.codahale.metrics.MetricRegistry.name;
+
 import java.util.HashSet;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-import com.redhat.lightblue.Response;
+
 import com.redhat.lightblue.OperationStatus;
 
 import com.redhat.lightblue.config.LightblueFactory;
@@ -52,11 +57,12 @@ import com.redhat.lightblue.util.Path;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.rest.crud.metrics.MetricsInstrumentator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GenerateCommand extends AbstractRestCommand {
+public class GenerateCommand extends AbstractRestCommand implements MetricsInstrumentator{
     private static final Logger LOGGER = LoggerFactory.getLogger(GenerateCommand.class);
 
     private final String entity;
@@ -64,17 +70,31 @@ public class GenerateCommand extends AbstractRestCommand {
     private final String field;
     private final int n;
 
+    private String metricNamespace;
+	private Counter activeRequests;
+	private Timer requestTimer;
+	
     public GenerateCommand(String entity, String version, String field, int n) {
         super(null);
         this.entity = entity;
         this.version = version;
         this.field = field;
         this.n = n <= 0 ? 1 : n;
+        this.metricNamespace=getSuccessMetricsNamespace("find", entity, version);
+        initializeMetrics(metricNamespace);
     }
+    
+    @Override
+	public void initializeMetrics(String merticNamespace) {
+		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
+		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+	}
 
     @Override
     public CallStatus run() {
-        LOGGER.debug("run: entity={}, version={}", entity, version);
+    	activeRequests.inc();
+    	final Timer.Context context = requestTimer.time();
+    	LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
@@ -120,12 +140,28 @@ public class GenerateCommand extends AbstractRestCommand {
                 throw Error.get(CrudConstants.ERR_NO_ACCESS, "generate " + mdResolver.getTopLevelEntityName());
             }
         } catch (Error e) {
+            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
             return new CallStatus(e);
         } catch (Exception ex) {
+            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, ex)).mark();
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_GENERATE, ex.toString()));
-        }
+        } finally {
+			context.stop();
+			activeRequests.dec();
+		}
         com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
         r.setStatus(OperationStatus.COMPLETE);
         return new CallStatus(r);
     }
+    
+	@Override
+	public String getSuccessMetricsNamespace(String operationName, String entityName, String entityVersion) {
+		return operationName + "." + entityName + "." + entityVersion;
+	}
+
+	@Override
+	public String getErrorMetricsNamespace(String metricNamespace, Throwable exception) {
+		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
+		return metricNamespace + ".exception." + actualExceptionClass.getName();
+	}
 }

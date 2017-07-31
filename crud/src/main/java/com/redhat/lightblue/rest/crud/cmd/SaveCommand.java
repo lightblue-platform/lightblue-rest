@@ -18,6 +18,8 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
@@ -25,7 +27,11 @@ import com.redhat.lightblue.crud.SaveRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.rest.crud.metrics.MetricsInstrumentator;
 import com.redhat.lightblue.util.JsonUtils;
+
+import static com.codahale.metrics.MetricRegistry.name;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,13 +39,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author nmalik
  */
-public class SaveCommand extends AbstractRestCommand {
+public class SaveCommand extends AbstractRestCommand implements MetricsInstrumentator{
     private static final Logger LOGGER = LoggerFactory.getLogger(SaveCommand.class);
 
     private final String entity;
     private final String version;
     private final String request;
 
+    private String metricNamespace;
+	private Counter activeRequests;
+	private Timer requestTimer;
+	
     public SaveCommand(String entity, String version, String request) {
         this(null, entity, version, request);
     }
@@ -49,10 +59,20 @@ public class SaveCommand extends AbstractRestCommand {
         this.entity = entity;
         this.version = version;
         this.request = request;
+        this.metricNamespace=getSuccessMetricsNamespace("find", entity, version);
+        initializeMetrics(metricNamespace);
     }
+    
+    @Override
+	public void initializeMetrics(String merticNamespace) {
+		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
+		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+	}
 
     @Override
     public CallStatus run() {
+    	activeRequests.inc();
+    	final Timer.Context context = requestTimer.time();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -65,11 +85,27 @@ public class SaveCommand extends AbstractRestCommand {
             Response r = getMediator().save(ireq);
             return new CallStatus(r);
         } catch (Error e) {
+            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
             LOGGER.error("save failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            metricsRegistry.meter(getErrorMetricsNamespace(metricNamespace, e)).mark();
             LOGGER.error("save failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_SAVE, e.toString()));
-        }
+        } finally {
+			context.stop();
+			activeRequests.dec();
+		}
     }
+    
+	@Override
+	public String getSuccessMetricsNamespace(String operationName, String entityName, String entityVersion) {
+		return operationName + "." + entityName + "." + entityVersion;
+	}
+
+	@Override
+	public String getErrorMetricsNamespace(String metricNamespace, Throwable exception) {
+		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
+		return metricNamespace + ".exception." + actualExceptionClass.getName();
+	}
 }
