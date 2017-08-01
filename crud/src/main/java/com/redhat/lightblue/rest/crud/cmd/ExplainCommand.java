@@ -18,19 +18,17 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.codahale.metrics.Timer;
-import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
-
-import static com.codahale.metrics.MetricRegistry.name;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ExplainCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExplainCommand.class);
@@ -51,12 +49,6 @@ public class ExplainCommand extends AbstractRestCommand {
         this.metricNamespace=getMetricsNamespace("explain", entity, version);
         initializeMetrics(metricNamespace);
     }
-
-    @Override
-	public void initializeMetrics(String merticNamespace) {
-	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
-	} 
 
     @Override
     public CallStatus run() {
@@ -100,15 +92,4 @@ public class ExplainCommand extends AbstractRestCommand {
             activeRequests.dec();
         }
     }
-    
-	@Override
-	public String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
-		return operationName + "." + entityName + "." + entityVersion;
-	}
-
-	@Override
-	public String getErrorNamespace(String metricNamespace, Throwable exception) {
-		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
-		return metricNamespace + ".exception." + actualExceptionClass.getName();
-	}
 }

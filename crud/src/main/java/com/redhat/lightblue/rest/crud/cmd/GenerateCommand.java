@@ -18,47 +18,35 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import java.util.Set;
-
-import static com.codahale.metrics.MetricRegistry.name;
-
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-
-
 import com.redhat.lightblue.OperationStatus;
-
 import com.redhat.lightblue.config.LightblueFactory;
-
-import com.redhat.lightblue.query.FieldProjection;
-
-import com.redhat.lightblue.crud.Factory;
 import com.redhat.lightblue.crud.CrudConstants;
+import com.redhat.lightblue.crud.Factory;
 import com.redhat.lightblue.crud.valuegenerators.GeneratedFields;
-
 import com.redhat.lightblue.mediator.DefaultMetadataResolver;
-
-import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.EntityMetadata;
 import com.redhat.lightblue.metadata.FieldTreeNode;
+import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.SimpleField;
-
-import com.redhat.lightblue.util.Error;
-import com.redhat.lightblue.util.Path;
+import com.redhat.lightblue.query.FieldProjection;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.Path;
 
 public class GenerateCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(GenerateCommand.class);
@@ -77,12 +65,6 @@ public class GenerateCommand extends AbstractRestCommand {
         this.metricNamespace=getMetricsNamespace("generate", entity, version);
         initializeMetrics(metricNamespace);
     }
-    
-    @Override
-	public void initializeMetrics(String merticNamespace) {
-	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
-	}
 
     @Override
     public CallStatus run() {
@@ -147,15 +129,4 @@ public class GenerateCommand extends AbstractRestCommand {
         r.setStatus(OperationStatus.COMPLETE);
         return new CallStatus(r);
     }
-    
-	@Override
-	public String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
-		return operationName + "." + entityName + "." + entityVersion;
-	}
-
-	@Override
-	public String getErrorNamespace(String metricNamespace, Throwable exception) {
-		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
-		return metricNamespace + ".exception." + actualExceptionClass.getName();
-	}
 }

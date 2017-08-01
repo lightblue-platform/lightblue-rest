@@ -18,19 +18,17 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import com.codahale.metrics.Timer;
-import com.redhat.lightblue.util.Error;
-import com.redhat.lightblue.Request;
-import com.redhat.lightblue.crud.BulkResponse;
-import com.redhat.lightblue.crud.BulkRequest;
-import com.redhat.lightblue.rest.CallStatus;
-import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.util.JsonUtils;
-
-import static com.codahale.metrics.MetricRegistry.name;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.codahale.metrics.Timer;
+import com.redhat.lightblue.Request;
+import com.redhat.lightblue.crud.BulkRequest;
+import com.redhat.lightblue.crud.BulkResponse;
+import com.redhat.lightblue.rest.CallStatus;
+import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.JsonUtils;
 
 public class BulkRequestCommand extends AbstractRestCommand{
     private static final Logger LOGGER = LoggerFactory.getLogger(BulkRequestCommand.class);
@@ -42,12 +40,6 @@ public class BulkRequestCommand extends AbstractRestCommand{
         this.metricNamespace=getMetricsNamespace("bulkrequest", null, null);
         initializeMetrics(metricNamespace);
     }
-
-    @Override
-	public void initializeMetrics(String merticNamespace) {
-	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
-	}
 
     @Override
     public CallStatus run() {
@@ -91,15 +83,4 @@ public class BulkRequestCommand extends AbstractRestCommand{
             activeRequests.dec();
         }
     }
-    
-	@Override
-	public String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
-		 return operationName;
-	}
-
-	@Override
-	public String getErrorNamespace(String metricNamespace, Throwable exception) {
-		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
-	    return metricNamespace + ".exception." + actualExceptionClass.getName();
-	}
 }

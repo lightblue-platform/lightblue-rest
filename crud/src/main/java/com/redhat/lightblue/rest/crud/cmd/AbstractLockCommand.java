@@ -18,6 +18,9 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,11 +31,6 @@ import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.SimpleJsonObject;
-
-import static com.codahale.metrics.MetricRegistry.name;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstractLockCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockCommand.class);
@@ -53,12 +51,6 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
         this.metricNamespace=getMetricsNamespace("lock", domain, resource+"."+caller);
         initializeMetrics(metricNamespace);
     }
-
-    @Override
-	public void initializeMetrics(String merticNamespace) {
-	    this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-	    this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
-	}
 
     public static AbstractLockCommand getLockCommand(String request) {
         AbstractLockCommand command = null;
@@ -125,16 +117,5 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
         }
     }
 
-    protected abstract JsonNode runLockCommand(Locking locking);
-    
-	@Override
-	public String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
-		return operationName + "." + entityName + "." + entityVersion;
-	}
-
-	@Override
-	public String getErrorNamespace(String metricNamespace, Throwable exception) {
-		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
-	    return metricNamespace + ".exception." + actualExceptionClass.getName();
-	}    
+    protected abstract JsonNode runLockCommand(Locking locking); 
 }

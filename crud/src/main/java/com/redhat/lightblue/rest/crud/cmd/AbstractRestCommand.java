@@ -26,6 +26,8 @@ import java.lang.reflect.UndeclaredThrowableException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -36,13 +38,11 @@ import com.redhat.lightblue.EntityVersion;
 import com.redhat.lightblue.Request;
 import com.redhat.lightblue.config.JsonTranslator;
 import com.redhat.lightblue.mediator.Mediator;
-import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.CallStatus;
+import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.rest.crud.metrics.MetricRegistryFactory;
 import com.redhat.lightblue.util.Error;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Note that passing a Mediator in the constructor is optional. If not provided,
@@ -57,6 +57,8 @@ public abstract class AbstractRestCommand {
 
     private final Mediator mediator;
     private final HttpServletRequest httpServletRequest;
+    
+    private static final String API = "api";
     
     protected String metricNamespace;
     protected Counter activeRequests;
@@ -148,26 +150,44 @@ public abstract class AbstractRestCommand {
 
     public abstract CallStatus run();
     
+	/**
+	 * Create namespace for reporting metrics via jmx
+	 * 
+	 */
 	protected String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
-		return "abstractRestCommand.metrics";
+		return API + "." + operationName + "." + entityName + "." + entityVersion;
 	}
-	
-	protected String getErrorNamespace(String metricNamespace, Throwable exception) {
-		return "abstractRestCommand.exception";
-	}
-	
-	protected abstract void initializeMetrics(String metricNamespace);
-	
-    /**
-     * Get to the cause we actually care about in case the bubbled up exception is a higher level
-     * framework exception that encapsulates the stuff we really care about.
-     */
-    protected Class<? extends Throwable> unravelReflectionExceptions(Throwable e) {
-      while (e.getCause() != null &&
-          (e instanceof UndeclaredThrowableException || e instanceof InvocationTargetException)) {
-        e = e.getCause();
-      }
 
-      return e.getClass();
-    }
+	/**
+	 * Create exception namespace for jmx metrics reporting based on exception
+	 * name
+	 * 
+	 */
+	protected String getErrorNamespace(String metricNamespace, Throwable exception) {
+		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
+		return metricNamespace + ".exception." + actualExceptionClass.getSimpleName();
+	}
+
+	/**
+	 * Initialize metric meters, these meters will be used to report metrics of
+	 * each command object
+	 * 
+	 */
+	public void initializeMetrics(String merticNamespace) {
+		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
+		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+	}
+
+	/**
+	 * Get to the cause we actually care about in case the bubbled up exception
+	 * is a higher level framework exception that encapsulates the stuff we
+	 * really care about.
+	 */
+	protected Class<? extends Throwable> unravelReflectionExceptions(Throwable e) {
+		while (e.getCause() != null
+				&& (e instanceof UndeclaredThrowableException || e instanceof InvocationTargetException)) {
+			e = e.getCause();
+		}
+		return e.getClass();
+	}
 }
