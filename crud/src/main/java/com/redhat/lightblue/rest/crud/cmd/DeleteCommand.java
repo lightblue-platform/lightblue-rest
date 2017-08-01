@@ -40,7 +40,7 @@ public class DeleteCommand extends AbstractRestCommand {
     private final String entity;
     private final String version;
     private final String request;
-	
+    
     public DeleteCommand(String entity, String version, String request) {
         this(null, entity, version, request);
     }
@@ -53,7 +53,7 @@ public class DeleteCommand extends AbstractRestCommand {
         this.metricNamespace=getMetricsNamespace("delete", entity, version);
         initializeMetrics(metricNamespace);
     }
-	
+    
     @Override
     public CallStatus run() {
         activeRequests.inc();

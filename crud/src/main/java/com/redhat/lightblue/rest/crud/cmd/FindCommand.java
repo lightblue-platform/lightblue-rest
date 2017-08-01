@@ -95,6 +95,7 @@ public class FindCommand extends AbstractRestCommand {
      *   }
      * </pre>
      */
+    
     public StreamingOutput getResponseStream() {
         return new StreamingOutput() {            
             @Override
@@ -124,8 +125,6 @@ public class FindCommand extends AbstractRestCommand {
             }
         };
     }
-    
-
     
     @Override
     public CallStatus run() {

@@ -55,7 +55,7 @@ public class GenerateCommand extends AbstractRestCommand {
     private final String version;
     private final String field;
     private final int n;
-	
+    
     public GenerateCommand(String entity, String version, String field, int n) {
         super(null);
         this.entity = entity;
@@ -70,7 +70,7 @@ public class GenerateCommand extends AbstractRestCommand {
     public CallStatus run() {
         activeRequests.inc();
         final Timer.Context timer = requestTimer.time();
-    	LOGGER.debug("run: entity={}, version={}", entity, version);
+        LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());

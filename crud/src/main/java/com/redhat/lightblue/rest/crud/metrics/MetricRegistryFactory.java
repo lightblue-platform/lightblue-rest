@@ -1,9 +1,11 @@
 package com.redhat.lightblue.rest.crud.metrics;
 
+import java.lang.management.ManagementFactory;
 import java.util.concurrent.TimeUnit;
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.jvm.BufferPoolMetricSet;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
@@ -16,7 +18,8 @@ public class MetricRegistryFactory {
 	private static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
 
 	static {
-		METRIC_REGISTRY.register("garbage-collection", new GarbageCollectorMetricSet());
+		METRIC_REGISTRY.register("garbage-collector", new GarbageCollectorMetricSet());
+		METRIC_REGISTRY.register("buffers", new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
 		METRIC_REGISTRY.register("memory", new MemoryUsageGaugeSet());
 		METRIC_REGISTRY.register("threads", new ThreadStatesGaugeSet());
 

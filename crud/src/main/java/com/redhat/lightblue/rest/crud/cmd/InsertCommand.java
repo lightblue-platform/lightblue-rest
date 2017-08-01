@@ -40,7 +40,7 @@ public class InsertCommand extends AbstractRestCommand {
     private final String entity;
     private final String version;
     private final String request;
-	
+    
     public InsertCommand(String entity, String version, String request) {
         this(null, entity, version, request);
     }

@@ -47,7 +47,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
     private final Sort sort;
     private final Integer from,to;
     private final Map<String,String> params;
-	
+    
     public RunSavedSearchCommand(String searchName,
                                  String entity,
                                  String version,

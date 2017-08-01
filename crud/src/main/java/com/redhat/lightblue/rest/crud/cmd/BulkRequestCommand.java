@@ -30,7 +30,7 @@ import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
 
-public class BulkRequestCommand extends AbstractRestCommand{
+public class BulkRequestCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(BulkRequestCommand.class);
 
     private final String request;

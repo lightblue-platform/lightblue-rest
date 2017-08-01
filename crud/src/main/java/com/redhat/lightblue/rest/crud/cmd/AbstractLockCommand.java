@@ -117,5 +117,5 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
         }
     }
 
-    protected abstract JsonNode runLockCommand(Locking locking); 
+    protected abstract JsonNode runLockCommand(Locking locking);
 }

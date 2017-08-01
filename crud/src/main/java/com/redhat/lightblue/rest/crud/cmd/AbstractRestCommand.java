@@ -155,7 +155,7 @@ public abstract class AbstractRestCommand {
 	 * 
 	 */
 	protected String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
-		return API + "." + operationName + "." + entityName + "." + entityVersion;
+		return name(API, operationName, entityName, entityVersion);
 	}
 
 	/**
@@ -165,7 +165,7 @@ public abstract class AbstractRestCommand {
 	 */
 	protected String getErrorNamespace(String metricNamespace, Throwable exception) {
 		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
-		return metricNamespace + ".exception." + actualExceptionClass.getSimpleName();
+		return name(metricNamespace, "requests", "exception", actualExceptionClass.getSimpleName());
 	}
 
 	/**
@@ -174,8 +174,8 @@ public abstract class AbstractRestCommand {
 	 * 
 	 */
 	public void initializeMetrics(String merticNamespace) {
-		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "activeRequests"));
-		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests"));
+		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "requests", "active"));
+		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests", "completed"));
 	}
 
 	/**
