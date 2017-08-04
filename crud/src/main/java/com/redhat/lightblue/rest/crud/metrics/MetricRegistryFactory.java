@@ -18,18 +18,18 @@ public class MetricRegistryFactory {
 	private static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
 
 	static {
-		METRIC_REGISTRY.register("garbage-collector", new GarbageCollectorMetricSet());
-		METRIC_REGISTRY.register("buffers", new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
-		METRIC_REGISTRY.register("memory", new MemoryUsageGaugeSet());
-		METRIC_REGISTRY.register("threads", new ThreadStatesGaugeSet());
-
-		final JmxReporter jmxReporter = JmxReporter.forRegistry(METRIC_REGISTRY)
-				.convertRatesTo(TimeUnit.SECONDS)
-				.convertDurationsTo(TimeUnit.MILLISECONDS).build();
-		jmxReporter.start();
+	    METRIC_REGISTRY.register("garbage-collector", new GarbageCollectorMetricSet());
+	    METRIC_REGISTRY.register("buffers", new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
+	    METRIC_REGISTRY.register("memory", new MemoryUsageGaugeSet());
+	    METRIC_REGISTRY.register("threads", new ThreadStatesGaugeSet());
+	    
+	    final JmxReporter jmxReporter = JmxReporter.forRegistry(METRIC_REGISTRY)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .convertDurationsTo(TimeUnit.MILLISECONDS).build();
+        jmxReporter.start();
 	}
 
 	public static MetricRegistry getMetricRegistry() {
-		return METRIC_REGISTRY;
+	    return METRIC_REGISTRY;
 	}
 }

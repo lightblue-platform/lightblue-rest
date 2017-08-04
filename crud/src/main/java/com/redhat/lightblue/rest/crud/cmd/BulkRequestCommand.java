@@ -61,18 +61,18 @@ public class BulkRequestCommand extends AbstractRestCommand {
                     addCallerId(r);
                 }
             } catch (Exception e) {
-            	markRequestException(e);
+                markRequestException(e);
                 LOGGER.error("bulk:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, "Request is not valid"));
             }
             BulkResponse r = getMediator().bulkRequest(req);
             return new CallStatus(r);
         } catch (Error e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("bulk:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("bulk:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {

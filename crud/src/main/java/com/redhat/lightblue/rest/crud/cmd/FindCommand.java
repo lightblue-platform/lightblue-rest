@@ -92,8 +92,7 @@ public class FindCommand extends AbstractRestCommand {
      *      resultMetadata: { metadata }
      *   }
      * </pre>
-     */
-    
+     */  
     public StreamingOutput getResponseStream() {
         return new StreamingOutput() {            
             @Override
@@ -137,7 +136,7 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-            	markRequestException(e);
+                markRequestException(e);
                 LOGGER.error("find:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
@@ -145,7 +144,7 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
-            	markRequestException(e);
+                markRequestException(e);
                 LOGGER.error("find:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
@@ -159,11 +158,11 @@ public class FindCommand extends AbstractRestCommand {
                 return new CallStatus(getMediator().find(ireq));
             }
         } catch (Error e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("find:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         } finally {

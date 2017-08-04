@@ -71,7 +71,7 @@ public class UpdateCommand extends AbstractRestCommand {
             LOGGER.error("update failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("update failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_UPDATE, e.toString()));
         } finally {

@@ -105,7 +105,7 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             LOGGER.error("failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {

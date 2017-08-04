@@ -71,7 +71,7 @@ public class DeleteCommand extends AbstractRestCommand {
             LOGGER.error("delete failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("delete failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_DELETE, e.toString()));
         } finally {

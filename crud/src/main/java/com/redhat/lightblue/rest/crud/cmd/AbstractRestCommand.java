@@ -133,5 +133,4 @@ public abstract class AbstractRestCommand extends AbstractRequestMetrics{
     }
 
     public abstract CallStatus run();
-
 }

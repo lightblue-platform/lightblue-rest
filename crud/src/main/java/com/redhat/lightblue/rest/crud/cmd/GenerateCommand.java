@@ -54,7 +54,7 @@ public class GenerateCommand extends AbstractRestCommand {
     private final String version;
     private final String field;
     private final int n;
-    
+
     public GenerateCommand(String entity, String version, String field, int n) {
         super(null);
         this.entity = entity;
@@ -116,7 +116,7 @@ public class GenerateCommand extends AbstractRestCommand {
             markRequestException(e);
             return new CallStatus(e);
         } catch (Exception ex) {
-        	markRequestException(ex);
+            markRequestException(ex);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_GENERATE, ex.toString()));
         } finally {
             endRequestMonitoring();

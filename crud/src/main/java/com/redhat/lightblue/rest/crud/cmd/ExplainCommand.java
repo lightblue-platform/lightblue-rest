@@ -69,7 +69,7 @@ public class ExplainCommand extends AbstractRestCommand {
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
-            	markRequestException(e);
+                markRequestException(e);
                 LOGGER.error("explain:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
@@ -77,11 +77,11 @@ public class ExplainCommand extends AbstractRestCommand {
             Response r = getMediator().explain(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("explain:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("explain:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         } finally {

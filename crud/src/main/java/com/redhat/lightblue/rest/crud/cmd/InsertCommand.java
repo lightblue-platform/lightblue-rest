@@ -71,7 +71,7 @@ public class InsertCommand extends AbstractRestCommand {
             LOGGER.error("insert failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-        	markRequestException(e);
+            markRequestException(e);
             LOGGER.error("insert failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_INSERT, e.toString()));
         } finally {
