@@ -23,7 +23,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.redhat.lightblue.ClientIdentification;
 import com.redhat.lightblue.Response;
@@ -64,14 +63,12 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
         this.from=from;
         this.to=to;
         this.params=properties;
-        this.metricNamespace=getMetricsNamespace("savedsearch", entity, version);
-        initializeMetrics(metricNamespace);
+        initializeMetrics("savedsearch", entity, version);
     }
 
     @Override
     public CallStatus run() {
-        activeRequests.inc();
-        final Timer.Context timer = requestTimer.time();
+        startRequestMonitoring();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -98,20 +95,18 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                 req.setTo(to.longValue());
             }
             LOGGER.debug("Request:{}",req);
-            System.out.println("request:"+req);
             Response r = getMediator().find(req);
             return new CallStatus(r);
         } catch (Error e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+            markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        	markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         } finally {
-            timer.stop();
-            activeRequests.dec();
+            endRequestMonitoring();
         }
     }
 }

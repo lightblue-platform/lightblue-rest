@@ -21,7 +21,6 @@ package com.redhat.lightblue.rest.crud.cmd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Timer;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.mediator.Mediator;
@@ -46,14 +45,12 @@ public class ExplainCommand extends AbstractRestCommand {
         this.entity = entity;
         this.version = version;
         this.request = request;
-        this.metricNamespace=getMetricsNamespace("explain", entity, version);
-        initializeMetrics(metricNamespace);
+        initializeMetrics("explain", entity, version);
     }
 
     @Override
     public CallStatus run() {
-        activeRequests.inc();
-        final Timer.Context timer = requestTimer.time();
+    	startRequestMonitoring();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -64,7 +61,7 @@ public class ExplainCommand extends AbstractRestCommand {
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+                markRequestException(e);
                 LOGGER.error("explain:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
@@ -72,7 +69,7 @@ public class ExplainCommand extends AbstractRestCommand {
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
-                metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+            	markRequestException(e);
                 LOGGER.error("explain:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
@@ -80,16 +77,15 @@ public class ExplainCommand extends AbstractRestCommand {
             Response r = getMediator().explain(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        	markRequestException(e);
             LOGGER.error("explain:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        	markRequestException(e);
             LOGGER.error("explain:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         } finally {
-            timer.stop();
-            activeRequests.dec();
+            endRequestMonitoring();
         }
     }
 }

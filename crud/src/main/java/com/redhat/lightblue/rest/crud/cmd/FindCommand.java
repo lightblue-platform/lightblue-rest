@@ -28,7 +28,6 @@ import javax.ws.rs.core.StreamingOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.Response;
@@ -73,8 +72,7 @@ public class FindCommand extends AbstractRestCommand {
         this.version = version;
         this.request = request;
         this.stream=stream;
-        this.metricNamespace=getMetricsNamespace("find", entity, version);
-        initializeMetrics(metricNamespace);
+        initializeMetrics("find", entity, version);
     }
     
     /**
@@ -128,8 +126,7 @@ public class FindCommand extends AbstractRestCommand {
     
     @Override
     public CallStatus run() {
-        activeRequests.inc();
-        final Timer.Context timer = requestTimer.time();
+        startRequestMonitoring();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -140,7 +137,7 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+            	markRequestException(e);
                 LOGGER.error("find:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
@@ -148,7 +145,7 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
-                metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+            	markRequestException(e);
                 LOGGER.error("find:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
@@ -162,16 +159,15 @@ public class FindCommand extends AbstractRestCommand {
                 return new CallStatus(getMediator().find(ireq));
             }
         } catch (Error e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        	markRequestException(e);
             LOGGER.error("find:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        	markRequestException(e);
             LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         } finally {
-            timer.stop();
-            activeRequests.dec();
+            endRequestMonitoring();
         }
     }
 }

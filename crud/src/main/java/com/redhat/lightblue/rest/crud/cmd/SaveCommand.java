@@ -21,7 +21,6 @@ package com.redhat.lightblue.rest.crud.cmd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Timer;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.SaveRequest;
 import com.redhat.lightblue.mediator.Mediator;
@@ -50,14 +49,12 @@ public class SaveCommand extends AbstractRestCommand {
         this.entity = entity;
         this.version = version;
         this.request = request;
-        this.metricNamespace=getMetricsNamespace("save", entity, version);
-        initializeMetrics(metricNamespace);
+        initializeMetrics("save", entity, version);
     }
 
     @Override
     public CallStatus run() {
-        activeRequests.inc();
-        final Timer.Context timer = requestTimer.time();
+        startRequestMonitoring();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -70,16 +67,15 @@ public class SaveCommand extends AbstractRestCommand {
             Response r = getMediator().save(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+            markRequestException(e);
             LOGGER.error("save failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        	markRequestException(e);
             LOGGER.error("save failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_SAVE, e.toString()));
         } finally {
-            timer.stop();
-            activeRequests.dec();
+            endRequestMonitoring();
         }
     }
 }

@@ -18,20 +18,12 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import static com.codahale.metrics.MetricRegistry.name;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.UndeclaredThrowableException;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.redhat.lightblue.ClientIdentification;
 import com.redhat.lightblue.EntityVersion;
@@ -41,7 +33,7 @@ import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.rest.crud.metrics.MetricRegistryFactory;
+import com.redhat.lightblue.rest.crud.metrics.AbstractRequestMetrics;
 import com.redhat.lightblue.util.Error;
 
 /**
@@ -50,21 +42,13 @@ import com.redhat.lightblue.util.Error;
  *
  * @author nmalik
  */
-public abstract class AbstractRestCommand {
+public abstract class AbstractRestCommand extends AbstractRequestMetrics{
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRestCommand.class);
 
     protected static final JsonNodeFactory NODE_FACTORY = JsonNodeFactory.withExactBigDecimals(true);
 
     private final Mediator mediator;
     private final HttpServletRequest httpServletRequest;
-    
-    private static final String API = "api";
-    
-    protected String metricNamespace;
-    protected Counter activeRequests;
-    protected Timer requestTimer;
-
-    final MetricRegistry metricsRegistry = MetricRegistryFactory.getMetricRegistry();
     
     public AbstractRestCommand(Mediator mediator) {
         this.mediator = mediator;
@@ -149,45 +133,5 @@ public abstract class AbstractRestCommand {
     }
 
     public abstract CallStatus run();
-    
-	/**
-	 * Create namespace for reporting metrics via jmx
-	 * 
-	 */
-	protected String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
-		return name(API, operationName, entityName, entityVersion);
-	}
 
-	/**
-	 * Create exception namespace for jmx metrics reporting based on exception
-	 * name
-	 * 
-	 */
-	protected String getErrorNamespace(String metricNamespace, Throwable exception) {
-		Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
-		return name(metricNamespace, "requests", "exception", actualExceptionClass.getSimpleName());
-	}
-
-	/**
-	 * Initialize metric meters, these meters will be used to report metrics of
-	 * each command object
-	 * 
-	 */
-	public void initializeMetrics(String merticNamespace) {
-		this.activeRequests = metricsRegistry.counter(name(merticNamespace, "requests", "active"));
-		this.requestTimer = metricsRegistry.timer(name(merticNamespace, "requests", "completed"));
-	}
-
-	/**
-	 * Get to the cause we actually care about in case the bubbled up exception
-	 * is a higher level framework exception that encapsulates the stuff we
-	 * really care about.
-	 */
-	protected Class<? extends Throwable> unravelReflectionExceptions(Throwable e) {
-		while (e.getCause() != null
-				&& (e instanceof UndeclaredThrowableException || e instanceof InvocationTargetException)) {
-			e = e.getCause();
-		}
-		return e.getClass();
-	}
 }

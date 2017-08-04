@@ -2,17 +2,17 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
-	<filter>
-		<filter-name>LoggingFilter</filter-name>
-		<filter-class>com.redhat.lightblue.rest.logging.LoggingFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>LoggingFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
+    <filter>
+        <filter-name>LoggingFilter</filter-name>
+        <filter-class>com.redhat.lightblue.rest.logging.LoggingFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>LoggingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
-	<security-constraint>
-		<web-resource-collection>
+    <security-constraint>
+        <web-resource-collection>
 			<web-resource-name>rest-crud services</web-resource-name>
 			<url-pattern>/*</url-pattern>
 		</web-resource-collection>
@@ -31,12 +31,12 @@
 		</web-resource-collection>
 	</security-constraint>
 
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Health servlet (Unauth)</web-resource-name>
-      <url-pattern>/health</url-pattern>
-    </web-resource-collection>
-  </security-constraint>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Health servlet (Unauth)</web-resource-name>
+			<url-pattern>/health</url-pattern>
+		</web-resource-collection>
+	</security-constraint>
 
 	<login-config>
 		<auth-method>CLIENT-CERT</auth-method>
@@ -58,22 +58,22 @@
 	</servlet-mapping>
 
 	<servlet>
-	    <servlet-name>version</servlet-name>
-	    <jsp-file>/version.jsp</jsp-file>
+		<servlet-name>version</servlet-name>
+		<jsp-file>/version.jsp</jsp-file>
 	</servlet>
 	<servlet-mapping>
-	    <servlet-name>version</servlet-name>
-	    <url-pattern>/version</url-pattern>
+		<servlet-name>version</servlet-name>
+		<url-pattern>/version</url-pattern>
 	</servlet-mapping>
 
-  <servlet>
-    <servlet-name>health</servlet-name>
-    <jsp-file>/version.jsp</jsp-file>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>health</servlet-name>
-    <url-pattern>/health</url-pattern>
-  </servlet-mapping>
+	<servlet>
+		<servlet-name>health</servlet-name>
+		<jsp-file>/version.jsp</jsp-file>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>health</servlet-name>
+		<url-pattern>/health</url-pattern>
+	</servlet-mapping>
 
 	<listener>
 		<listener-class>com.redhat.lightblue.rest.cors.CorsInitializingServletContextListener</listener-class>
@@ -93,12 +93,12 @@
 	</listener>
 
 	<servlet>
-    <servlet-name>diagnostics</servlet-name>
+		<servlet-name>diagnostics</servlet-name>
 		<servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-    <servlet-name>diagnostics</servlet-name>
-    <url-pattern>/diagnostics</url-pattern>
+		<servlet-name>diagnostics</servlet-name>
+		<url-pattern>/diagnostics</url-pattern>
 	</servlet-mapping>
 
 </web-app>

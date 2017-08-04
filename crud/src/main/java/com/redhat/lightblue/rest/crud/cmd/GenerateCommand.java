@@ -27,7 +27,6 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -62,14 +61,12 @@ public class GenerateCommand extends AbstractRestCommand {
         this.version = version;
         this.field = field;
         this.n = n <= 0 ? 1 : n;
-        this.metricNamespace=getMetricsNamespace("generate", entity, version);
-        initializeMetrics(metricNamespace);
+        initializeMetrics("generate", entity, version);
     }
 
     @Override
     public CallStatus run() {
-        activeRequests.inc();
-        final Timer.Context timer = requestTimer.time();
+        startRequestMonitoring();
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -116,14 +113,13 @@ public class GenerateCommand extends AbstractRestCommand {
                 throw Error.get(CrudConstants.ERR_NO_ACCESS, "generate " + mdResolver.getTopLevelEntityName());
             }
         } catch (Error e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+            markRequestException(e);
             return new CallStatus(e);
         } catch (Exception ex) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, ex)).mark();
+        	markRequestException(ex);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_GENERATE, ex.toString()));
         } finally {
-            timer.stop();
-            activeRequests.dec();
+            endRequestMonitoring();
         }
         com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
         r.setStatus(OperationStatus.COMPLETE);

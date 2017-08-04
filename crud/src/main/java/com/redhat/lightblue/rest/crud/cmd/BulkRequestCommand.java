@@ -21,7 +21,6 @@ package com.redhat.lightblue.rest.crud.cmd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Timer;
 import com.redhat.lightblue.Request;
 import com.redhat.lightblue.crud.BulkRequest;
 import com.redhat.lightblue.crud.BulkResponse;
@@ -37,14 +36,12 @@ public class BulkRequestCommand extends AbstractRestCommand {
     
     public BulkRequestCommand(String request) {
         this.request = request;
-        this.metricNamespace=getMetricsNamespace("bulkrequest", null, null);
-        initializeMetrics(metricNamespace);
+        initializeMetrics("bulkrequest", null, null);
     }
 
     @Override
     public CallStatus run() {
-        activeRequests.inc();
-        final Timer.Context timer = requestTimer.time();
+        startRequestMonitoring();
         LOGGER.debug("bulk request");
         Error.reset();
         Error.push("rest");
@@ -54,7 +51,7 @@ public class BulkRequestCommand extends AbstractRestCommand {
             try {
                 req = getJsonTranslator().parse(BulkRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+                markRequestException(e);
                 LOGGER.error("bulk:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, "Error parsing request"));
             }
@@ -64,23 +61,22 @@ public class BulkRequestCommand extends AbstractRestCommand {
                     addCallerId(r);
                 }
             } catch (Exception e) {
-                metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+            	markRequestException(e);
                 LOGGER.error("bulk:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, "Request is not valid"));
             }
             BulkResponse r = getMediator().bulkRequest(req);
             return new CallStatus(r);
         } catch (Error e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        	markRequestException(e);
             LOGGER.error("bulk:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        	markRequestException(e);
             LOGGER.error("bulk:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {
-            timer.stop();
-            activeRequests.dec();
+            endRequestMonitoring();
         }
     }
 }

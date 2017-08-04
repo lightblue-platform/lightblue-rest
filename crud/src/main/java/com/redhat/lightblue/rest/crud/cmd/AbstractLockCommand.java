@@ -21,7 +21,6 @@ package com.redhat.lightblue.rest.crud.cmd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -48,8 +47,7 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
         this.domain = domain;
         this.resource = resource;
         this.caller = caller;
-        this.metricNamespace=getMetricsNamespace("lock", domain, resource+"."+caller);
-        initializeMetrics(metricNamespace);
+        initializeMetrics("lock", domain, resource+"."+caller);
     }
 
     public static AbstractLockCommand getLockCommand(String request) {
@@ -90,8 +88,7 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        activeRequests.inc();
-        final Timer.Context timer = requestTimer.time();    	
+        startRequestMonitoring();   	
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();
         Error.push("rest");
@@ -104,16 +101,15 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             o.set("result", result);
             return new CallStatus(new SimpleJsonObject(o));
         } catch (Error e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+            markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        	markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {
-            timer.stop();
-            activeRequests.dec();
+            endRequestMonitoring();
         }
     }
 
