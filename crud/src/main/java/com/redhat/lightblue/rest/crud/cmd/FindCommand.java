@@ -23,17 +23,12 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.io.IOException;
 
-import java.util.List;
-
 import javax.ws.rs.core.StreamingOutput;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
-import com.redhat.lightblue.ResultMetadata;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.crud.DocCtx;
 import com.redhat.lightblue.mediator.Mediator;

@@ -76,6 +76,10 @@
             <artifactId>lightblue-rest-test</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.redhat.lightblue.rest</groupId>
+            <artifactId>lightblue-rest-metrics</artifactId>
+         </dependency>           
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>1.4.181</version>

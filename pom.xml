@@ -103,6 +103,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.redhat.lightblue.rest</groupId>
+                <artifactId>lightblue-rest-metrics</artifactId>
+                <version>${project.version}</version>
+            </dependency>            
+            <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-api</artifactId>
                 <version>${lightblue.core.version}</version>
@@ -246,11 +251,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                 <version>${dropwizard.metrics.version}</version>
             </dependency>
             <dependency>
+            	<groupId>io.dropwizard.metrics</groupId>
+            	<artifactId>metrics-jvm</artifactId>
+            	<version>${dropwizard.metrics.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>1.7.25</version>
             </dependency>
-
             <dependency>
                 <groupId>org.jboss.shrinkwrap.resolver</groupId>
                 <artifactId>shrinkwrap-resolver-bom</artifactId>
@@ -345,6 +354,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <module>metadata-basic-auth</module>
         <module>metadata-cert-auth</module>
         <module>lightblue-rest-integration-test</module>
+        <module>metrics</module>
     </modules>
     <properties>
         <sonar.exclusions>**/*Test.java,**/*Exception.java</sonar.exclusions>
