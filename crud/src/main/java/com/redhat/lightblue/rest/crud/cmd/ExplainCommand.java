@@ -45,12 +45,11 @@ public class ExplainCommand extends AbstractRestCommand {
         this.entity = entity;
         this.version = version;
         this.request = request;
-        initializeMetrics("explain", entity, version);
     }
 
     @Override
     public CallStatus run() {
-    	startRequestMonitoring();
+    	startRequestMonitoring("explain", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

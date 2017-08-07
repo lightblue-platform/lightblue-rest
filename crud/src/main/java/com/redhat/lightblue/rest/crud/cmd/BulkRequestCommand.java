@@ -36,12 +36,11 @@ public class BulkRequestCommand extends AbstractRestCommand {
     
     public BulkRequestCommand(String request) {
         this.request = request;
-        initializeMetrics("bulkrequest", null, null);
     }
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring();
+        startRequestMonitoring("bulkrequest", null, null);
         LOGGER.debug("bulk request");
         Error.reset();
         Error.push("rest");

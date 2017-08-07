@@ -49,12 +49,11 @@ public class InsertCommand extends AbstractRestCommand {
         this.entity = entity;
         this.version = version;
         this.request = request;
-        initializeMetrics("insert", entity, version);
     }
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring();
+        startRequestMonitoring("insert", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

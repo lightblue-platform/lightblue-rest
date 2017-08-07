@@ -1,3 +1,21 @@
+/*
+ Copyright 2013 Red Hat, Inc. and/or its affiliates.
+
+ This file is part of lightblue.
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.redhat.lightblue.rest.crud.metrics;
 
 import static com.codahale.metrics.MetricRegistry.name;
@@ -9,7 +27,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
-public abstract class AbstractRequestMetrics {
+public class RequestMetrics {
 
     private final String API = "api";
 
@@ -21,29 +39,21 @@ public abstract class AbstractRequestMetrics {
     private final MetricRegistry metricsRegistry = MetricRegistryFactory.getMetricRegistry();
 
     /**
-     * Create namespace for reporting metrics via jmx
+     * Creates namespace for metric reporting and initializes metric meters, 
+     * these meters will be used to report metrics of each command object
      * 
      */
-    private String getMetricsNamespace(String operationName, String entityName, String entityVersion) {
-        return name(API, operationName, entityName, entityVersion);
-    }
-
-    /**
-     * Initialize metric meters, these meters will be used to report metrics of each
-     * command object
-     * 
-     */
-    public void initializeMetrics(String operation, String entity, String version) {
-        this.metricNamespace = getMetricsNamespace(operation, entity, version);
+    private void initializeMetrics(String operation, String entity, String version) {
+        this.metricNamespace = name(API, operation, entity, version);
         this.activeRequests = metricsRegistry.counter(name(metricNamespace, "requests", "active"));
         this.requestTimer = metricsRegistry.timer(name(metricNamespace, "requests", "completed"));
     }
 
     /**
-     * Create exception namespace for jmx metrics reporting based on exception name
+     * Create exception namespace for metric reporting based on exception name
      * 
      */
-    private String getErrorNamespace(String metricNamespace, Throwable exception) {
+    private String errorNamespace(String metricNamespace, Throwable exception) {
         Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
         return name(metricNamespace, "requests", "exception", actualExceptionClass.getSimpleName());
     }
@@ -66,7 +76,8 @@ public abstract class AbstractRequestMetrics {
      * Start request monitoring
      * 
      */
-    public void startRequestMonitoring() {
+    public void startRequestMonitoring(String operation, String entity, String version) {
+        initializeMetrics(operation, entity, version);
         activeRequests.inc();
         timer = requestTimer.time();
     }
@@ -85,6 +96,6 @@ public abstract class AbstractRequestMetrics {
      * 
      */
     public void markRequestException(Exception e) {
-        metricsRegistry.meter(getErrorNamespace(metricNamespace, e)).mark();
+        metricsRegistry.meter(errorNamespace(metricNamespace, e)).mark();
     }
 }

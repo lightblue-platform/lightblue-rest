@@ -49,12 +49,11 @@ public class DeleteCommand extends AbstractRestCommand {
         this.entity = entity;
         this.version = version;
         this.request = request;
-        initializeMetrics("delete", entity, version);
     }
     
     @Override
     public CallStatus run() {
-        startRequestMonitoring();
+        startRequestMonitoring("delete", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

@@ -49,12 +49,11 @@ public class SaveCommand extends AbstractRestCommand {
         this.entity = entity;
         this.version = version;
         this.request = request;
-        initializeMetrics("save", entity, version);
     }
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring();
+        startRequestMonitoring("save", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

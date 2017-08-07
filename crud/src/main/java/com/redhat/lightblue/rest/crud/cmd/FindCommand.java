@@ -72,7 +72,6 @@ public class FindCommand extends AbstractRestCommand {
         this.version = version;
         this.request = request;
         this.stream=stream;
-        initializeMetrics("find", entity, version);
     }
     
     /**
@@ -125,7 +124,7 @@ public class FindCommand extends AbstractRestCommand {
     
     @Override
     public CallStatus run() {
-        startRequestMonitoring();
+        startRequestMonitoring("find", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

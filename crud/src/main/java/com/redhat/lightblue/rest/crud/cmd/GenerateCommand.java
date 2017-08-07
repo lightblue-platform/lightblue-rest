@@ -61,12 +61,11 @@ public class GenerateCommand extends AbstractRestCommand {
         this.version = version;
         this.field = field;
         this.n = n <= 0 ? 1 : n;
-        initializeMetrics("generate", entity, version);
     }
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring();
+        startRequestMonitoring("generate", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

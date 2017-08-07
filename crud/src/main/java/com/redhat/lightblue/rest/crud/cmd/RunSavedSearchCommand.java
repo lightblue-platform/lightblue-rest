@@ -63,12 +63,11 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
         this.from=from;
         this.to=to;
         this.params=properties;
-        initializeMetrics("savedsearch", entity, version);
     }
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring();
+        startRequestMonitoring("savedsearch", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

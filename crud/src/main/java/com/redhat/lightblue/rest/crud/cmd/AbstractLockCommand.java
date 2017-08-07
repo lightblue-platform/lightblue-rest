@@ -47,7 +47,6 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
         this.domain = domain;
         this.resource = resource;
         this.caller = caller;
-        initializeMetrics("lock", domain, resource+"."+caller);
     }
 
     public static AbstractLockCommand getLockCommand(String request) {
@@ -88,7 +87,7 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring();   	
+        startRequestMonitoring("lock", domain, resource + "." + caller);   	
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();
         Error.push("rest");
