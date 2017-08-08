@@ -53,7 +53,7 @@ public class FindCommand extends AbstractRestCommand {
     private final boolean stream;
 
     private StreamingResponse streamResponse;
-    
+
     public FindCommand(String entity, String version, String request) {
         this(null,entity,version,request,false);
     }
@@ -73,7 +73,7 @@ public class FindCommand extends AbstractRestCommand {
         this.request = request;
         this.stream=stream;
     }
-    
+
     /**
      * The streaming protocol:
      * <pre>
@@ -91,7 +91,7 @@ public class FindCommand extends AbstractRestCommand {
      *      resultMetadata: { metadata }
      *   }
      * </pre>
-     */  
+     */
     public StreamingOutput getResponseStream() {
         return new StreamingOutput() {            
             @Override
@@ -121,7 +121,7 @@ public class FindCommand extends AbstractRestCommand {
             }
         };
     }
-    
+
     @Override
     public CallStatus run() {
         startRequestMonitoring("find", entity, version);

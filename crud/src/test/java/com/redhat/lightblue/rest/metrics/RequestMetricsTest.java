@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.redhat.lightblue.rest.crud.cmd;
+package com.redhat.lightblue.rest.metrics;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,7 +31,7 @@ import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 public class RequestMetricsTest {
     private RequestMetrics requestMetrics = new RequestMetrics();
     
-    private MetricRegistry metricsRegistry = MetricRegistryFactory.getMetricRegistry();
+    private static MetricRegistry metricsRegistry = MetricRegistryFactory.getMetricRegistry();;
 
     @Test
     public void testStartRequestMonitoring() {
@@ -69,3 +69,4 @@ public class RequestMetricsTest {
         Assert.assertEquals(1, exceptionMeter.getCount());
     }
 }
+

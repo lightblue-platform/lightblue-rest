@@ -49,7 +49,7 @@ public abstract class AbstractRestCommand extends RequestMetrics{
 
     private final Mediator mediator;
     private final HttpServletRequest httpServletRequest;
-    
+
     public AbstractRestCommand(Mediator mediator) {
         this.mediator = mediator;
         this.httpServletRequest = ResteasyProviderFactory.getContextData(HttpServletRequest.class);

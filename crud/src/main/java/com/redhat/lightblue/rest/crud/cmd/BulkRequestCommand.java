@@ -33,7 +33,7 @@ public class BulkRequestCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(BulkRequestCommand.class);
 
     private final String request;
-    
+
     public BulkRequestCommand(String request) {
         this.request = request;
     }

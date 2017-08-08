@@ -39,7 +39,7 @@ public class DeleteCommand extends AbstractRestCommand {
     private final String entity;
     private final String version;
     private final String request;
-    
+
     public DeleteCommand(String entity, String version, String request) {
         this(null, entity, version, request);
     }
@@ -50,7 +50,7 @@ public class DeleteCommand extends AbstractRestCommand {
         this.version = version;
         this.request = request;
     }
-    
+
     @Override
     public CallStatus run() {
         startRequestMonitoring("delete", entity, version);
