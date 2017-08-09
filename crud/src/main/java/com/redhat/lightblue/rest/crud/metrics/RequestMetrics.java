@@ -76,6 +76,18 @@ public class RequestMetrics {
         return new Context(name(API, "lock", domain, lockOperation));
     }
 
+    // TODO: I didn't use this but just a demonstration of another request where the parameters are
+    // different
+    public Context startGenerate(String entity, String version, String path) {
+        return new Context(name(API, "generate", entity, version, path));
+    }
+
+    public Context startBulkRequest() {
+        // Not very useful :(... can consider alternatives, but should probably refactor more, see
+        // comments in BulkRequestCommand
+        return new Context(name(API, "bulk"));
+    }
+
     public class Context {
         private final String metricNamespace;
         private final Timer.Context context;

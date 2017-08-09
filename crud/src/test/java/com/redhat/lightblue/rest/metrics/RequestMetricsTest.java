@@ -29,9 +29,9 @@ import com.redhat.lightblue.rest.crud.metrics.MetricRegistryFactory;
 import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 
 public class RequestMetricsTest {
-    private RequestMetrics requestMetrics = new RequestMetrics(MetricRegistryFactory.getMetricRegistry());
-    
-    private static MetricRegistry metricsRegistry = MetricRegistryFactory.getMetricRegistry();;
+    // Use fresh registry for each test
+    private MetricRegistry metricsRegistry = new MetricRegistry();
+    private RequestMetrics requestMetrics = new RequestMetrics(metricsRegistry);
 
     @Test
     public void testStartRequestMonitoring() {
@@ -49,8 +49,8 @@ public class RequestMetricsTest {
 
     @Test
     public void testEndRequestMonitoring() {
-        requestMetrics.startEntityRequest("explain", "name", "version");
-        requestMetrics.endRequestMonitoring();
+        RequestMetrics.Context context = requestMetrics.startEntityRequest("explain", "name", "version");
+        context.endRequestMonitoring();
 
         Counter activeRequestCounter = metricsRegistry.counter("api.explain.name.version.requests.active");
         Timer completedRequestTimer = metricsRegistry.timer("api.explain.name.version.requests.completed");
@@ -62,8 +62,8 @@ public class RequestMetricsTest {
 
     @Test
     public void testMarkRequestException() {
-        requestMetrics.startEntityRequest("insert", "name", "version");
-        requestMetrics.markRequestException(new NullPointerException());
+        RequestMetrics.Context context = requestMetrics.startEntityRequest("insert", "name", "version");
+        context.markRequestException(new NullPointerException());
         
         Meter exceptionMeter = metricsRegistry.meter("api.insert.name.version.requests.exception.NullPointerException");
         Assert.assertEquals(1, exceptionMeter.getCount());

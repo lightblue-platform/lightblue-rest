@@ -456,7 +456,7 @@ public abstract class AbstractCrudResource {
     @Path("/bulk")
     public Response bulk(String request) {
         Error.reset();
-        CallStatus st = new BulkRequestCommand(request).run();
+        CallStatus st = new BulkRequestCommand(request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
