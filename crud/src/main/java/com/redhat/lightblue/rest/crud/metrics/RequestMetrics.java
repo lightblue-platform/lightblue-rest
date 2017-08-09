@@ -22,6 +22,7 @@ import static com.codahale.metrics.MetricRegistry.name;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Objects;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
@@ -29,31 +30,19 @@ import com.codahale.metrics.Timer;
 
 public class RequestMetrics {
 
-    private final String API = "api";
+    private static final String API = "api";
 
-    private String metricNamespace;
-    private Counter activeRequests;
-    private Timer requestTimer;
-    private Timer.Context timer;
+    private final MetricRegistry metricsRegistry;
 
-    private final MetricRegistry metricsRegistry = MetricRegistryFactory.getMetricRegistry();
-
-    /**
-     * Creates namespace for metric reporting and initializes metric meters, 
-     * these meters will be used to report metrics of each command object
-     * 
-     */
-    private void initializeMetrics(String operation, String entity, String version) {
-        this.metricNamespace = name(API, operation, entity, version);
-        this.activeRequests = metricsRegistry.counter(name(metricNamespace, "requests", "active"));
-        this.requestTimer = metricsRegistry.timer(name(metricNamespace, "requests", "completed"));
+    public RequestMetrics(MetricRegistry metricRegistry) {
+        metricsRegistry = metricRegistry;
     }
 
     /**
      * Create exception namespace for metric reporting based on exception name
      * 
      */
-    private String errorNamespace(String metricNamespace, Throwable exception) {
+    private static String errorNamespace(String metricNamespace, Throwable exception) {
         Class<? extends Throwable> actualExceptionClass = unravelReflectionExceptions(exception);
         return name(metricNamespace, "requests", "exception", actualExceptionClass.getSimpleName());
     }
@@ -64,7 +53,7 @@ public class RequestMetrics {
      * about.
      * 
      */
-    private Class<? extends Throwable> unravelReflectionExceptions(Throwable e) {
+    private static Class<? extends Throwable> unravelReflectionExceptions(Throwable e) {
         while (e.getCause() != null
                 && (e instanceof UndeclaredThrowableException || e instanceof InvocationTargetException)) {
             e = e.getCause();
@@ -73,29 +62,48 @@ public class RequestMetrics {
     }
 
     /**
-     * Start request monitoring
-     * 
+     * Start timers and counters for the request. Use the returned context to complete the request
+     * and optionally mark errors if they occur.
+     *
+     * <p>The returned context itself is not completely thread safe, it is expected to be used by
+     * one and only one thread concurrently.
      */
-    public void startRequestMonitoring(String operation, String entity, String version) {
-        initializeMetrics(operation, entity, version);
-        activeRequests.inc();
-        timer = requestTimer.time();
+    public Context startEntityRequest(String operation, String entity, String version) {
+        return new Context(name(API, operation, entity, version));
     }
 
-    /**
-     * Stop request monitoring
-     * 
-     */
-    public void endRequestMonitoring() {
-        activeRequests.dec();
-        timer.stop();
+    public Context startLock(String lockOperation, String domain) {
+        return new Context(name(API, "lock", domain, lockOperation));
     }
 
-    /**
-     * Mark request as exception
-     * 
-     */
-    public void markRequestException(Exception e) {
-        metricsRegistry.meter(errorNamespace(metricNamespace, e)).mark();
+    public class Context {
+        private final String metricNamespace;
+        private final Timer.Context context;
+        private final Counter activeRequests;
+        private boolean ended = false;
+
+        public Context(String metricNamespace) {
+            this.metricNamespace = Objects.requireNonNull(metricNamespace, "metricNamespace");
+            this.context = metricsRegistry.timer(name(metricNamespace, "latency")).time();
+            this.activeRequests = metricsRegistry.counter(name(metricNamespace, "requests", "active"));
+
+            activeRequests.inc();
+        }
+        public void endRequestMonitoring() {
+            // Added this error handling to catch bugs. Might want to synchronize this, or consider
+            // only logging a warning instead. Important point is that we don't decrement counter
+            // again if request already ended.
+            if (ended) {
+                throw new IllegalStateException("Request already ended.");
+            }
+
+            ended = true;
+            activeRequests.dec();
+            context.stop();
+        }
+
+        public void markRequestException(Exception e) {
+            metricsRegistry.meter(errorNamespace(metricNamespace, e)).mark();
+        }
     }
 }

@@ -25,7 +25,7 @@ import com.redhat.lightblue.extensions.synch.Locking;
 public class ReleaseCommand extends AbstractLockCommand {
 
     public ReleaseCommand(String domain, String caller, String resource) {
-        super(domain, caller, resource);
+        super(domain, caller, resource, metrics);
     }
 
     @Override
