@@ -35,12 +35,12 @@ public class RequestMetricsTest {
 
     @Test
     public void testStartRequestMonitoring() {
-        requestMetrics.startRequestMonitoring("save", "name", "version");
+        requestMetrics.startRequestMonitoring("bulk", null, null);
         Assert.assertNotNull(metricsRegistry.getCounters());
         Assert.assertNotNull(metricsRegistry.getTimers());
 
-        Counter activeRequestCounter = metricsRegistry.counter("api.save.name.version.requests.active");
-        Timer completedRequestTimer = metricsRegistry.timer("api.save.name.version.requests.completed");
+        Counter activeRequestCounter = metricsRegistry.counter("api.bulk.requests.active");
+        Timer completedRequestTimer = metricsRegistry.timer("api.bulk.requests.completed");
 
         Assert.assertEquals(1, activeRequestCounter.getCount());
         Assert.assertEquals(0, completedRequestTimer.getCount());
