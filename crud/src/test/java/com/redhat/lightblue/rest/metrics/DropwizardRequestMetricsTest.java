@@ -25,13 +25,14 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.redhat.lightblue.rest.crud.metrics.MetricRegistryFactory;
+
+import com.redhat.lightblue.rest.crud.metrics.DropwizardRequestMetrics;
 import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 
-public class RequestMetricsTest {
+public class DropwizardRequestMetricsTest {
     // Use fresh registry for each test
     private MetricRegistry metricsRegistry = new MetricRegistry();
-    private RequestMetrics requestMetrics = new RequestMetrics(metricsRegistry);
+    private RequestMetrics requestMetrics = new DropwizardRequestMetrics(metricsRegistry);
 
     @Test
     public void testStartRequestMonitoring() {
@@ -49,7 +50,7 @@ public class RequestMetricsTest {
 
     @Test
     public void testEndRequestMonitoring() {
-        RequestMetrics.Context context = requestMetrics.startEntityRequest("explain", "name", "version");
+        DropwizardRequestMetrics.Context context = requestMetrics.startEntityRequest("explain", "name", "version");
         context.endRequestMonitoring();
 
         Counter activeRequestCounter = metricsRegistry.counter("api.explain.name.version.requests.active");
@@ -62,7 +63,7 @@ public class RequestMetricsTest {
 
     @Test
     public void testMarkRequestException() {
-        RequestMetrics.Context context = requestMetrics.startEntityRequest("insert", "name", "version");
+        DropwizardRequestMetrics.Context context = requestMetrics.startEntityRequest("insert", "name", "version");
         context.markRequestException(new NullPointerException());
         
         Meter exceptionMeter = metricsRegistry.meter("api.insert.name.version.requests.exception.NullPointerException");

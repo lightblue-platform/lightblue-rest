@@ -49,6 +49,7 @@ import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
 import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
 import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
 import com.redhat.lightblue.rest.crud.cmd.RunSavedSearchCommand;
+import com.redhat.lightblue.rest.crud.metrics.DropwizardRequestMetrics;
 import com.redhat.lightblue.rest.crud.metrics.MetricRegistryFactory;
 import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 import com.redhat.lightblue.rest.util.QueryTemplateUtils;
@@ -101,7 +102,7 @@ public abstract class AbstractCrudResource {
      * CDI injection.
      */
     private static final RequestMetrics metrics =
-            new RequestMetrics(MetricRegistryFactory.getMetricRegistry());
+            new DropwizardRequestMetrics(MetricRegistryFactory.getMetricRegistry());
 
     @GET
     @LZF

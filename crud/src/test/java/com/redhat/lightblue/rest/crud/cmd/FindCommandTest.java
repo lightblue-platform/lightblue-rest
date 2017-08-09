@@ -18,8 +18,7 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import com.redhat.lightblue.rest.crud.metrics.MetricRegistryFactory;
-import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
+import com.redhat.lightblue.rest.metrics.NoopRequestMetrics;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,7 +30,8 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
     @Test
     public void runFindWithReturn() {
-        FindCommand command = new FindCommand(mediator, "name", "version", "{\"request\":\"data\"}", new RequestMetrics(MetricRegistryFactory.getMetricRegistry()));
+        FindCommand command = new FindCommand(mediator, "name", "version", "{\"request\":\"data\"}",
+                new NoopRequestMetrics());
 
         String output = command.run().toString();
 
@@ -42,7 +42,8 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
     @Test
     public void runFindWithParseProblem() {
-        FindCommand command = new FindCommand(mediator, "name", "version", "{\"request\":\"invalid}", new RequestMetrics(MetricRegistryFactory.getMetricRegistry()));
+        FindCommand command = new FindCommand(mediator, "name", "version", "{\"request\":\"invalid}",
+                new NoopRequestMetrics());
 
         String output = command.run().toString();
 
@@ -53,7 +54,8 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
     @Test
     public void runFindWithInvalid() {
-        FindCommand command = new FindCommand(mediator, null, "version", "{\"request\":\"invalid\"}", new RequestMetrics(MetricRegistryFactory.getMetricRegistry()));
+        FindCommand command = new FindCommand(mediator, null, "version", "{\"request\":\"invalid\"}",
+                new NoopRequestMetrics());
 
         String output = command.run().toString();
 
