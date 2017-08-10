@@ -80,9 +80,4 @@ public class UpdateCommand extends AbstractRestCommand {
             context.endRequestMonitoring();
         }
     }
-    
-    @Override
-    public String getCommandName() {
-        return "update";
-    }
 }

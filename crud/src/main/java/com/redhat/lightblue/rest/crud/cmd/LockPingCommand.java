@@ -34,9 +34,4 @@ public class LockPingCommand extends AbstractLockCommand {
         locking.ping(caller, resource);
         return NODE_FACTORY.booleanNode(true);
     }
-
-    @Override
-    public String getCommandName() {
-        return "ping";
-    }
 }

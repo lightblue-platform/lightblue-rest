@@ -90,9 +90,4 @@ public class ExplainCommand extends AbstractRestCommand {
             context.endRequestMonitoring();
         }
     }
-    
-    @Override
-    public String getCommandName() {
-        return "explain";
-    }
 }

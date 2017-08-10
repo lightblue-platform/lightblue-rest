@@ -34,9 +34,4 @@ public class ReleaseCommand extends AbstractLockCommand {
         boolean ret = locking.release(caller, resource);
         return NODE_FACTORY.booleanNode(ret);
     }
-    
-    @Override
-    public String getCommandName() {
-        return "release";
-    }
 }

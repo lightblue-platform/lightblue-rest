@@ -74,10 +74,6 @@
         <dependency>
             <groupId>com.redhat.lightblue.rest</groupId>
             <artifactId>lightblue-rest-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.dropwizard.metrics</groupId>
-            <artifactId>metrics-core</artifactId>
         </dependency>		  
         <dependency>
             <groupId>com.h2database</groupId>

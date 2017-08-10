@@ -80,9 +80,4 @@ public class SaveCommand extends AbstractRestCommand {
             context.endRequestMonitoring();
         }
     }
-    
-    @Override
-    public String getCommandName() {
-        return "save";
-    }
 }

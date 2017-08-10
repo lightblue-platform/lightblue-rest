@@ -90,8 +90,6 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        // Omitting resource because might be too many different targets, number of resources is
-        // unbounded.
         RequestMetrics.Context context = metrics.startLockRequest(getCommandName(), domain);
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();

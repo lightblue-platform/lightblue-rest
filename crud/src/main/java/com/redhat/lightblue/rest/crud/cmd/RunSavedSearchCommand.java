@@ -112,9 +112,4 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
             context.endRequestMonitoring();
         }
     }
-    
-    @Override
-    public String getCommandName() {
-        return "savedsearch";
-    }
 }

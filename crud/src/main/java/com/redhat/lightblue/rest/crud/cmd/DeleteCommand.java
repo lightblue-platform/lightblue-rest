@@ -80,9 +80,4 @@ public class DeleteCommand extends AbstractRestCommand {
             context.endRequestMonitoring();
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return "delete";
-    }
 }

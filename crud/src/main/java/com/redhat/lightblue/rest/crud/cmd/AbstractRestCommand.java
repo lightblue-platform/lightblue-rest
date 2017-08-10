@@ -133,5 +133,7 @@ public abstract class AbstractRestCommand {
 
     public abstract CallStatus run();
     
-    public abstract String getCommandName();
+    public String getCommandName() {
+        return this.getClass().getSimpleName().toLowerCase();
+    }
 }

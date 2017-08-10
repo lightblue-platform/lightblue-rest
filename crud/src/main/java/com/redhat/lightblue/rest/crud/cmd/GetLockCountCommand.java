@@ -34,9 +34,4 @@ public class GetLockCountCommand extends AbstractLockCommand {
         int ret = locking.getLockCount(caller, resource);
         return NODE_FACTORY.numberNode(ret);
     }
-    
-    @Override
-    public String getCommandName() {
-        return "count";
-    }
 }
