@@ -18,16 +18,17 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.redhat.lightblue.util.Error;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
+import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ExplainCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExplainCommand.class);
@@ -35,20 +36,23 @@ public class ExplainCommand extends AbstractRestCommand {
     private final String entity;
     private final String version;
     private final String request;
+    private final RequestMetrics metrics;
 
-    public ExplainCommand(String entity, String version, String request) {
-        this(null, entity, version, request);
+    public ExplainCommand(String entity, String version, String request, RequestMetrics metrics) {
+        this(null, entity, version, request, metrics);
     }
 
-    public ExplainCommand(Mediator mediator, String entity, String version, String request) {
+    public ExplainCommand(Mediator mediator, String entity, String version, String request, RequestMetrics metrics) {
         super(mediator);
         this.entity = entity;
         this.version = version;
         this.request = request;
+        this.metrics = metrics;
     }
 
     @Override
     public CallStatus run() {
+        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -59,6 +63,7 @@ public class ExplainCommand extends AbstractRestCommand {
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
+                context.markRequestException(e);
                 LOGGER.error("explain:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
@@ -66,6 +71,7 @@ public class ExplainCommand extends AbstractRestCommand {
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
+                context.markRequestException(e);
                 LOGGER.error("explain:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
@@ -73,11 +79,15 @@ public class ExplainCommand extends AbstractRestCommand {
             Response r = getMediator().explain(ireq);
             return new CallStatus(r);
         } catch (Error e) {
+            context.markRequestException(e);
             LOGGER.error("explain:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            context.markRequestException(e);
             LOGGER.error("explain:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+        } finally {
+            context.endRequestMonitoring();
         }
     }
 }

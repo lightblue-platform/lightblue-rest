@@ -23,6 +23,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.redhat.lightblue.rest.crud.cmd.NoopRequestMetrics;
+
 /**
  * @author nmalik
  */
@@ -32,7 +34,7 @@ public class InsertCommandTest extends AbstractRestCommandTest {
     @Test
     public void execute() {
 
-        InsertCommand command = new InsertCommand(mediator, "name", "version", "{\"request\":\"data\"}");
+        InsertCommand command = new InsertCommand(mediator, "name", "version", "{\"request\":\"data\"}", new NoopRequestMetrics());
 
         String output = command.run().toString();
 
