@@ -28,6 +28,7 @@ import com.redhat.lightblue.extensions.synch.Locking;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.SimpleJsonObject;
 
@@ -42,14 +43,16 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
     protected final String domain;
     protected final String resource;
     protected final String caller;
+    private final RequestMetrics metrics;
 
-    public AbstractLockCommand(String domain, String caller, String resource) {
+    public AbstractLockCommand(String domain, String caller, String resource, RequestMetrics metrics) {
         this.domain = domain;
         this.resource = resource;
         this.caller = caller;
+        this.metrics = metrics;
     }
 
-    public static AbstractLockCommand getLockCommand(String request) {
+    public static AbstractLockCommand getLockCommand(String request, RequestMetrics metrics) {
         AbstractLockCommand command = null;
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -65,7 +68,7 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
                     if(null != rootNode.get("ttl")) {
                         ttl = rootNode.get("ttl").asLong();
                     }
-                    command = new AcquireCommand(domain, callerId, resourceId, ttl);
+                    command = new AcquireCommand(domain, callerId, resourceId, ttl, metrics);
                     break;
                 case OPERATION_RELEASE :
                     command = new ReleaseCommand(domain, callerId, resourceId);
@@ -87,7 +90,9 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring("lock", domain, resource + "." + caller);   	
+        // Omitting resource because might be too many different targets, number of resources is
+        // unbounded.
+        RequestMetrics.Context metricsCtx = metrics.startLock(lockCommandName(), domain);
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();
         Error.push("rest");
@@ -100,17 +105,19 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             o.set("result", result);
             return new CallStatus(new SimpleJsonObject(o));
         } catch (Error e) {
-            markRequestException(e);
+            metricsCtx.markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            markRequestException(e);
+            metricsCtx.markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {
-            endRequestMonitoring();
+            metricsCtx.endRequestMonitoring();
         }
     }
+
+    protected abstract String lockCommandName();
 
     protected abstract JsonNode runLockCommand(Locking locking);
 }

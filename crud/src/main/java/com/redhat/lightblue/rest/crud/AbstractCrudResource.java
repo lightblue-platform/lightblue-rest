@@ -49,6 +49,9 @@ import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
 import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
 import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
 import com.redhat.lightblue.rest.crud.cmd.RunSavedSearchCommand;
+import com.redhat.lightblue.rest.crud.metrics.DropwizardRequestMetrics;
+import com.redhat.lightblue.rest.crud.metrics.MetricRegistryFactory;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 import com.redhat.lightblue.rest.util.QueryTemplateUtils;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
@@ -93,6 +96,14 @@ public abstract class AbstractCrudResource {
         java.security.Security.setProperty("networkaddress.cache.ttl", "30");
     }
 
+    /**
+     * Thread-safe, shared static instance for all requests. Registry is also static, so does not
+     * make much difference to inject. If you wanted to inject, you could do so rather easily using
+     * CDI injection.
+     */
+    private static final RequestMetrics metrics =
+            new DropwizardRequestMetrics(MetricRegistryFactory.getMetricRegistry());
+
     @GET
     @LZF
     @Path("/search/{entity}")
@@ -111,7 +122,7 @@ public abstract class AbstractCrudResource {
         }
         CallStatus st=new FindCommand(freq.getEntityVersion().getEntity(),
                                       freq.getEntityVersion().getVersion(),
-                                      freq.toJson().toString()).run();
+                                      freq.toJson().toString(), metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -237,7 +248,7 @@ public abstract class AbstractCrudResource {
     @Path("/lock/")
     public Response lock(String request) {
         Error.reset();
-        CallStatus st = getLockCommand(request).run();
+        CallStatus st = getLockCommand(request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -248,7 +259,7 @@ public abstract class AbstractCrudResource {
                             @PathParam("resourceId") String resourceId,
                             @QueryParam("ttl") Long ttl) {
         Error.reset();
-        CallStatus st = new AcquireCommand(domain, callerId, resourceId, ttl).run();
+        CallStatus st = new AcquireCommand(domain, callerId, resourceId, ttl, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -411,7 +422,7 @@ public abstract class AbstractCrudResource {
                          String request) {
         Error.reset();
         boolean bstream=stream!=null&&stream;
-        FindCommand f=new FindCommand(entity, version, request,bstream);
+        FindCommand f=new FindCommand(entity, version, request,bstream, metrics);
         CallStatus st=f.run();
         if(!st.hasErrors()&&bstream) {
             // This is how you stream. You put a response stream into
@@ -446,7 +457,7 @@ public abstract class AbstractCrudResource {
     @Path("/bulk")
     public Response bulk(String request) {
         Error.reset();
-        CallStatus st = new BulkRequestCommand(request).run();
+        CallStatus st = new BulkRequestCommand(request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -509,7 +520,7 @@ public abstract class AbstractCrudResource {
                                @QueryParam("maxResults") Long maxResults) throws IOException {
         Error.reset();
         String request=buildSimpleRequest(entity,version,q,p,s,from,to,maxResults).toString();
-        CallStatus st = new FindCommand(null, entity, version, request).run();
+        CallStatus st = new FindCommand(null, entity, version, request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
