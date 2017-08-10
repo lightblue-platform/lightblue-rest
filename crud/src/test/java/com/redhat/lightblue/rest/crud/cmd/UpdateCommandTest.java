@@ -21,7 +21,7 @@ package com.redhat.lightblue.rest.crud.cmd;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.redhat.lightblue.rest.metrics.NoopRequestMetrics;
+import com.redhat.lightblue.rest.crud.cmd.NoopRequestMetrics;
 
 /**
  *

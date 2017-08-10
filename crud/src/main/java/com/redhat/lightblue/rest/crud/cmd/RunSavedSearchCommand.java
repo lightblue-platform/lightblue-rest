@@ -33,7 +33,7 @@ import com.redhat.lightblue.query.Sort;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.redhat.lightblue.savedsearch.FindRequestBuilder;
 import com.redhat.lightblue.util.Error;
 

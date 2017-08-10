@@ -1,6 +1,6 @@
-package com.redhat.lightblue.rest.metrics;
+package com.redhat.lightblue.rest.crud.cmd;
 
-import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 
 public class NoopRequestMetrics implements RequestMetrics {
 
