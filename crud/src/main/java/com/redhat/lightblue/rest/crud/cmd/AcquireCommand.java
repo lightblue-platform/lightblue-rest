@@ -33,13 +33,13 @@ public class AcquireCommand extends AbstractLockCommand {
     }
 
     @Override
-    protected String lockCommandName() {
-        return "acquire";
-    }
-
-    @Override
     protected JsonNode runLockCommand(Locking locking) {
         boolean ret = locking.acquire(caller, resource, ttl);
         return NODE_FACTORY.booleanNode(ret);
+    }
+    
+    @Override
+    public String getCommandName() {
+        return "acquire";
     }
 }

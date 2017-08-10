@@ -54,7 +54,7 @@ public class DropwizardRequestMetricsTest {
         context.endRequestMonitoring();
 
         Counter activeRequestCounter = metricsRegistry.counter("api.explain.name.version.requests.active");
-        Timer completedRequestTimer = metricsRegistry.timer("api.explain.name.version.requests.completed");
+        Timer completedRequestTimer = metricsRegistry.timer("api.explain.name.version.requests.latency");
 
         Assert.assertEquals(0, activeRequestCounter.getCount());
         Assert.assertEquals(1, completedRequestTimer.getCount());

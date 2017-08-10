@@ -47,7 +47,7 @@ public class BulkRequestCommand extends AbstractRestCommand {
         // refactoring in lightblue-core. It raises the question: should all of the timing really be
         // done at the core layer? There is already metrics tracking being done there. We should
         // probably expand upon that instead of adding to the rest layer.
-        RequestMetrics.Context context = metrics.startBulkRequest();
+        RequestMetrics.Context context = metrics.startBulkRequest(getCommandName());
         LOGGER.debug("bulk request");
         Error.reset();
         Error.push("rest");
@@ -86,5 +86,10 @@ public class BulkRequestCommand extends AbstractRestCommand {
         } finally {
             context.endRequestMonitoring();
         }
+    }
+
+    @Override
+    public String getCommandName() {
+        return "bulk";
     }
 }

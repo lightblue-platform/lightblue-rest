@@ -12,17 +12,12 @@ public class NoopRequestMetrics implements RequestMetrics {
     }
 
     @Override
-    public Context startLock(String lockOperation, String domain) {
+    public Context startLockRequest(String lockOperation, String domain) {
         return NOOP_CONTEXT;
     }
 
     @Override
-    public Context startGenerate(String entity, String version, String path) {
-        return NOOP_CONTEXT;
-    }
-
-    @Override
-    public Context startBulkRequest() {
+    public Context startBulkRequest(String bulkOperation) {
         return NOOP_CONTEXT;
     }
 
@@ -35,6 +30,11 @@ public class NoopRequestMetrics implements RequestMetrics {
         @Override
         public void markRequestException(Exception e) {
 
+        }
+
+        @Override
+        public void endRequestMonitoringWithException(Exception e) {
+    
         }
     }
 }

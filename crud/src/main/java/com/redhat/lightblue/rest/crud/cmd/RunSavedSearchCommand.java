@@ -33,6 +33,7 @@ import com.redhat.lightblue.query.Sort;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 import com.redhat.lightblue.savedsearch.FindRequestBuilder;
 import com.redhat.lightblue.util.Error;
 
@@ -46,6 +47,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
     private final Sort sort;
     private final Integer from,to;
     private final Map<String,String> params;
+    private final RequestMetrics metrics;
     
     public RunSavedSearchCommand(String searchName,
                                  String entity,
@@ -54,7 +56,8 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                                  Sort sort,
                                  Integer from,
                                  Integer to,
-                                 Map<String,String> properties) {
+                                 Map<String,String> properties,
+                                 RequestMetrics metrics) {
         this.searchName=searchName;
         this.entity=entity;
         this.version=version;
@@ -63,11 +66,12 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
         this.from=from;
         this.to=to;
         this.params=properties;
+        this.metrics = metrics;
     }
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring("savedsearch", entity, version);
+        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -97,15 +101,20 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
             Response r = getMediator().find(req);
             return new CallStatus(r);
         } catch (Error e) {
-            markRequestException(e);
+            context.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            markRequestException(e);
+            context.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         } finally {
-            endRequestMonitoring();
+            context.endRequestMonitoring();
         }
+    }
+    
+    @Override
+    public String getCommandName() {
+        return "savedsearch";
     }
 }

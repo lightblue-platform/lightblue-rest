@@ -1,5 +1,5 @@
 /*
- Copyright 2013 Red Hat, Inc. and/or its affiliates.
+ Copyright 2017 Red Hat, Inc. and/or its affiliates.
 
  This file is part of lightblue.
 
@@ -20,15 +20,20 @@ package com.redhat.lightblue.rest.crud.metrics;
 
 import static com.codahale.metrics.MetricRegistry.name;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.Objects;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.codahale.metrics.MetricRegistry;
 
 public class DropwizardRequestMetrics implements RequestMetrics {
+    
+    private final Logger LOGGER = LoggerFactory.getLogger(DropwizardRequestMetrics.class);
 
     private static final String API = "api";
 
@@ -67,25 +72,17 @@ public class DropwizardRequestMetrics implements RequestMetrics {
     }
 
     @Override
-    public Context startLock(String lockOperation, String domain) {
+    public Context startLockRequest(String lockOperation, String domain) {
         return new DropwizardContext(name(API, "lock", domain, lockOperation));
     }
 
-    // TODO: I didn't use this but just a demonstration of another request where the parameters are
-    // different
     @Override
-    public Context startGenerate(String entity, String version, String path) {
-        return new DropwizardContext(name(API, "generate", entity, version, path));
-    }
-
-    @Override
-    public Context startBulkRequest() {
-        // Not very useful :(... can consider alternatives, but should probably refactor more, see
-        // comments in BulkRequestCommand
-        return new DropwizardContext(name(API, "bulk"));
+    public Context startBulkRequest(String bulkOperation) {
+        return new DropwizardContext(name(API, bulkOperation));
     }
 
     public class DropwizardContext implements Context {
+        
         private final String metricNamespace;
         private final Timer.Context context;
         private final Counter activeRequests;
@@ -93,28 +90,32 @@ public class DropwizardRequestMetrics implements RequestMetrics {
 
         public DropwizardContext(String metricNamespace) {
             this.metricNamespace = Objects.requireNonNull(metricNamespace, "metricNamespace");
-            this.context = metricsRegistry.timer(name(metricNamespace, "latency")).time();
+            this.context = metricsRegistry.timer(name(metricNamespace, "requests", "latency")).time();
             this.activeRequests = metricsRegistry.counter(name(metricNamespace, "requests", "active"));
 
             activeRequests.inc();
         }
+
         @Override
         public void endRequestMonitoring() {
-            // Added this error handling to catch bugs. Might want to synchronize this, or consider
-            // only logging a warning instead. Important point is that we don't decrement counter
-            // again if request already ended.
-            if (ended) {
-                throw new IllegalStateException("Request already ended.");
+            if (!ended) {
+                ended = true;
+                activeRequests.dec();
+                context.stop();
+            } else {
+                LOGGER.warn("Request already ended");
             }
-
-            ended = true;
-            activeRequests.dec();
-            context.stop();
         }
 
         @Override
         public void markRequestException(Exception e) {
             metricsRegistry.meter(errorNamespace(metricNamespace, e)).mark();
+        }
+
+        @Override
+        public void endRequestMonitoringWithException(Exception e) {
+            endRequestMonitoring();
+            markRequestException(e);
         }
     }
 }

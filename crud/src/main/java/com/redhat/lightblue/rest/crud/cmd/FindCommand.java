@@ -56,7 +56,7 @@ public class FindCommand extends AbstractRestCommand {
     private final RequestMetrics metrics;
 
     private StreamingResponse streamResponse;
-    private RequestMetrics.Context metricsCtx;
+    private RequestMetrics.Context context;
 
     public FindCommand(String entity, String version, String request, RequestMetrics metrics) {
         this(null, entity, version, request, metrics);
@@ -72,11 +72,11 @@ public class FindCommand extends AbstractRestCommand {
     
     public FindCommand(Mediator mediator, String entity, String version, String request, boolean stream, RequestMetrics metrics) {
         super(mediator);
-        this.metrics = metrics;
         this.entity = entity;
         this.version = version;
         this.request = request;
-        this.stream=stream;
+        this.stream = stream;
+        this.metrics = metrics;
     }
 
     /**
@@ -122,7 +122,7 @@ public class FindCommand extends AbstractRestCommand {
                     writer.flush();
                 } finally {
                     streamResponse.documentStream.close();
-                    metricsCtx.endRequestMonitoring();
+                    context.endRequestMonitoring();
                     // TODO: What if there is IOException?
                 }
             }
@@ -131,7 +131,7 @@ public class FindCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        metricsCtx = metrics.startEntityRequest("find", entity, version);
+        context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -142,7 +142,7 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                metricsCtx.markRequestException(e);
+                context.markRequestException(e);
                 LOGGER.error("find:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
@@ -150,7 +150,7 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
-                metricsCtx.markRequestException(e);
+                context.markRequestException(e);
                 LOGGER.error("find:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
@@ -164,21 +164,22 @@ public class FindCommand extends AbstractRestCommand {
                 streamResponse=getMediator().findAndStream(ireq);
                 return new CallStatus(new Response());
             } else {
-                metricsCtx.endRequestMonitoring();
+                context.endRequestMonitoring();
                 return new CallStatus(getMediator().find(ireq));
             }
         } catch (Error e) {
-            // Could consider combining markRequestException and endRequestMonitoring with single
-            // method like `endRequestMonitoring(e)`.
-            metricsCtx.markRequestException(e);
-            metricsCtx.endRequestMonitoring();
+            context.endRequestMonitoringWithException(e);
             LOGGER.error("find:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsCtx.markRequestException(e);
-            metricsCtx.endRequestMonitoring();
+            context.endRequestMonitoringWithException(e);
             LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         }
+    }
+    
+    @Override
+    public String getCommandName() {
+        return "find";
     }
 }

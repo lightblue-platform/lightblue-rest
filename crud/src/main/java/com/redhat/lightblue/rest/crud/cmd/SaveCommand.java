@@ -26,6 +26,7 @@ import com.redhat.lightblue.crud.SaveRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
 
@@ -39,21 +40,23 @@ public class SaveCommand extends AbstractRestCommand {
     private final String entity;
     private final String version;
     private final String request;
+    private final RequestMetrics metrics;
 
-    public SaveCommand(String entity, String version, String request) {
-        this(null, entity, version, request);
+    public SaveCommand(String entity, String version, String request, RequestMetrics metrics) {
+        this(null, entity, version, request, metrics);
     }
 
-    public SaveCommand(Mediator mediator, String entity, String version, String request) {
+    public SaveCommand(Mediator mediator, String entity, String version, String request, RequestMetrics metrics) {
         super(mediator);
         this.entity = entity;
         this.version = version;
         this.request = request;
+        this.metrics = metrics;
     }
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring("save", entity, version);
+        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -66,15 +69,20 @@ public class SaveCommand extends AbstractRestCommand {
             Response r = getMediator().save(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            markRequestException(e);
+            context.markRequestException(e);
             LOGGER.error("save failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            markRequestException(e);
+            context.markRequestException(e);
             LOGGER.error("save failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_SAVE, e.toString()));
         } finally {
-            endRequestMonitoring();
+            context.endRequestMonitoring();
         }
+    }
+    
+    @Override
+    public String getCommandName() {
+        return "save";
     }
 }

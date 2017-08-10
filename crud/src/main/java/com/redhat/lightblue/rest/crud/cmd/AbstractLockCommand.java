@@ -71,13 +71,13 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
                     command = new AcquireCommand(domain, callerId, resourceId, ttl, metrics);
                     break;
                 case OPERATION_RELEASE :
-                    command = new ReleaseCommand(domain, callerId, resourceId);
+                    command = new ReleaseCommand(domain, callerId, resourceId, metrics);
                     break;
                 case OPERATION_COUNT :
-                    command = new GetLockCountCommand(domain, callerId, resourceId);
+                    command = new GetLockCountCommand(domain, callerId, resourceId, metrics);
                     break;
                 case OPERATION_PING :
-                    command = new LockPingCommand(domain, callerId, resourceId);
+                    command = new LockPingCommand(domain, callerId, resourceId, metrics);
                     break;
                 default :
                     Error.push("Error parsing lock request");
@@ -92,7 +92,7 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
     public CallStatus run() {
         // Omitting resource because might be too many different targets, number of resources is
         // unbounded.
-        RequestMetrics.Context metricsCtx = metrics.startLock(lockCommandName(), domain);
+        RequestMetrics.Context context = metrics.startLockRequest(getCommandName(), domain);
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();
         Error.push("rest");
@@ -105,19 +105,17 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             o.set("result", result);
             return new CallStatus(new SimpleJsonObject(o));
         } catch (Error e) {
-            metricsCtx.markRequestException(e);
+            context.markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricsCtx.markRequestException(e);
+            context.markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {
-            metricsCtx.endRequestMonitoring();
+            context.endRequestMonitoring();
         }
     }
-
-    protected abstract String lockCommandName();
 
     protected abstract JsonNode runLockCommand(Locking locking);
 }

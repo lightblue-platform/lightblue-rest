@@ -44,6 +44,7 @@ import com.redhat.lightblue.query.FieldProjection;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.Path;
 
@@ -54,18 +55,20 @@ public class GenerateCommand extends AbstractRestCommand {
     private final String version;
     private final String field;
     private final int n;
+    private final RequestMetrics metrics;
 
-    public GenerateCommand(String entity, String version, String field, int n) {
+    public GenerateCommand(String entity, String version, String field, int n, RequestMetrics metrics) {
         super(null);
         this.entity = entity;
         this.version = version;
         this.field = field;
         this.n = n <= 0 ? 1 : n;
+        this.metrics = metrics;
     }
 
     @Override
     public CallStatus run() {
-        startRequestMonitoring("generate", entity, version);
+        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -112,16 +115,21 @@ public class GenerateCommand extends AbstractRestCommand {
                 throw Error.get(CrudConstants.ERR_NO_ACCESS, "generate " + mdResolver.getTopLevelEntityName());
             }
         } catch (Error e) {
-            markRequestException(e);
+            context.markRequestException(e);
             return new CallStatus(e);
         } catch (Exception ex) {
-            markRequestException(ex);
+            context.markRequestException(ex);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_GENERATE, ex.toString()));
         } finally {
-            endRequestMonitoring();
+            context.endRequestMonitoring();
         }
         com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
         r.setStatus(OperationStatus.COMPLETE);
         return new CallStatus(r);
+    }
+    
+    @Override
+    public String getCommandName() {
+        return "generate";
     }
 }

@@ -21,10 +21,11 @@ package com.redhat.lightblue.rest.crud.cmd;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.redhat.lightblue.extensions.synch.Locking;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 
 public class ReleaseCommand extends AbstractLockCommand {
 
-    public ReleaseCommand(String domain, String caller, String resource) {
+    public ReleaseCommand(String domain, String caller, String resource, RequestMetrics metrics) {
         super(domain, caller, resource, metrics);
     }
 
@@ -32,5 +33,10 @@ public class ReleaseCommand extends AbstractLockCommand {
     protected JsonNode runLockCommand(Locking locking) {
         boolean ret = locking.release(caller, resource);
         return NODE_FACTORY.booleanNode(ret);
+    }
+    
+    @Override
+    public String getCommandName() {
+        return "release";
     }
 }

@@ -21,10 +21,11 @@ package com.redhat.lightblue.rest.crud.cmd;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.redhat.lightblue.extensions.synch.Locking;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 
 public class LockPingCommand extends AbstractLockCommand {
 
-    public LockPingCommand(String domain, String caller, String resource) {
+    public LockPingCommand(String domain, String caller, String resource, RequestMetrics metrics) {
         super(domain, caller, resource, metrics);
     }
 
@@ -32,5 +33,10 @@ public class LockPingCommand extends AbstractLockCommand {
     protected JsonNode runLockCommand(Locking locking) {
         locking.ping(caller, resource);
         return NODE_FACTORY.booleanNode(true);
+    }
+
+    @Override
+    public String getCommandName() {
+        return "ping";
     }
 }
