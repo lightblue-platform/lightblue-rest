@@ -19,29 +19,23 @@
 package com.redhat.lightblue.rest.crud.cmd;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import com.redhat.lightblue.ClientIdentification;
-
-import com.redhat.lightblue.query.Projection;
-import com.redhat.lightblue.query.QueryExpression;
-import com.redhat.lightblue.query.Sort;
-
-import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.FindRequest;
 import com.redhat.lightblue.metadata.types.DefaultTypes;
-import com.redhat.lightblue.mediator.Mediator;
-import com.redhat.lightblue.rest.RestConfiguration;
+import com.redhat.lightblue.query.Projection;
+import com.redhat.lightblue.query.Sort;
 import com.redhat.lightblue.rest.CallStatus;
+import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.util.JsonUtils;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.redhat.lightblue.savedsearch.FindRequestBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.redhat.lightblue.util.Error;
 
 public class RunSavedSearchCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(RunSavedSearchCommand.class);
@@ -53,6 +47,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
     private final Sort sort;
     private final Integer from,to;
     private final Map<String,String> params;
+    private final RequestMetrics metrics;
     
     public RunSavedSearchCommand(String searchName,
                                  String entity,
@@ -61,7 +56,8 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                                  Sort sort,
                                  Integer from,
                                  Integer to,
-                                 Map<String,String> properties) {
+                                 Map<String,String> properties,
+                                 RequestMetrics metrics) {
         this.searchName=searchName;
         this.entity=entity;
         this.version=version;
@@ -70,10 +66,12 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
         this.from=from;
         this.to=to;
         this.params=properties;
+        this.metrics = metrics;
     }
 
     @Override
     public CallStatus run() {
+        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -100,15 +98,18 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                 req.setTo(to.longValue());
             }
             LOGGER.debug("Request:{}",req);
-            System.out.println("request:"+req);
             Response r = getMediator().find(req);
             return new CallStatus(r);
         } catch (Error e) {
+            context.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            context.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+        } finally {
+            context.endRequestMonitoring();
         }
     }
 }

@@ -18,6 +18,9 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -25,10 +28,9 @@ import com.redhat.lightblue.extensions.synch.Locking;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.SimpleJsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstractLockCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockCommand.class);
@@ -41,14 +43,16 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
     protected final String domain;
     protected final String resource;
     protected final String caller;
+    private final RequestMetrics metrics;
 
-    public AbstractLockCommand(String domain, String caller, String resource) {
+    public AbstractLockCommand(String domain, String caller, String resource, RequestMetrics metrics) {
         this.domain = domain;
         this.resource = resource;
         this.caller = caller;
+        this.metrics = metrics;
     }
 
-    public static AbstractLockCommand getLockCommand(String request) {
+    public static AbstractLockCommand getLockCommand(String request, RequestMetrics metrics) {
         AbstractLockCommand command = null;
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -64,16 +68,16 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
                     if(null != rootNode.get("ttl")) {
                         ttl = rootNode.get("ttl").asLong();
                     }
-                    command = new AcquireCommand(domain, callerId, resourceId, ttl);
+                    command = new AcquireCommand(domain, callerId, resourceId, ttl, metrics);
                     break;
                 case OPERATION_RELEASE :
-                    command = new ReleaseCommand(domain, callerId, resourceId);
+                    command = new ReleaseCommand(domain, callerId, resourceId, metrics);
                     break;
                 case OPERATION_COUNT :
-                    command = new GetLockCountCommand(domain, callerId, resourceId);
+                    command = new GetLockCountCommand(domain, callerId, resourceId, metrics);
                     break;
                 case OPERATION_PING :
-                    command = new LockPingCommand(domain, callerId, resourceId);
+                    command = new LockPingCommand(domain, callerId, resourceId, metrics);
                     break;
                 default :
                     Error.push("Error parsing lock request");
@@ -86,6 +90,7 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
+        RequestMetrics.Context context = metrics.startLockRequest(getCommandName(), domain);
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();
         Error.push("rest");
@@ -98,11 +103,15 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             o.set("result", result);
             return new CallStatus(new SimpleJsonObject(o));
         } catch (Error e) {
+            context.markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            context.markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
+        } finally {
+            context.endRequestMonitoring();
         }
     }
 
