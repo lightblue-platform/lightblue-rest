@@ -127,9 +127,4 @@ public class GenerateCommand extends AbstractRestCommand {
         r.setStatus(OperationStatus.COMPLETE);
         return new CallStatus(r);
     }
-    
-    @Override
-    public String getCommandName() {
-        return "generate";
-    }
 }

@@ -177,9 +177,4 @@ public class FindCommand extends AbstractRestCommand {
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         }
     }
-    
-    @Override
-    public String getCommandName() {
-        return "find";
-    }
 }

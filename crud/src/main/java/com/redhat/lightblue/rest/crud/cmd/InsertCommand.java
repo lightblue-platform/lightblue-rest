@@ -80,9 +80,4 @@ public class InsertCommand extends AbstractRestCommand {
             context.endRequestMonitoring();
         }
     }
-    
-    @Override
-    public String getCommandName() {
-        return "insert";
-    }
 }

@@ -87,9 +87,4 @@ public class BulkRequestCommand extends AbstractRestCommand {
             context.endRequestMonitoring();
         }
     }
-
-    @Override
-    public String getCommandName() {
-        return "bulk";
-    }
 }
