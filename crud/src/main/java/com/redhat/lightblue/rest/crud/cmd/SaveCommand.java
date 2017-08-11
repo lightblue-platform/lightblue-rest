@@ -56,7 +56,6 @@ public class SaveCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -66,18 +65,14 @@ public class SaveCommand extends AbstractRestCommand {
             SaveRequest ireq = getJsonTranslator().parse(SaveRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().save(ireq);
+            Response r = getMediator().save(ireq, metrics, false);
             return new CallStatus(r);
         } catch (Error e) {
-            context.markRequestException(e);
             LOGGER.error("save failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            context.markRequestException(e);
             LOGGER.error("save failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_SAVE, e.toString()));
-        } finally {
-            context.endRequestMonitoring();
         }
     }
 }

@@ -37,4 +37,9 @@ public class AcquireCommand extends AbstractLockCommand {
         boolean ret = locking.acquire(caller, resource, ttl);
         return NODE_FACTORY.booleanNode(ret);
     }
+    
+    @Override
+    public String getLockCommandName() {
+        return "lock.acquire";
+    }       
 }

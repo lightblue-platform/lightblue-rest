@@ -90,7 +90,7 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context context = metrics.startLockRequest(getCommandName(), domain);
+        RequestMetrics.Context context = metrics.startLockRequest(getLockCommandName(), domain);
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();
         Error.push("rest");
@@ -116,4 +116,6 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
     }
 
     protected abstract JsonNode runLockCommand(Locking locking);
+    
+    public abstract String getLockCommandName();
 }

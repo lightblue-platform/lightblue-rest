@@ -131,7 +131,7 @@ public class FindCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        context = metrics.startEntityRequest(getCommandName(), entity, version);
+        context = metrics.startEntityRequest("find", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -165,7 +165,7 @@ public class FindCommand extends AbstractRestCommand {
                 return new CallStatus(new Response());
             } else {
                 context.endRequestMonitoring();
-                return new CallStatus(getMediator().find(ireq));
+                return new CallStatus(getMediator().find(ireq, metrics, false));
             }
         } catch (Error e) {
             context.endRequestMonitoringWithException(e);

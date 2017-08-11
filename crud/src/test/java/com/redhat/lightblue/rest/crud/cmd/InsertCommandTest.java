@@ -23,7 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.redhat.lightblue.rest.crud.cmd.NoopRequestMetrics;
+import com.redhat.lightblue.util.metrics.NoopRequestMetrics;
 
 /**
  * @author nmalik
