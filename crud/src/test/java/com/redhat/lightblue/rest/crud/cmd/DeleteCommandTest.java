@@ -21,13 +21,15 @@ package com.redhat.lightblue.rest.crud.cmd;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.redhat.lightblue.rest.metrics.NoopRequestMetrics;
+
 /**
  * @author nmalik
  */
 public class DeleteCommandTest extends AbstractRestCommandTest {
     @Test
     public void execute() {
-        DeleteCommand command = new DeleteCommand(mediator, "name", "version", "{\"request\":\"data\"}");
+        DeleteCommand command = new DeleteCommand(mediator, "name", "version", "{\"request\":\"data\"}", new NoopRequestMetrics());
 
         String output = command.run().toString();
 

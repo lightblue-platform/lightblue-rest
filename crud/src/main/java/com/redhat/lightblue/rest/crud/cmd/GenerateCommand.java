@@ -18,43 +18,35 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-
-import com.redhat.lightblue.Response;
 import com.redhat.lightblue.OperationStatus;
-
 import com.redhat.lightblue.config.LightblueFactory;
-
-import com.redhat.lightblue.query.FieldProjection;
-
-import com.redhat.lightblue.crud.Factory;
 import com.redhat.lightblue.crud.CrudConstants;
+import com.redhat.lightblue.crud.Factory;
 import com.redhat.lightblue.crud.valuegenerators.GeneratedFields;
-
 import com.redhat.lightblue.mediator.DefaultMetadataResolver;
-
-import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.EntityMetadata;
 import com.redhat.lightblue.metadata.FieldTreeNode;
+import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.metadata.SimpleField;
-
-import com.redhat.lightblue.util.Error;
-import com.redhat.lightblue.util.Path;
+import com.redhat.lightblue.query.FieldProjection;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
+import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.Path;
 
 public class GenerateCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(GenerateCommand.class);
@@ -63,17 +55,20 @@ public class GenerateCommand extends AbstractRestCommand {
     private final String version;
     private final String field;
     private final int n;
+    private final RequestMetrics metrics;
 
-    public GenerateCommand(String entity, String version, String field, int n) {
+    public GenerateCommand(String entity, String version, String field, int n, RequestMetrics metrics) {
         super(null);
         this.entity = entity;
         this.version = version;
         this.field = field;
         this.n = n <= 0 ? 1 : n;
+        this.metrics = metrics;
     }
 
     @Override
     public CallStatus run() {
+        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -120,9 +115,13 @@ public class GenerateCommand extends AbstractRestCommand {
                 throw Error.get(CrudConstants.ERR_NO_ACCESS, "generate " + mdResolver.getTopLevelEntityName());
             }
         } catch (Error e) {
+            context.markRequestException(e);
             return new CallStatus(e);
         } catch (Exception ex) {
+            context.markRequestException(ex);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_GENERATE, ex.toString()));
+        } finally {
+            context.endRequestMonitoring();
         }
         com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
         r.setStatus(OperationStatus.COMPLETE);

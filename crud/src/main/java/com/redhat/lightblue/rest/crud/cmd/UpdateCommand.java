@@ -18,16 +18,17 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.redhat.lightblue.util.Error;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.UpdateRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
+import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -39,20 +40,23 @@ public class UpdateCommand extends AbstractRestCommand {
     private final String entity;
     private final String version;
     private final String request;
+    private final RequestMetrics metrics;
 
-    public UpdateCommand(String entity, String version, String request) {
-        this(null, entity, version, request);
+    public UpdateCommand(String entity, String version, String request, RequestMetrics metrics) {
+        this(null, entity, version, request, metrics);
     }
 
-    public UpdateCommand(Mediator mediator, String entity, String version, String request) {
+    public UpdateCommand(Mediator mediator, String entity, String version, String request, RequestMetrics metrics) {
         super(mediator);
         this.entity = entity;
         this.version = version;
         this.request = request;
+        this.metrics = metrics;
     }
 
     @Override
     public CallStatus run() {
+        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -65,11 +69,15 @@ public class UpdateCommand extends AbstractRestCommand {
             Response r = getMediator().update(ireq);
             return new CallStatus(r);
         } catch (Error e) {
+            context.markRequestException(e);
             LOGGER.error("update failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            context.markRequestException(e);
             LOGGER.error("update failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_UPDATE, e.toString()));
+        } finally {
+            context.endRequestMonitoring();
         }
     }
 }

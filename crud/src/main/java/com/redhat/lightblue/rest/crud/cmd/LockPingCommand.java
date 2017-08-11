@@ -21,11 +21,12 @@ package com.redhat.lightblue.rest.crud.cmd;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.redhat.lightblue.extensions.synch.Locking;
+import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
 
 public class LockPingCommand extends AbstractLockCommand {
 
-    public LockPingCommand(String domain, String caller, String resource) {
-        super(domain, caller, resource);
+    public LockPingCommand(String domain, String caller, String resource, RequestMetrics metrics) {
+        super(domain, caller, resource, metrics);
     }
 
     @Override
