@@ -97,7 +97,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                 req.setTo(to.longValue());
             }
             LOGGER.debug("Request:{}",req);
-            Response r = getMediator().find(req, metrics, false);
+            Response r = getMediator().find(req, metrics);
             return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("saved_search failure: {}", e);

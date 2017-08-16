@@ -83,35 +83,35 @@ public abstract class AbstractRestCommandTest {
         }
 
         @Override
-        public Response insert(InsertionRequest req, RequestMetrics metrics, boolean isBulkRequest) {
+        public Response insert(InsertionRequest req, RequestMetrics metrics) {
             methodCalled = "insert";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response save(SaveRequest req, RequestMetrics metrics, boolean isBulkRequest) {
+        public Response save(SaveRequest req, RequestMetrics metrics) {
             methodCalled = "save";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response update(UpdateRequest req, RequestMetrics metrics, boolean isBulkRequest) {
+        public Response update(UpdateRequest req, RequestMetrics metrics) {
             methodCalled = "update";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response find(FindRequest req, RequestMetrics metrics, boolean isBulkRequest) {
+        public Response find(FindRequest req, RequestMetrics metrics) {
             methodCalled = "find";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response delete(DeleteRequest req, RequestMetrics metrics, boolean isBulkRequest) {
+        public Response delete(DeleteRequest req, RequestMetrics metrics) {
             methodCalled = "delete";
             args = new Object[]{req};
             return new Response();

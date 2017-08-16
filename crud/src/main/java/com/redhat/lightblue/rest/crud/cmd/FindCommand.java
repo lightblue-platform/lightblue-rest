@@ -165,7 +165,7 @@ public class FindCommand extends AbstractRestCommand {
                 return new CallStatus(new Response());
             } else {
                 context.endRequestMonitoring();
-                return new CallStatus(getMediator().find(ireq, metrics, false));
+                return new CallStatus(getMediator().find(ireq, metrics));
             }
         } catch (Error e) {
             context.endRequestMonitoringWithException(e);
