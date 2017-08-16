@@ -422,7 +422,7 @@ public abstract class AbstractCrudResource {
                          String request) {
         Error.reset();
         boolean bstream=stream!=null&&stream;
-        FindCommand f=new FindCommand(entity, version, request,bstream, metrics);
+        FindCommand f=new FindCommand(entity, version, request, bstream, metrics);
         CallStatus st=f.run();
         if(!st.hasErrors()&&bstream) {
             // This is how you stream. You put a response stream into

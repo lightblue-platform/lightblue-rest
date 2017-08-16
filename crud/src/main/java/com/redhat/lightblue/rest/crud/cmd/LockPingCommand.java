@@ -37,6 +37,6 @@ public class LockPingCommand extends AbstractLockCommand {
     
     @Override
     public String getLockCommandName() {
-        return "lock.ping";
+        return "ping";
     }    
 }

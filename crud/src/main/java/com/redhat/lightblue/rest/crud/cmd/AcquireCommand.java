@@ -40,6 +40,6 @@ public class AcquireCommand extends AbstractLockCommand {
     
     @Override
     public String getLockCommandName() {
-        return "lock.acquire";
+        return "acquire";
     }       
 }

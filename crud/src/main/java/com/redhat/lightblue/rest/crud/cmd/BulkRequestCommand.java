@@ -44,10 +44,6 @@ public class BulkRequestCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        // TODO: Bulk should really time each request individually, but this would require
-        // refactoring in lightblue-core. It raises the question: should all of the timing really be
-        // done at the core layer? There is already metrics tracking being done there. We should
-        // probably expand upon that instead of adding to the rest layer.
         LOGGER.debug("bulk request");
         Error.reset();
         Error.push("rest");
@@ -69,8 +65,6 @@ public class BulkRequestCommand extends AbstractRestCommand {
                 LOGGER.error("bulk:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, "Request is not valid"));
             }
-            // TODO: Would be nice if we could pass (req, metrics) here. Mediator already has a
-            // `Measure` class. This and RequestMetrics probably should be combined.
             BulkResponse r = getMediator().bulkRequest(req, metrics);
             return new CallStatus(r);
         } catch (Error e) {

@@ -37,6 +37,6 @@ public class ReleaseCommand extends AbstractLockCommand {
     
     @Override
     public String getLockCommandName() {
-        return "lock.release";
+        return "release";
     }   
 }

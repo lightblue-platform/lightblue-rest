@@ -122,7 +122,9 @@ public class FindCommand extends AbstractRestCommand {
                     writer.flush();
                 } finally {
                     streamResponse.documentStream.close();
-                    context.endRequestMonitoring();
+                    if (context != null) {  
+                        context.endRequestMonitoring();
+                    }
                     // TODO: What if there is IOException?
                 }
             }
@@ -131,7 +133,6 @@ public class FindCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        context = metrics.startEntityRequest("find", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -142,7 +143,6 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                context.markRequestException(e);
                 LOGGER.error("find:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
@@ -150,29 +150,27 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
-                context.markRequestException(e);
                 LOGGER.error("find:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
             addCallerId(ireq);
             // Until streaming is supported in mediator, we'll get the
             // results and stream them
-            // Metrics handling is outside of finally block because behavior is different
+            // Handle metrics only for streaming requests at this level, normal find request 
+            // metrics will be handled at mediator level. This is because behavior is different
             // if streaming or not. Exceptions always end request monitoring, but streaming is ended
             // only when stream is fully written.
             if(stream) {
+                context = metrics.startStreamingEntityRequest("find", entity, version);
                 streamResponse=getMediator().findAndStream(ireq);
                 return new CallStatus(new Response());
             } else {
-                context.endRequestMonitoring();
                 return new CallStatus(getMediator().find(ireq, metrics));
             }
         } catch (Error e) {
-            context.endRequestMonitoringWithException(e);
             LOGGER.error("find:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            context.endRequestMonitoringWithException(e);
             LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         }

@@ -37,6 +37,6 @@ public class GetLockCountCommand extends AbstractLockCommand {
 
     @Override
     public String getLockCommandName() {
-        return "lock.count";
+        return "count";
     }
 }
