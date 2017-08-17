@@ -66,7 +66,7 @@ public class DeleteCommand extends AbstractRestCommand {
             DeleteRequest ireq = getJsonTranslator().parse(DeleteRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().delete(ireq);
+            Response r = getMediator().delete(ireq, metrics);
             return new CallStatus(r);
         } catch (Error e) {
             context.markRequestException(e);

@@ -18,12 +18,12 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import com.redhat.lightblue.util.metrics.NoopRequestMetrics;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.redhat.lightblue.rest.crud.cmd.NoopRequestMetrics;
 
 /**
  * @author nmalik

@@ -19,21 +19,13 @@ package com.redhat.lightblue.rest.crud.cert.auth;
  */
 
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriBuilder;
-
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.authentication.ClientCertAuthenticator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.redhat.lightblue.rest.test.RestConfigurationRule;
+import com.redhat.lightblue.rest.test.support.Assets;
+import com.redhat.lightblue.rest.test.support.CrudWebXmls;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.ClientRequest;
@@ -47,13 +39,16 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.redhat.lightblue.rest.test.RestConfigurationRule;
-import com.redhat.lightblue.rest.test.support.Assets;
-import com.redhat.lightblue.rest.test.support.CrudWebXmls;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-// @RunWith(Arquillian.class)
+import static org.junit.Assert.assertTrue;
+
+@RunWith(Arquillian.class)
 public class ITCaseCertAuthTest {
      
     @Rule
@@ -63,8 +58,6 @@ public class ITCaseCertAuthTest {
     public void setup() throws Exception {
 
     }
-    
-    
 
     @Deployment
     public static WebArchive createDeployment() throws Exception {
@@ -99,8 +92,8 @@ public class ITCaseCertAuthTest {
         return archive;
     }
 
-    // @Test
-    // @RunAsClient
+    @Test
+    @RunAsClient
     public void testHealthCheck(@ArquillianResource URL url) throws Exception {
         ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
                 .path("healthcheck")

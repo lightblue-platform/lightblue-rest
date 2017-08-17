@@ -1,6 +1,6 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
     <filter>
         <filter-name>LoggingFilter</filter-name>
@@ -13,7 +13,7 @@
 
     <security-constraint>
         <web-resource-collection>
-           <web-resource-name>rest-crud services</web-resource-name>
+            <web-resource-name>rest-crud services</web-resource-name>
             <url-pattern>/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
@@ -66,15 +66,6 @@
         <url-pattern>/version</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>health</servlet-name>
-        <jsp-file>/version.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>health</servlet-name>
-        <url-pattern>/health</url-pattern>
-    </servlet-mapping>
-
     <listener>
         <listener-class>com.redhat.lightblue.rest.cors.CorsInitializingServletContextListener</listener-class>
     </listener>
@@ -87,18 +78,5 @@
         <param-name>resteasy.providers</param-name>
         <param-value>com.restcompress.provider.LZFEncodingInterceptor,com.restcompress.provider.LZFDecodingInterceptor</param-value>
     </context-param>
-
-    <listener>
-        <listener-class>com.redhat.lightblue.rest.crud.cert.auth.health.CrudCertAuthHealthCheckServletContextListener</listener-class>
-    </listener>
-
-    <servlet>
-        <servlet-name>diagnostics</servlet-name>
-        <servlet-class>com.codahale.metrics.servlets.HealthCheckServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>diagnostics</servlet-name>
-        <url-pattern>/diagnostics</url-pattern>
-    </servlet-mapping>
 
 </web-app>

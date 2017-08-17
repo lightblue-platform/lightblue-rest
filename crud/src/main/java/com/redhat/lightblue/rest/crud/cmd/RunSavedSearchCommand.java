@@ -18,11 +18,6 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.redhat.lightblue.ClientIdentification;
 import com.redhat.lightblue.Response;
@@ -33,9 +28,13 @@ import com.redhat.lightblue.query.Sort;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.redhat.lightblue.savedsearch.FindRequestBuilder;
 import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 public class RunSavedSearchCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(RunSavedSearchCommand.class);
@@ -98,7 +97,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                 req.setTo(to.longValue());
             }
             LOGGER.debug("Request:{}",req);
-            Response r = getMediator().find(req);
+            Response r = getMediator().find(req, metrics);
             return new CallStatus(r);
         } catch (Error e) {
             context.markRequestException(e);

@@ -18,16 +18,6 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-
-import javax.ws.rs.core.StreamingOutput;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.Response;
@@ -37,9 +27,17 @@ import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.mediator.StreamingResponse;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.core.StreamingOutput;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 /**
  *
@@ -165,7 +163,7 @@ public class FindCommand extends AbstractRestCommand {
                 return new CallStatus(new Response());
             } else {
                 context.endRequestMonitoring();
-                return new CallStatus(getMediator().find(ireq));
+                return new CallStatus(getMediator().find(ireq, metrics));
             }
         } catch (Error e) {
             context.endRequestMonitoringWithException(e);
