@@ -28,7 +28,7 @@ import com.redhat.lightblue.extensions.synch.Locking;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.SimpleJsonObject;
 
@@ -90,8 +90,6 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        // Omitting resource because might be too many different targets, number of resources is
-        // unbounded.
         RequestMetrics.Context context = metrics.startLockRequest(getCommandName(), domain);
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();

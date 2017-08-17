@@ -37,7 +37,7 @@ import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.mediator.StreamingResponse;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.rest.crud.metrics.RequestMetrics;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
 
@@ -157,7 +157,7 @@ public class FindCommand extends AbstractRestCommand {
             addCallerId(ireq);
             // Until streaming is supported in mediator, we'll get the
             // results and stream them
-            // Had to move metrics handling outside of finally block because behavior is different
+            // Metrics handling is outside of finally block because behavior is different
             // if streaming or not. Exceptions always end request monitoring, but streaming is ended
             // only when stream is fully written.
             if(stream) {
