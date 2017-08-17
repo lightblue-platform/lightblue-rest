@@ -105,7 +105,6 @@ public class FindCommand extends AbstractRestCommand {
                 Writer writer=new OutputStreamWriter(os);
                 writer.write(streamResponse.toJson().toString());
                 writer.flush();
-
                 try {
                     // Send the docs
                     while(streamResponse.documentStream.hasNext()) {
@@ -133,6 +132,13 @@ public class FindCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
+        // Handle metrics only for streaming requests at this level, simple/bulk find request's 
+        // metrics will be handled at mediator level. This is because behavior is different
+        // if streaming or not. Exceptions always end request monitoring, but streaming is ended
+        // only when stream is fully written.
+        if(stream) {
+            context = metrics.startStreamingEntityRequest("find", entity, version);
+        }
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -156,12 +162,7 @@ public class FindCommand extends AbstractRestCommand {
             addCallerId(ireq);
             // Until streaming is supported in mediator, we'll get the
             // results and stream them
-            // Handle metrics only for streaming requests at this level, normal find request 
-            // metrics will be handled at mediator level. This is because behavior is different
-            // if streaming or not. Exceptions always end request monitoring, but streaming is ended
-            // only when stream is fully written.
             if(stream) {
-                context = metrics.startStreamingEntityRequest("find", entity, version);
                 streamResponse=getMediator().findAndStream(ireq);
                 return new CallStatus(new Response());
             } else {
