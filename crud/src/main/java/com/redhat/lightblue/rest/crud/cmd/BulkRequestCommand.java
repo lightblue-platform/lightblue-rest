@@ -39,7 +39,6 @@ public class BulkRequestCommand extends AbstractRestCommand {
     public BulkRequestCommand(String request, RequestMetrics metrics) {
         this.request = request;
         this.metrics = metrics;
-        this.metrics.setBulkRequest(true);
     }
 
     @Override

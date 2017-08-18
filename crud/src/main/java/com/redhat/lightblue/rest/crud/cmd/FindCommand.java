@@ -63,11 +63,11 @@ public class FindCommand extends AbstractRestCommand {
     }
         
     public FindCommand(String entity, String version, String request, boolean stream, RequestMetrics metrics) {
-        this(null, entity, version, request,stream, metrics);
+        this(null, entity, version, request, stream, metrics);
     }
 
     public FindCommand(Mediator mediator, String entity, String version, String request, RequestMetrics metrics) {
-        this(mediator,entity,version,request,false, metrics);
+        this(mediator, entity, version, request, false, metrics);
     }
     
     public FindCommand(Mediator mediator, String entity, String version, String request, boolean stream, RequestMetrics metrics) {
