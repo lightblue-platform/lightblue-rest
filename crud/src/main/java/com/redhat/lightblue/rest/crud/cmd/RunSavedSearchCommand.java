@@ -70,6 +70,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
+        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -99,11 +100,15 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
             Response r = getMediator().find(req, metrics);
             return new CallStatus(r);
         } catch (Error e) {
+            context.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            context.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+        } finally {
+            context.endRequestMonitoring();
         }
     }
 }
