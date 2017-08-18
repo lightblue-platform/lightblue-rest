@@ -32,6 +32,7 @@ import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.util.metrics.RequestMetrics;
 
+import org.aspectj.lang.NoAspectBoundException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -76,49 +77,49 @@ public abstract class AbstractRestCommandTest {
         public String methodCalled;
         public Object[] args;
 
-        public TestMediator(Metadata md, Factory factory) {
-            super(md, factory);
+        public TestMediator(Metadata md, Factory factory, RequestMetrics metrics) {
+            super(md, factory, metrics);
             methodCalled = null;
             args = null;
         }
 
         @Override
-        public Response insert(InsertionRequest req, RequestMetrics metrics) {
+        public Response insert(InsertionRequest req) {
             methodCalled = "insert";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response save(SaveRequest req, RequestMetrics metrics) {
+        public Response save(SaveRequest req) {
             methodCalled = "save";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response update(UpdateRequest req, RequestMetrics metrics) {
+        public Response update(UpdateRequest req) {
             methodCalled = "update";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response find(FindRequest req, RequestMetrics metrics) {
+        public Response find(FindRequest req) {
             methodCalled = "find";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response delete(DeleteRequest req, RequestMetrics metrics) {
+        public Response delete(DeleteRequest req) {
             methodCalled = "delete";
             args = new Object[]{req};
             return new Response();
         }
     }
 
-    protected TestMediator mediator = new TestMediator(null, null);
+    protected TestMediator mediator = new TestMediator(null, null, null);
 
     @After
     public void tearDown() {

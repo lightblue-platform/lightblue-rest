@@ -78,7 +78,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
         Error.push(entity);
         try {
             ClientIdentification callerId=getCallerId();
-            JsonNode searchDoc=RestConfiguration.getSavedSearchCache().getSavedSearch(getMediator(),getCallerId(),searchName,entity,version);
+            JsonNode searchDoc=RestConfiguration.getSavedSearchCache().getSavedSearch(getMediator(metrics),getCallerId(),searchName,entity,version);
             if(searchDoc==null)
                 throw Error.get(RestCrudConstants.ERR_REST_SAVED_SEARCH,searchName+":"+entity+":"+version);
             Map<String,String> parameters=FindRequestBuilder.fillDefaults(searchDoc,params,new DefaultTypes());
@@ -97,7 +97,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                 req.setTo(to.longValue());
             }
             LOGGER.debug("Request:{}",req);
-            Response r = getMediator().find(req, metrics);
+            Response r = getMediator(metrics).find(req);
             return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("saved_search failure: {}", e);

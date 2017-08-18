@@ -163,10 +163,10 @@ public class FindCommand extends AbstractRestCommand {
             // Until streaming is supported in mediator, we'll get the
             // results and stream them
             if(stream) {
-                streamResponse=getMediator().findAndStream(ireq);
+                streamResponse=getMediator(metrics).findAndStream(ireq);
                 return new CallStatus(new Response());
             } else {
-                return new CallStatus(getMediator().find(ireq, metrics));
+                return new CallStatus(getMediator(metrics).find(ireq));
             }
         } catch (Error e) {
             LOGGER.error("find:generic_error failure: {}", e);

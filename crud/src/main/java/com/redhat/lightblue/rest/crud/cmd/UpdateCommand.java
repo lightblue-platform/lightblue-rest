@@ -65,7 +65,7 @@ public class UpdateCommand extends AbstractRestCommand {
             UpdateRequest ireq = getJsonTranslator().parse(UpdateRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().update(ireq, metrics);
+            Response r = getMediator(metrics).update(ireq);
             return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("update failure: {}", e);

@@ -73,7 +73,7 @@ public class ExplainCommand extends AbstractRestCommand {
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
             addCallerId(ireq);
-            Response r = getMediator().explain(ireq, metrics);
+            Response r = getMediator(metrics).explain(ireq);
             return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("explain:generic_error failure: {}", e);

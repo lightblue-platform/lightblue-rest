@@ -34,6 +34,7 @@ import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 
 /**
  * Note that passing a Mediator in the constructor is optional. If not provided,
@@ -65,13 +66,13 @@ public abstract class AbstractRestCommand {
      * @return
      * @throws Exception
      */
-    protected Mediator getMediator() {
+    protected Mediator getMediator(RequestMetrics metrics) {
         Mediator m = null;
         try {
             if (null != mediator) {
                 m = mediator;
             } else {
-                m = RestConfiguration.getFactory().getMediator();
+                m = RestConfiguration.getFactory().getMediator(metrics);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);

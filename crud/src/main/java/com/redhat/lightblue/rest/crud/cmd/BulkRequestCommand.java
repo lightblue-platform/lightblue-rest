@@ -64,7 +64,7 @@ public class BulkRequestCommand extends AbstractRestCommand {
                 LOGGER.error("bulk:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, "Request is not valid"));
             }
-            BulkResponse r = getMediator().bulkRequest(req, metrics);
+            BulkResponse r = getMediator(metrics).bulkRequest(req);
             return new CallStatus(r);
         } catch (Error e) {
             LOGGER.error("bulk:generic_error failure: {}", e);
