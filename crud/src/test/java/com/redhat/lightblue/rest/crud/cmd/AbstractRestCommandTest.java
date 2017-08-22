@@ -77,49 +77,49 @@ public abstract class AbstractRestCommandTest {
         public String methodCalled;
         public Object[] args;
 
-        public TestMediator(Metadata md, Factory factory, RequestMetrics metrics) {
-            super(md, factory, metrics);
+        public TestMediator(Metadata md, Factory factory) {
+            super(md, factory);
             methodCalled = null;
             args = null;
         }
 
         @Override
-        public Response insert(InsertionRequest req) {
+        public Response insert(InsertionRequest req, RequestMetrics.Context metricCtx) {
             methodCalled = "insert";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response save(SaveRequest req) {
+        public Response save(SaveRequest req, RequestMetrics.Context metricCtx) {
             methodCalled = "save";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response update(UpdateRequest req) {
+        public Response update(UpdateRequest req, RequestMetrics.Context metricCtx) {
             methodCalled = "update";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response find(FindRequest req) {
+        public Response find(FindRequest req, RequestMetrics.Context metricCtx) {
             methodCalled = "find";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response delete(DeleteRequest req) {
+        public Response delete(DeleteRequest req, RequestMetrics.Context metricCtx) {
             methodCalled = "delete";
             args = new Object[]{req};
             return new Response();
         }
     }
 
-    protected TestMediator mediator = new TestMediator(null, null, null);
+    protected TestMediator mediator = new TestMediator(null, null);
 
     @After
     public void tearDown() {

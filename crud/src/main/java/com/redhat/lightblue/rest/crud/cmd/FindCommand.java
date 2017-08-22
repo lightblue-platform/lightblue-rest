@@ -132,13 +132,7 @@ public class FindCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        // Handle metrics only for streaming requests at this level, simple/bulk find request's 
-        // metrics will be handled at mediator level. This is because behavior is different
-        // if streaming or not. Exceptions always end request monitoring, but streaming is ended
-        // only when stream is fully written.
-        if(stream) {
-            context = metrics.startStreamingEntityRequest("find", entity, version);
-        }
+        RequestMetrics.Context metricCtx = metrics.startEntityRequest("find", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -163,15 +157,17 @@ public class FindCommand extends AbstractRestCommand {
             // Until streaming is supported in mediator, we'll get the
             // results and stream them
             if(stream) {
-                streamResponse=getMediator(metrics).findAndStream(ireq);
+                streamResponse=getMediator().findAndStream(ireq, metricCtx);
                 return new CallStatus(new Response());
             } else {
-                return new CallStatus(getMediator(metrics).find(ireq));
+                return new CallStatus(getMediator().find(ireq, metricCtx));
             }
         } catch (Error e) {
+            metricCtx.markRequestException(e);
             LOGGER.error("find:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            metricCtx.markRequestException(e);
             LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         }

@@ -71,6 +71,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
+    	RequestMetrics.Context savedSearchMetricCtx = metrics.startEntityRequest("savedsearch", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -78,7 +79,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
         Error.push(entity);
         try {
             ClientIdentification callerId=getCallerId();
-            JsonNode searchDoc=RestConfiguration.getSavedSearchCache().getSavedSearch(getMediator(metrics),getCallerId(),searchName,entity,version);
+            JsonNode searchDoc=RestConfiguration.getSavedSearchCache().getSavedSearch(getMediator(),getCallerId(),searchName,entity,version,metrics);
             if(searchDoc==null)
                 throw Error.get(RestCrudConstants.ERR_REST_SAVED_SEARCH,searchName+":"+entity+":"+version);
             Map<String,String> parameters=FindRequestBuilder.fillDefaults(searchDoc,params,new DefaultTypes());
@@ -97,14 +98,19 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                 req.setTo(to.longValue());
             }
             LOGGER.debug("Request:{}",req);
-            Response r = getMediator(metrics).find(req);
+            RequestMetrics.Context findMetricCtx = metrics.startEntityRequest("find", req.getEntityVersion().getEntity(), req.getEntityVersion().getVersion());
+            Response r = getMediator().find(req, findMetricCtx);
             return new CallStatus(r);
         } catch (Error e) {
+        	savedSearchMetricCtx.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+        	savedSearchMetricCtx.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+        } finally {
+        	savedSearchMetricCtx.endRequestMonitoring();
         }
     }
 }

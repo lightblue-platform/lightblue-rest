@@ -52,6 +52,7 @@ public class ExplainCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
+    	RequestMetrics.Context metricCtx = metrics.startEntityRequest("explain", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -73,12 +74,14 @@ public class ExplainCommand extends AbstractRestCommand {
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
             addCallerId(ireq);
-            Response r = getMediator(metrics).explain(ireq);
+            Response r = getMediator().explain(ireq, metricCtx);
             return new CallStatus(r);
         } catch (Error e) {
+            metricCtx.markRequestException(e);
             LOGGER.error("explain:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            metricCtx.markRequestException(e);
             LOGGER.error("explain:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         }

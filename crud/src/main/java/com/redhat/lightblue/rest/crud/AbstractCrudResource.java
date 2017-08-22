@@ -97,12 +97,10 @@ public abstract class AbstractCrudResource {
     }
 
     /**
-     * Thread-safe, shared static instance for all requests. Registry is also static, so does not
-     * make much difference to inject. If you wanted to inject, you could do so rather easily using
-     * CDI injection.
+     * Thread-safe, shared static instance for all requests. 
      */
     private static final RequestMetrics metrics =
-            new DropwizardRequestMetrics(MetricRegistryFactory.getMetricRegistry());
+            new DropwizardRequestMetrics(MetricRegistryFactory.getJmxMetricRegistry());
 
     @GET
     @LZF

@@ -43,6 +43,7 @@ public class BulkRequestCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
+    	RequestMetrics.Context metricCtx = metrics.startBulkRequest();
         LOGGER.debug("bulk request");
         Error.reset();
         Error.push("rest");
@@ -64,12 +65,14 @@ public class BulkRequestCommand extends AbstractRestCommand {
                 LOGGER.error("bulk:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, "Request is not valid"));
             }
-            BulkResponse r = getMediator(metrics).bulkRequest(req);
+            BulkResponse r = getMediator().bulkRequest(req, metricCtx, metrics);
             return new CallStatus(r);
         } catch (Error e) {
+        	metricCtx.markRequestException(e);
             LOGGER.error("bulk:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+        	metricCtx.markRequestException(e);
             LOGGER.error("bulk:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         }
