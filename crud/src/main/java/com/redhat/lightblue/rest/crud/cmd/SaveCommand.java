@@ -62,11 +62,12 @@ public class SaveCommand extends AbstractRestCommand {
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             SaveRequest ireq = getJsonTranslator().parse(SaveRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().save(ireq, metricCtx);
+            r = getMediator().save(ireq);
             return new CallStatus(r);
         } catch (Error e) {
             metricCtx.markRequestException(e);
@@ -76,6 +77,12 @@ public class SaveCommand extends AbstractRestCommand {
             metricCtx.markRequestException(e);
             LOGGER.error("save failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_SAVE, e.toString()));
+        } finally {
+           if (r != null) {
+              metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+           } else {
+              metricCtx.endRequestMonitoring();
+           }
         }
     }
 }

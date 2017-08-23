@@ -62,11 +62,12 @@ public class UpdateCommand extends AbstractRestCommand {
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             UpdateRequest ireq = getJsonTranslator().parse(UpdateRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().update(ireq, metricCtx);
+            r = getMediator().update(ireq);
             return new CallStatus(r);
         } catch (Error e) {
             metricCtx.markRequestException(e);
@@ -76,6 +77,12 @@ public class UpdateCommand extends AbstractRestCommand {
             metricCtx.markRequestException(e);
             LOGGER.error("update failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_UPDATE, e.toString()));
+        } finally {
+           if (r != null) {
+              metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+           } else {
+              metricCtx.endRequestMonitoring();
+           }
         }
     }
 }

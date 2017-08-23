@@ -62,11 +62,12 @@ public class DeleteCommand extends AbstractRestCommand {
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             DeleteRequest ireq = getJsonTranslator().parse(DeleteRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().delete(ireq, metricCtx);
+            r = getMediator().delete(ireq);
             return new CallStatus(r);
         } catch (Error e) {
             metricCtx.markRequestException(e);
@@ -76,6 +77,12 @@ public class DeleteCommand extends AbstractRestCommand {
             metricCtx.markRequestException(e);
             LOGGER.error("delete failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_DELETE, e.toString()));
+        } finally {
+           if (r != null) {
+              metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+           } else {
+              metricCtx.endRequestMonitoring();
+           }
         }
     }
 }

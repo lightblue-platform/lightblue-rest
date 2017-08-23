@@ -18,7 +18,6 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -56,7 +55,7 @@ public class FindCommand extends AbstractRestCommand {
     private final RequestMetrics metrics;
 
     private StreamingResponse streamResponse;
-    private RequestMetrics.Context context;
+    private RequestMetrics.Context metricCtx;
 
     public FindCommand(String entity, String version, String request, RequestMetrics metrics) {
         this(null, entity, version, request, metrics);
@@ -100,12 +99,13 @@ public class FindCommand extends AbstractRestCommand {
     public StreamingOutput getResponseStream() {
         return new StreamingOutput() {            
             @Override
-            public void write(OutputStream os) throws IOException {
-                // Send the header
-                Writer writer=new OutputStreamWriter(os);
-                writer.write(streamResponse.toJson().toString());
-                writer.flush();
+            public void write(OutputStream os) {
                 try {
+                    // Send the header
+                    Writer writer=new OutputStreamWriter(os);
+                    writer.write(streamResponse.toJson().toString());
+                    writer.flush();
+                    
                     // Send the docs
                     while(streamResponse.documentStream.hasNext()) {
                         DocCtx doc=streamResponse.documentStream.next();
@@ -119,12 +119,12 @@ public class FindCommand extends AbstractRestCommand {
                         writer.write(chunkNode.toString());
                     }
                     writer.flush();
-                } finally {
+                } catch(Exception e) {
+                    metricCtx.markRequestException(e);
+                }
+                finally {
                     streamResponse.documentStream.close();
-                    if (context != null) {  
-                        context.endRequestMonitoring();
-                    }
-                    // TODO: What if there is IOException?
+                    metricCtx.endRequestMonitoring();
                 }
             }
         };
@@ -132,17 +132,19 @@ public class FindCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context metricCtx = metrics.startEntityRequest("find", entity, version);
+    	metricCtx = metrics.startStreamingEntityRequest("find", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             FindRequest ireq;
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
+                metricCtx.markRequestException(e);
                 LOGGER.error("find:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
@@ -150,6 +152,7 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
+                metricCtx.markRequestException(e);
                 LOGGER.error("find:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
@@ -157,10 +160,12 @@ public class FindCommand extends AbstractRestCommand {
             // Until streaming is supported in mediator, we'll get the
             // results and stream them
             if(stream) {
-                streamResponse=getMediator().findAndStream(ireq, metricCtx);
+                streamResponse=getMediator().findAndStream(ireq);
                 return new CallStatus(new Response());
             } else {
-                return new CallStatus(getMediator().find(ireq, metricCtx));
+                metricCtx.endRequestMonitoring();
+                r = getMediator().find(ireq);
+                return new CallStatus(r);
             }
         } catch (Error e) {
             metricCtx.markRequestException(e);
@@ -170,6 +175,14 @@ public class FindCommand extends AbstractRestCommand {
             metricCtx.markRequestException(e);
             LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+        } finally {
+            if (!stream) {
+               if (r != null) {
+                  metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+               } else {
+                  metricCtx.endRequestMonitoring();
+               } 	
+            }
         }
     }
 }

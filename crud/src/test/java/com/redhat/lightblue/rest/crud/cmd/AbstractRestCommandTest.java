@@ -30,9 +30,6 @@ import com.redhat.lightblue.crud.UpdateRequest;
 import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.metadata.Metadata;
 import com.redhat.lightblue.rest.RestConfiguration;
-import com.redhat.lightblue.util.metrics.RequestMetrics;
-
-import org.aspectj.lang.NoAspectBoundException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -84,35 +81,35 @@ public abstract class AbstractRestCommandTest {
         }
 
         @Override
-        public Response insert(InsertionRequest req, RequestMetrics.Context metricCtx) {
+        public Response insert(InsertionRequest req) {
             methodCalled = "insert";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response save(SaveRequest req, RequestMetrics.Context metricCtx) {
+        public Response save(SaveRequest req) {
             methodCalled = "save";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response update(UpdateRequest req, RequestMetrics.Context metricCtx) {
+        public Response update(UpdateRequest req) {
             methodCalled = "update";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response find(FindRequest req, RequestMetrics.Context metricCtx) {
+        public Response find(FindRequest req) {
             methodCalled = "find";
             args = new Object[]{req};
             return new Response();
         }
 
         @Override
-        public Response delete(DeleteRequest req, RequestMetrics.Context metricCtx) {
+        public Response delete(DeleteRequest req) {
             methodCalled = "delete";
             args = new Object[]{req};
             return new Response();

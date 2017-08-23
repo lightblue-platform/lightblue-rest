@@ -58,11 +58,13 @@ public class ExplainCommand extends AbstractRestCommand {
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             FindRequest ireq;
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
+                metricCtx.markRequestException(e);
                 LOGGER.error("explain:parse failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
             }
@@ -70,11 +72,12 @@ public class ExplainCommand extends AbstractRestCommand {
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
+                metricCtx.markRequestException(e);
                 LOGGER.error("explain:validate failure: {}", e);
                 return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
             }
             addCallerId(ireq);
-            Response r = getMediator().explain(ireq, metricCtx);
+            r = getMediator().explain(ireq);
             return new CallStatus(r);
         } catch (Error e) {
             metricCtx.markRequestException(e);
@@ -84,6 +87,12 @@ public class ExplainCommand extends AbstractRestCommand {
             metricCtx.markRequestException(e);
             LOGGER.error("explain:generic_exception failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+        } finally {
+           if(r != null) {
+              metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+           } else {
+              metricCtx.endRequestMonitoring();
+           }
         }
     }
 }

@@ -62,11 +62,12 @@ public class InsertCommand extends AbstractRestCommand {
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             InsertionRequest ireq = getJsonTranslator().parse(InsertionRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().insert(ireq, metricCtx);
+            r = getMediator().insert(ireq);
             return new CallStatus(r);
         } catch (Error e) {
             metricCtx.markRequestException(e);
@@ -76,6 +77,12 @@ public class InsertCommand extends AbstractRestCommand {
             metricCtx.markRequestException(e);
             LOGGER.error("insert failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_INSERT, e.toString()));
+        } finally {
+           if (r != null) {
+              metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+           } else {
+              metricCtx.endRequestMonitoring();
+           }
         }
     }
 }

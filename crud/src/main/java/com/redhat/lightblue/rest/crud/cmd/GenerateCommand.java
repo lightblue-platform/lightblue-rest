@@ -121,7 +121,7 @@ public class GenerateCommand extends AbstractRestCommand {
             metricCtx.markRequestException(ex);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_GENERATE, ex.toString()));
         } finally {
-        	metricCtx.endRequestMonitoring();
+            metricCtx.endRequestMonitoring();
         }
         com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
         r.setStatus(OperationStatus.COMPLETE);
