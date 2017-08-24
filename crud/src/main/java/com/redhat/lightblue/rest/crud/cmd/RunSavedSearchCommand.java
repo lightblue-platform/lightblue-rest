@@ -18,6 +18,11 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.redhat.lightblue.ClientIdentification;
 import com.redhat.lightblue.Response;
@@ -28,13 +33,9 @@ import com.redhat.lightblue.query.Sort;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.redhat.lightblue.savedsearch.FindRequestBuilder;
 import com.redhat.lightblue.util.Error;
-import com.redhat.lightblue.util.metrics.RequestMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class RunSavedSearchCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(RunSavedSearchCommand.class);
@@ -70,12 +71,14 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
+    	RequestMetrics.Context savedSearchMetricCtx = metrics.startEntityRequest("savedsearch", entity, version);
+    	RequestMetrics.Context findMetricCtx = null;
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             ClientIdentification callerId=getCallerId();
             JsonNode searchDoc=RestConfiguration.getSavedSearchCache().getSavedSearch(getMediator(),getCallerId(),searchName,entity,version);
@@ -97,18 +100,25 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                 req.setTo(to.longValue());
             }
             LOGGER.debug("Request:{}",req);
-            Response r = getMediator().find(req, metrics);
+            findMetricCtx = metrics.startEntityRequest("find", req.getEntityVersion().getEntity(), req.getEntityVersion().getVersion());
+            r = getMediator().find(req);
             return new CallStatus(r);
         } catch (Error e) {
-            context.markRequestException(e);
+            savedSearchMetricCtx.markRequestException(e, e.getErrorCode());
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            context.markRequestException(e);
+            savedSearchMetricCtx.markRequestException(e, e.getMessage());
+            findMetricCtx.markRequestException(e, e.getMessage());
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
         } finally {
-            context.endRequestMonitoring();
+           savedSearchMetricCtx.endRequestMonitoring();
+           if (r != null) {
+              findMetricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+           } else {
+              findMetricCtx.endRequestMonitoring();
+           } 	
         }
     }
 }

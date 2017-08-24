@@ -68,7 +68,7 @@ public class GenerateCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context context = metrics.startEntityRequest("generate", entity, version);
+        RequestMetrics.Context metricCtx = metrics.startEntityRequest("generate", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -115,13 +115,13 @@ public class GenerateCommand extends AbstractRestCommand {
                 throw Error.get(CrudConstants.ERR_NO_ACCESS, "generate " + mdResolver.getTopLevelEntityName());
             }
         } catch (Error e) {
-            context.markRequestException(e);
+            metricCtx.markRequestException(e, e.getErrorCode());
             return new CallStatus(e);
         } catch (Exception ex) {
-            context.markRequestException(ex);
+            metricCtx.markRequestException(ex);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_GENERATE, ex.toString()));
         } finally {
-            context.endRequestMonitoring();
+            metricCtx.endRequestMonitoring();
         }
         com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
         r.setStatus(OperationStatus.COMPLETE);

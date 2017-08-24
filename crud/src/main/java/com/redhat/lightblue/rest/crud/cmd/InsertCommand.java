@@ -56,28 +56,33 @@ public class InsertCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
+    	RequestMetrics.Context metricCtx = metrics.startEntityRequest("insert", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             InsertionRequest ireq = getJsonTranslator().parse(InsertionRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().insert(ireq, metrics);
+            r = getMediator().insert(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            context.markRequestException(e);
+            metricCtx.markRequestException(e, e.getErrorCode());
             LOGGER.error("insert failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            context.markRequestException(e);
+            metricCtx.markRequestException(e, e.getMessage());
             LOGGER.error("insert failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_INSERT, e.toString()));
         } finally {
-            context.endRequestMonitoring();
+           if (r != null) {
+              metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+           } else {
+              metricCtx.endRequestMonitoring();
+           }
         }
     }
 }

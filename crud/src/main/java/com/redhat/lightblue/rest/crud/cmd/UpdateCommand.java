@@ -56,23 +56,33 @@ public class UpdateCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
+    	RequestMetrics.Context metricCtx = metrics.startEntityRequest("update", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             UpdateRequest ireq = getJsonTranslator().parse(UpdateRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().update(ireq, metrics);
+            r = getMediator().update(ireq);
             return new CallStatus(r);
         } catch (Error e) {
+            metricCtx.markRequestException(e, e.getErrorCode());
             LOGGER.error("update failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
+            metricCtx.markRequestException(e, e.getMessage());
             LOGGER.error("update failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_UPDATE, e.toString()));
+        } finally {
+           if (r != null) {
+              metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+           } else {
+              metricCtx.endRequestMonitoring();
+           }
         }
     }
 }

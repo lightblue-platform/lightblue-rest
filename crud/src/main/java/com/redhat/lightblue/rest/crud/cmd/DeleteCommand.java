@@ -56,28 +56,33 @@ public class DeleteCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context context = metrics.startEntityRequest(getCommandName(), entity, version);
+    	RequestMetrics.Context metricCtx = metrics.startEntityRequest("delete", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         Error.push(entity);
+        Response r = null;
         try {
             DeleteRequest ireq = getJsonTranslator().parse(DeleteRequest.class, JsonUtils.json(request));
             validateReq(ireq, entity, version);
             addCallerId(ireq);
-            Response r = getMediator().delete(ireq, metrics);
+            r = getMediator().delete(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            context.markRequestException(e);
+            metricCtx.markRequestException(e, e.getErrorCode());
             LOGGER.error("delete failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            context.markRequestException(e);
+            metricCtx.markRequestException(e, e.getMessage());
             LOGGER.error("delete failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_DELETE, e.toString()));
         } finally {
-            context.endRequestMonitoring();
+           if (r != null) {
+              metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+           } else {
+              metricCtx.endRequestMonitoring();
+           }
         }
     }
 }

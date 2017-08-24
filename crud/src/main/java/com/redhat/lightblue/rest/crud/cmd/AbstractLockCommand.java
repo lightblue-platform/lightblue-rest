@@ -90,7 +90,7 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context context = metrics.startLockRequest(getLockCommandName(), domain);
+        RequestMetrics.Context metricCtx = metrics.startLockRequest(getLockCommandName(), domain);
         LOGGER.debug("run: domain={}, resource={}, caller={}", domain, resource, caller);
         Error.reset();
         Error.push("rest");
@@ -103,15 +103,15 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             o.set("result", result);
             return new CallStatus(new SimpleJsonObject(o));
         } catch (Error e) {
-            context.markRequestException(e);
+            metricCtx.markRequestException(e, e.getErrorCode());
             LOGGER.error("failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            context.markRequestException(e);
+            metricCtx.markRequestException(e, e.getMessage());
             LOGGER.error("failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {
-            context.endRequestMonitoring();
+            metricCtx.endRequestMonitoring();
         }
     }
 

@@ -20,7 +20,7 @@ public class ReadHealthCheck extends HealthCheck {
         String version = "1.0.0";
         String request = getFindTestRequest(entity, version);
 
-        RequestMetrics metrics = new DropwizardRequestMetrics(MetricRegistryFactory.getMetricRegistry());
+        RequestMetrics metrics = new DropwizardRequestMetrics(MetricRegistryFactory.getJmxMetricRegistry());
         CallStatus callStatus = new FindCommand(entity, version, request, metrics).run();
 
         if(callStatus.hasErrors()){
