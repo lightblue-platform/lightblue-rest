@@ -17,7 +17,7 @@ public class CrudCheckRegistry {
 
     public static HealthCheckRegistry getDiagnosticCheckRegistry() {
         if(diagnosticCheckRegistry == null) {
-            diagnosticCheckRegistry = CrudCheckConfiguration.getDiagnosticCheckRegistry();
+            diagnosticCheckRegistry = CrudCheckConfiguration.createDiagnosticCheckRegistry();
         }
         return diagnosticCheckRegistry;
     }
@@ -25,7 +25,7 @@ public class CrudCheckRegistry {
 
     public static HealthCheckRegistry getHealthCheckRegistry() {
         if(healthCheckRegistry == null) {
-            healthCheckRegistry = CrudCheckConfiguration.getHealthCheckRegistry();
+            healthCheckRegistry = CrudCheckConfiguration.createHealthCheckRegistry();
         }
         return healthCheckRegistry;
     }

@@ -24,6 +24,13 @@ public class CrudCheckResponse extends JsonObject {
             ObjectNode resultResponse = factory.objectNode();
             resultResponse.put("healthy", result.getValue().isHealthy());
             resultResponse.put("message", result.getValue().getMessage());
+
+            if (result.getValue().getDetails() != null) {
+              for (Map.Entry<String, Object> entry : result.getValue().getDetails().entrySet()) {
+                resultResponse.put(entry.getKey().toString(), entry.getValue().toString());
+              }
+            }
+
             healthCheckResponse.put(result.getKey(), resultResponse);
         }
         return healthCheckResponse;

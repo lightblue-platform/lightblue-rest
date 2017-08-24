@@ -21,10 +21,8 @@ package com.redhat.lightblue.rest.crud.cmd;
 import com.codahale.metrics.health.HealthCheck;
 import com.codahale.metrics.health.HealthCheck.Result;
 import com.codahale.metrics.health.HealthCheckRegistry;
-import com.redhat.lightblue.mediator.Mediator;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
-import com.redhat.lightblue.rest.crud.health.CrudCheckRegistry;
 import com.redhat.lightblue.rest.crud.health.CrudCheckResponse;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.metrics.RequestMetrics;
@@ -41,17 +39,13 @@ import java.util.Map;
 public class CheckHealthCommand extends AbstractRestCommand {
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckHealthCommand.class);
 
+    private HealthCheckRegistry healthCheckRegistry;
     private RequestMetrics metrics;
-    HealthCheckRegistry healthCheckRegistry;
-
+    
     public CheckHealthCommand(HealthCheckRegistry healthCheckRegistry, RequestMetrics metrics) {
-        this(null, healthCheckRegistry, metrics);
-    }
-
-    public CheckHealthCommand(Mediator mediator, HealthCheckRegistry healthCheckRegistry, RequestMetrics metrics) {
-        super(mediator);
         this.healthCheckRegistry = healthCheckRegistry;
         this.metrics = metrics;
+
     }
 
     @Override
@@ -65,7 +59,7 @@ public class CheckHealthCommand extends AbstractRestCommand {
         try {
             Map<String, HealthCheck.Result> healthCheckResults = new LinkedHashMap<>();
             CallStatus callStatus = new CallStatus();
-            for (Map.Entry<String, Result> entry : CrudCheckRegistry.getHealthCheckRegistry().runHealthChecks().entrySet()) {
+            for (Map.Entry<String, Result> entry : healthCheckRegistry.runHealthChecks().entrySet()) {
                 if (entry.getValue().isHealthy()) {
                     LOGGER.debug("healthCheck is OK", entry.getKey());
                     healthCheckResults.put(entry.getKey(), entry.getValue());

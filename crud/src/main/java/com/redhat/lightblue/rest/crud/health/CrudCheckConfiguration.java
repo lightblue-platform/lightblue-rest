@@ -24,14 +24,14 @@ public class CrudCheckConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CrudCheckConfiguration.class);
 
-    public static HealthCheckRegistry getHealthCheckRegistry() {
+    public static HealthCheckRegistry createHealthCheckRegistry() {
         LOGGER.debug("Initializing healthCheckRegistry");
         HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
         healthCheckRegistry.register("readHealthCheck", new ReadHealthCheck());
         return healthCheckRegistry;
     }
 
-    public static HealthCheckRegistry getDiagnosticCheckRegistry() {
+    public static HealthCheckRegistry createDiagnosticCheckRegistry() {
         LOGGER.debug("Initializing diagnosticCheckRegistry");
 
         HealthCheckRegistry diagnosticCheckRegistry = new HealthCheckRegistry();
