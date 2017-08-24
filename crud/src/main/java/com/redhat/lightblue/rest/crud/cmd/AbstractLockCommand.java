@@ -103,11 +103,11 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             o.set("result", result);
             return new CallStatus(new SimpleJsonObject(o));
         } catch (Error e) {
-            metricCtx.markRequestException(e);
+            metricCtx.markRequestException(e, e.getErrorCode());
             LOGGER.error("failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricCtx.markRequestException(e);
+            metricCtx.markRequestException(e, e.getMessage());
             LOGGER.error("failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
         } finally {

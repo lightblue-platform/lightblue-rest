@@ -115,7 +115,7 @@ public class GenerateCommand extends AbstractRestCommand {
                 throw Error.get(CrudConstants.ERR_NO_ACCESS, "generate " + mdResolver.getTopLevelEntityName());
             }
         } catch (Error e) {
-            metricCtx.markRequestException(e);
+            metricCtx.markRequestException(e, e.getErrorCode());
             return new CallStatus(e);
         } catch (Exception ex) {
             metricCtx.markRequestException(ex);

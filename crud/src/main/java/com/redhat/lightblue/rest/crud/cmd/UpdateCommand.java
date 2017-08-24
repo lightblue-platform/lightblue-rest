@@ -70,11 +70,11 @@ public class UpdateCommand extends AbstractRestCommand {
             r = getMediator().update(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            metricCtx.markRequestException(e);
+            metricCtx.markRequestException(e, e.getErrorCode());
             LOGGER.error("update failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricCtx.markRequestException(e);
+            metricCtx.markRequestException(e, e.getMessage());
             LOGGER.error("update failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_UPDATE, e.toString()));
         } finally {

@@ -70,11 +70,11 @@ public class DeleteCommand extends AbstractRestCommand {
             r = getMediator().delete(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            metricCtx.markRequestException(e);
+            metricCtx.markRequestException(e, e.getErrorCode());
             LOGGER.error("delete failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricCtx.markRequestException(e);
+            metricCtx.markRequestException(e, e.getMessage());
             LOGGER.error("delete failure: {}", e);
             return new CallStatus(Error.get(RestCrudConstants.ERR_REST_DELETE, e.toString()));
         } finally {
