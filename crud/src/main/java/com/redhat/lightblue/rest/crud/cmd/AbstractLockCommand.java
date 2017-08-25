@@ -103,13 +103,14 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
             o.set("result", result);
             return new CallStatus(new SimpleJsonObject(o));
         } catch (Error e) {
-            metricCtx.markRequestException(e, e.getErrorCode());
+            metricCtx.markRequestException(e);
             LOGGER.error("failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricCtx.markRequestException(e, e.getMessage());
+            Error error = Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString());
+            metricCtx.markRequestException(error);
             LOGGER.error("failure: {}", e);
-            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
+            return new CallStatus(error);
         } finally {
             metricCtx.endRequestMonitoring();
         }
@@ -117,5 +118,5 @@ public abstract class AbstractLockCommand extends AbstractRestCommand {
 
     protected abstract JsonNode runLockCommand(Locking locking);
     
-    public abstract String getLockCommandName();
+    protected abstract String getLockCommandName();
 }

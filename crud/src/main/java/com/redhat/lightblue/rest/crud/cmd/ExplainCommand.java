@@ -52,7 +52,7 @@ public class ExplainCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-    	RequestMetrics.Context metricCtx = metrics.startEntityRequest("explain", entity, version);
+        RequestMetrics.Context metricCtx = metrics.startEntityRequest("explain", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -64,29 +64,32 @@ public class ExplainCommand extends AbstractRestCommand {
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                metricCtx.markRequestException(e, e.getMessage());
+                Error error = Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"); 	
+                metricCtx.markRequestException(error);
                 LOGGER.error("explain:parse failure: {}", e);
-                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
+                return new CallStatus(error);
             }
             LOGGER.debug("Find request:{}", ireq);
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
-                metricCtx.markRequestException(e, e.getMessage());
+                Error error = Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid");
+                metricCtx.markRequestException(error);
                 LOGGER.error("explain:validate failure: {}", e);
-                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
+                return new CallStatus(error);
             }
             addCallerId(ireq);
             r = getMediator().explain(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            metricCtx.markRequestException(e, e.getErrorCode());
+            metricCtx.markRequestException(e);
             LOGGER.error("explain:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricCtx.markRequestException(e, e.getMessage());
+            Error error = Error.get(RestCrudConstants.ERR_REST_FIND, e.toString());
+            metricCtx.markRequestException(error);
             LOGGER.error("explain:generic_exception failure: {}", e);
-            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+            return new CallStatus(error);
         } finally {
            if(r != null) {
               metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
