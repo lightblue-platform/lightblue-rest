@@ -1,10 +1,11 @@
 package com.redhat.lightblue.rest.auth.health;
 
-import java.util.concurrent.TimeUnit;
-
 import com.codahale.metrics.health.HealthCheck;
 import com.codahale.metrics.health.annotation.Async;
 import com.redhat.lightblue.rest.auth.RolesProvider;
+
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Metrics Health check class for Roles Provider health
@@ -20,13 +21,20 @@ public class RolesProviderHealthCheck extends HealthCheck {
 
     @Override
     protected Result check() throws Exception {
-
         RolesProviderHealth health = rolesProvider.checkHealth();
 
+        ResultBuilder resultBuilder;
+
         if (health.isHealthy()) {
-            return Result.healthy(health.details());
+            resultBuilder = Result.builder().healthy();
         } else {
-            return Result.unhealthy(health.details());
+            resultBuilder = Result.builder().unhealthy();
         }
+
+        for (Map.Entry<String, Object> entry : health.details().entrySet()) {
+            resultBuilder.withDetail(entry.getKey(), entry.getValue());
+        }
+
+        return resultBuilder.build();
     }
 }

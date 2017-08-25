@@ -1,9 +1,8 @@
 package com.redhat.lightblue.rest.auth;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.redhat.lightblue.rest.auth.health.RolesProviderHealth;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,9 +12,11 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.redhat.lightblue.rest.auth.health.RolesProviderHealth;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.ResultCode;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CachedRolesProviderTest {
@@ -66,7 +67,7 @@ public class CachedRolesProviderTest {
 
         // ldap failure
         Mockito.when(rolesProvider.getUserRoles("user")).thenThrow(new LDAPException(ResultCode.SERVER_DOWN));
-
+ 
         rolesCache.put("user", roles);
         Thread.sleep(1000); // wait till it expires
         Assert.assertNull("rolesCache should have expired", rolesCache.get("user"));
@@ -81,7 +82,10 @@ public class CachedRolesProviderTest {
     public void isHealthyIfDelegateRolesProviderIsHealthy() throws Exception {
 
         // Mock RolesProvider healthy
-        Mockito.when(rolesProvider.checkHealth()).thenReturn(new RolesProviderHealth(true, "Return healthy for mock test"));
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("mock", "Return healthy for a mock test");
+
+        Mockito.when(rolesProvider.checkHealth()).thenReturn(new RolesProviderHealth(true, details));
         
         System.out.println(cachedRolesProvider.checkHealth().details());        
         Assert.assertTrue(cachedRolesProvider.checkHealth().isHealthy());
@@ -92,7 +96,10 @@ public class CachedRolesProviderTest {
     public void isUnhealthyIfDelegateRolesProviderIsUnhealthy() throws Exception {
 
         // Mock RolesProvider unhealthy
-        Mockito.when(rolesProvider.checkHealth()).thenReturn(new RolesProviderHealth(false, "Return unhealthy for mock test"));
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("mock", "Return unhealthy for a mock test");
+
+        Mockito.when(rolesProvider.checkHealth()).thenReturn(new RolesProviderHealth(false, details));
         
         System.out.println(cachedRolesProvider.checkHealth().details());        
         Assert.assertFalse(cachedRolesProvider.checkHealth().isHealthy());
