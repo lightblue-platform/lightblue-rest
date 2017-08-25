@@ -120,7 +120,7 @@ public class FindCommand extends AbstractRestCommand {
                     }
                     writer.flush();
                 } catch(Exception e) {
-                    metricCtx.markRequestException(e, e.getMessage());
+                    metricCtx.markRequestException(e);
                 }
                 finally {
                     streamResponse.documentStream.close();
@@ -148,17 +148,19 @@ public class FindCommand extends AbstractRestCommand {
             try {
                 ireq = getJsonTranslator().parse(FindRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                metricCtx.markRequestException(e, e.getMessage());
+                Error error = Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"); 	
+                metricCtx.markRequestException(error);
                 LOGGER.error("find:parse failure: {}", e);
-                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Error during the parse of the request"));
+                return new CallStatus(error);
             }
             LOGGER.debug("Find request:{}", ireq);
             try {
                 validateReq(ireq, entity, version);
             } catch (Exception e) {
-                metricCtx.markRequestException(e, e.getMessage());
+                Error error = Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"); 	
+                metricCtx.markRequestException(error);
                 LOGGER.error("find:validate failure: {}", e);
-                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, "Request is not valid"));
+                return new CallStatus(error);
             }
             addCallerId(ireq);
             // Until streaming is supported in mediator, we'll get the
@@ -171,13 +173,14 @@ public class FindCommand extends AbstractRestCommand {
                 return new CallStatus(r);
             }
         } catch (Error e) {
-            metricCtx.markRequestException(e, e.getErrorCode());
+            metricCtx.markRequestException(e);
             LOGGER.error("find:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricCtx.markRequestException(e, e.getMessage());
+            Error error = Error.get(RestCrudConstants.ERR_REST_FIND, e.toString());	
+            metricCtx.markRequestException(error);
             LOGGER.error("find:generic_exception failure: {}", e);
-            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+            return new CallStatus(error);
         } finally {
             if (!stream) {
                if (r != null) {

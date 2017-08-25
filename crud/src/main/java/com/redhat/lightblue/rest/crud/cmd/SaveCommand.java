@@ -70,13 +70,14 @@ public class SaveCommand extends AbstractRestCommand {
             r = getMediator().save(ireq);
             return new CallStatus(r);
         } catch (Error e) {
-            metricCtx.markRequestException(e, e.getErrorCode());
+            metricCtx.markRequestException(e);
             LOGGER.error("save failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricCtx.markRequestException(e, e.getMessage());
+            Error error = Error.get(RestCrudConstants.ERR_REST_SAVE, e.toString());
+            metricCtx.markRequestException(error);
             LOGGER.error("save failure: {}", e);
-            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_SAVE, e.toString()));
+            return new CallStatus(error);
         } finally {
            if (r != null) {
               metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());

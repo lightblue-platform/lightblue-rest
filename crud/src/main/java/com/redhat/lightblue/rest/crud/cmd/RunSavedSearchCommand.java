@@ -104,14 +104,15 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
             r = getMediator().find(req);
             return new CallStatus(r);
         } catch (Error e) {
-            savedSearchMetricCtx.markRequestException(e, e.getErrorCode());
+            savedSearchMetricCtx.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            savedSearchMetricCtx.markRequestException(e, e.getMessage());
-            findMetricCtx.markRequestException(e, e.getMessage());
+            Error error = Error.get(RestCrudConstants.ERR_REST_FIND, e.toString());
+            savedSearchMetricCtx.markRequestException(error);
+            findMetricCtx.markRequestException(error);
             LOGGER.error("saved_search failure: {}", e);
-            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_FIND, e.toString()));
+            return new CallStatus(error);
         } finally {
            savedSearchMetricCtx.endRequestMonitoring();
            if (r != null) {

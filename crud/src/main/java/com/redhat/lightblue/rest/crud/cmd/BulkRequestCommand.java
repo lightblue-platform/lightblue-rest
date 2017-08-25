@@ -53,9 +53,10 @@ public class BulkRequestCommand extends AbstractRestCommand {
             try {
                 req = getJsonTranslator().parse(BulkRequest.class, JsonUtils.json(request));
             } catch (Exception e) {
-                metricCtx.markRequestException(e, e.getMessage());
+                Error error = Error.get(RestCrudConstants.ERR_REST_ERROR, "Error parsing request");
+                metricCtx.markRequestException(error);
                 LOGGER.error("bulk:parse failure: {}", e);
-                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, "Error parsing request"));
+                return new CallStatus(error);
             }
             try {
                 for (Request r : req.getEntries()) {
@@ -63,20 +64,22 @@ public class BulkRequestCommand extends AbstractRestCommand {
                     addCallerId(r);
                 }
             } catch (Exception e) {
-                metricCtx.markRequestException(e, e.getMessage());
+                Error error = Error.get(RestCrudConstants.ERR_REST_ERROR, "Request is not valid");
+                metricCtx.markRequestException(error);
                 LOGGER.error("bulk:validate failure: {}", e);
-                return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, "Request is not valid"));
+                return new CallStatus(error);
             }
             BulkResponse r = getMediator().bulkRequest(req, metrics);
             return new CallStatus(r);
         } catch (Error e) {
-            metricCtx.markRequestException(e, e.getErrorCode());
+            metricCtx.markRequestException(e);
             LOGGER.error("bulk:generic_error failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
-            metricCtx.markRequestException(e, e.getMessage());
+            Error error = Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString());
+            metricCtx.markRequestException(error);
             LOGGER.error("bulk:generic_exception failure: {}", e);
-            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_ERROR, e.toString()));
+            return new CallStatus(error);
         } finally {
             metricCtx.endRequestMonitoring();
         }
