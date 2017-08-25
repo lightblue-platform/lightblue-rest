@@ -56,7 +56,7 @@ public class DeleteCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-    	RequestMetrics.Context metricCtx = metrics.startEntityRequest("delete", entity, version);
+        RequestMetrics.Context metricCtx = metrics.startEntityRequest("delete", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

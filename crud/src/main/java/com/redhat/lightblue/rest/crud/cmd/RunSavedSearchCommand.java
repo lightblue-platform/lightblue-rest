@@ -71,8 +71,8 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-    	RequestMetrics.Context savedSearchMetricCtx = metrics.startEntityRequest("savedsearch", entity, version);
-    	RequestMetrics.Context findMetricCtx = null;
+        RequestMetrics.Context savedSearchMetricCtx = metrics.startEntityRequest("savedsearch", entity, version);
+        RequestMetrics.Context findMetricCtx = null;
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -110,7 +110,6 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
         } catch (Exception e) {
             Error error = Error.get(RestCrudConstants.ERR_REST_FIND, e.toString());
             savedSearchMetricCtx.markRequestException(error);
-            findMetricCtx.markRequestException(error);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(error);
         } finally {

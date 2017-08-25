@@ -43,7 +43,7 @@ public class BulkRequestCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-    	RequestMetrics.Context metricCtx = metrics.startBulkRequest();
+        RequestMetrics.Context metricCtx = metrics.startBulkRequest();
         LOGGER.debug("bulk request");
         Error.reset();
         Error.push("rest");

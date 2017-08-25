@@ -56,7 +56,7 @@ public class SaveCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-    	RequestMetrics.Context metricCtx = metrics.startEntityRequest("save", entity, version);
+        RequestMetrics.Context metricCtx = metrics.startEntityRequest("save", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
