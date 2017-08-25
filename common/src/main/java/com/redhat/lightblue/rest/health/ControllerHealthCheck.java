@@ -1,11 +1,12 @@
 package com.redhat.lightblue.rest.health;
 
-import java.util.concurrent.TimeUnit;
-
 import com.codahale.metrics.health.HealthCheck;
 import com.codahale.metrics.health.annotation.Async;
 import com.redhat.lightblue.crud.CRUDController;
 import com.redhat.lightblue.crud.CRUDHealth;
+
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Metrics Health check class for CRUD Controller health
@@ -21,10 +22,20 @@ public class ControllerHealthCheck extends HealthCheck {
     @Override
     protected Result check() throws Exception {
         CRUDHealth health = controller.checkHealth();
+
+        ResultBuilder resultBuilder;
+
         if (health.isHealthy()) {
-            return Result.healthy(health.details());
+            resultBuilder = Result.builder().healthy();
         } else {
-            return Result.unhealthy(health.details());
+            resultBuilder = Result.builder().unhealthy();
         }
+
+        for (Map.Entry<String, Object> entry : health.details().entrySet()) {
+            resultBuilder.withDetail(entry.getKey(), entry.getValue());
+        }
+
+        return resultBuilder.build();
     }
+
 }
