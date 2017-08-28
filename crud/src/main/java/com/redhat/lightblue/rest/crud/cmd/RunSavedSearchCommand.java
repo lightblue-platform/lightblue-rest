@@ -71,8 +71,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context savedSearchMetricCtx = metrics.startEntityRequest("savedsearch", entity, version);
-        RequestMetrics.Context findMetricCtx = null;
+        RequestMetrics.Context metricCtx = metrics.startSavedSearchRequest("savedsearch", searchName, entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
@@ -100,25 +99,23 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
                 req.setTo(to.longValue());
             }
             LOGGER.debug("Request:{}",req);
-            findMetricCtx = metrics.startEntityRequest("find", req.getEntityVersion().getEntity(), req.getEntityVersion().getVersion());
             r = getMediator().find(req);
             return new CallStatus(r);
         } catch (Error e) {
-            savedSearchMetricCtx.markRequestException(e);
+            metricCtx.markRequestException(e);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(e);
         } catch (Exception e) {
             Error error = Error.get(RestCrudConstants.ERR_REST_FIND, e.toString());
-            savedSearchMetricCtx.markRequestException(error);
+            metricCtx.markRequestException(error);
             LOGGER.error("saved_search failure: {}", e);
             return new CallStatus(error);
         } finally {
-           savedSearchMetricCtx.endRequestMonitoring();
-           if (r != null) {
-              findMetricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
-           } else {
-              findMetricCtx.endRequestMonitoring();
-           } 	
+            if (r != null) {
+               metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
+            } else {
+               metricCtx.endRequestMonitoring();
+            } 	
         }
     }
 }
