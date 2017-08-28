@@ -9,6 +9,7 @@ import com.redhat.lightblue.util.metrics.DropwizardRequestMetrics;
 import com.redhat.lightblue.util.metrics.MetricRegistryFactory;
 import com.redhat.lightblue.util.metrics.RequestMetrics;
 
+import javax.ws.rs.core.Response;
 import java.util.concurrent.TimeUnit;
 
 @Async(period = 10, unit = TimeUnit.SECONDS)
@@ -23,8 +24,8 @@ public class ReadHealthCheck extends HealthCheck {
         RequestMetrics metrics = new DropwizardRequestMetrics(MetricRegistryFactory.getJmxMetricRegistry());
         CallStatus callStatus = new FindCommand(entity, version, request, metrics).run();
 
-        if(callStatus.hasErrors()){
-            return Result.unhealthy("Reads are not healthy: " + callStatus.getErrors());
+        if(!Response.Status.OK.equals(callStatus.getHttpStatus())){
+            return Result.unhealthy("Reads are not healthy: " + callStatus.getReturnValue());
         }
         return Result.healthy();
     }

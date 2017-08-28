@@ -18,21 +18,19 @@
  */
 package com.redhat.lightblue.rest;
 
-import java.util.List;
-import java.util.Collection;
-import java.util.ArrayList;
-
-import static javax.ws.rs.core.Response.Status;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.Response;
-
-import com.redhat.lightblue.util.JsonObject;
 import com.redhat.lightblue.util.Error;
+import com.redhat.lightblue.util.JsonObject;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static javax.ws.rs.core.Response.Status;
 
 /**
  * Status information returned from Hystrix commands. It contains the return
@@ -43,6 +41,7 @@ public class CallStatus<T extends JsonObject> {
 
     private List<Error> errors;
     private T returnValue;
+    private Status status;
 
     private static JsonNodeFactory factory = JsonNodeFactory.withExactBigDecimals(true);
 
@@ -54,7 +53,15 @@ public class CallStatus<T extends JsonObject> {
     }
 
     /**
-     * Construct a CallStatus witht the given error
+     * Construct a CallStatus with the given return value
+     */
+    public CallStatus(T ret, Status status) {
+        this.returnValue = ret;
+        this.status = status;
+    }
+
+    /**
+     * Construct a CallStatus with the given error
      */
     public CallStatus(Error x) {
         this.errors = new ArrayList<>();
@@ -115,6 +122,10 @@ public class CallStatus<T extends JsonObject> {
         return errors != null && !errors.isEmpty();
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     /**
      * If there are errors, returns an object containing an array of errors, and
      * a status field with value "ERROR". If there are no errors, returns the
@@ -133,7 +144,6 @@ public class CallStatus<T extends JsonObject> {
         } else {
             return returnValue == null ? factory.objectNode() : returnValue.toJson();
         }
-
     }
 
     /**
@@ -148,7 +158,7 @@ public class CallStatus<T extends JsonObject> {
                 return HttpErrorMapper.getStatus(l.get(0));
             }
         }
-        return Status.OK;
+        return (status == null) ? Status.OK : status;
     }
 
     @Override

@@ -29,6 +29,7 @@ import com.redhat.lightblue.util.metrics.RequestMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.core.Response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -49,14 +50,13 @@ public class CheckDiagnosticsCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-
         RequestMetrics.Context context = metrics.startDiagnosticsRequest();
         LOGGER.debug("run: diagnostic");
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         try {
-            CallStatus callStatus = new CallStatus();
+            Response.Status healthCheckResponse = Response.Status.OK;
             Map<String, HealthCheck.Result> healthCheckResults = new LinkedHashMap<>();
             for (Map.Entry<String, Result> entry : healthCheckRegistry.runHealthChecks().entrySet()) {
                 if (entry.getValue().isHealthy()) {
@@ -66,10 +66,11 @@ public class CheckDiagnosticsCommand extends AbstractRestCommand {
                     String errorDetails = entry.getKey().toString() + " " + entry.getValue().getDetails();
                     Error.push("diagnosticCheck failed! " + errorDetails);
                     LOGGER.debug("diagnosticCheck failed!", errorDetails);
-                    return new CallStatus(Error.get(RestCrudConstants.ERR_REST_CHECK_DIAGNOSTICS, errorDetails));
+                    healthCheckResults.put(entry.getKey(), entry.getValue());
+                    healthCheckResponse = Response.Status.SERVICE_UNAVAILABLE;
                 }
             }
-            return new CallStatus(new CrudCheckResponse(healthCheckResults));
+            return new CallStatus(new CrudCheckResponse(healthCheckResults), healthCheckResponse);
         } catch (Error e) {
             context.markRequestException(e);
             LOGGER.error("diagnosticCheck failure: {}", e);
@@ -77,7 +78,7 @@ public class CheckDiagnosticsCommand extends AbstractRestCommand {
         } catch (Exception e) {
             context.markRequestException(e);
             LOGGER.error("diagnosticCheck failure: {}", e);
-            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_CHECK_HEALTH, e.toString()));
+            return new CallStatus(Error.get(RestCrudConstants.ERR_REST_CHECK_DIAGNOSTICS, e.toString()));
         } finally {
             context.endRequestMonitoring();
         }

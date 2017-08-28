@@ -29,6 +29,7 @@ import com.redhat.lightblue.util.metrics.RequestMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.core.Response;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -45,20 +46,18 @@ public class CheckHealthCommand extends AbstractRestCommand {
     public CheckHealthCommand(HealthCheckRegistry healthCheckRegistry, RequestMetrics metrics) {
         this.healthCheckRegistry = healthCheckRegistry;
         this.metrics = metrics;
-
     }
 
     @Override
     public CallStatus run() {
-
         RequestMetrics.Context context = metrics.startHealthRequest();
         LOGGER.debug("run: health");
         Error.reset();
         Error.push("rest");
         Error.push(getClass().getSimpleName());
         try {
+            Response.Status healthCheckResponse = Response.Status.OK;
             Map<String, HealthCheck.Result> healthCheckResults = new LinkedHashMap<>();
-            CallStatus callStatus = new CallStatus();
             for (Map.Entry<String, Result> entry : healthCheckRegistry.runHealthChecks().entrySet()) {
                 if (entry.getValue().isHealthy()) {
                     LOGGER.debug("healthCheck is OK", entry.getKey());
@@ -67,10 +66,11 @@ public class CheckHealthCommand extends AbstractRestCommand {
                     String errorDetails = entry.getKey().toString() + " " + entry.getValue().getDetails();
                     Error.push("healthCheck failed! " + errorDetails);
                     LOGGER.debug("healthCheck failed!", errorDetails);
-                    return new CallStatus(Error.get(RestCrudConstants.ERR_REST_CHECK_HEALTH, errorDetails));
+                    healthCheckResults.put(entry.getKey(), entry.getValue());
+                    healthCheckResponse = Response.Status.SERVICE_UNAVAILABLE;
                 }
             }
-            return new CallStatus(new CrudCheckResponse(healthCheckResults));
+            return new CallStatus(new CrudCheckResponse(healthCheckResults), healthCheckResponse);
         } catch (Error e) {
             context.markRequestException(e);
             LOGGER.error("checkHealth failure: {}", e);

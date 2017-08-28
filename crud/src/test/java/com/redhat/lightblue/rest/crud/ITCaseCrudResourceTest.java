@@ -467,7 +467,7 @@ public class ITCaseCrudResourceTest {
         ClientResponse<String> response = request.get(String.class);
         ObjectNode jsonNode = (ObjectNode) new ObjectMapper().readTree(response.getEntity());
 
-        System.out.println("HealthCheckMessage: " + jsonNode.elements().next().get("message").asText());
+        System.out.println("DiagnosticCheckMessage: " + jsonNode.elements().next().get("message").asText());
         assertTrue(jsonNode.elements().next().get("healthy").asBoolean());
     }
 
@@ -475,7 +475,7 @@ public class ITCaseCrudResourceTest {
     @RunAsClient
     public void testHealthCheckAsClient(@ArquillianResource URL url) throws Exception {
         ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
-                .path("health")
+                .path("diagnostics")
                 .build()
                 .toString());
         request.accept(MediaType.APPLICATION_JSON);
