@@ -71,7 +71,7 @@ public class RunSavedSearchCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context metricCtx = metrics.startSavedSearchRequest("savedsearch", searchName, entity, version);
+        RequestMetrics.Context metricCtx = metrics.startSavedSearchRequest(searchName, entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
