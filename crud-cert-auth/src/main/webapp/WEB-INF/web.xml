@@ -38,6 +38,13 @@
         </web-resource-collection>
     </security-constraint>
 
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Diagnostics servlet (Unauth)</web-resource-name>
+            <url-pattern>/diagnostics</url-pattern>
+        </web-resource-collection>
+    </security-constraint>
+
     <login-config>
         <auth-method>CLIENT-CERT</auth-method>
     </login-config>
