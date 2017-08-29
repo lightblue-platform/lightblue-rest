@@ -113,7 +113,7 @@ public class FindCommand extends AbstractRestCommand {
                         if(!streamResponse.documentStream.hasNext()) {
                             chunkNode.set("last",JsonNodeFactory.instance.booleanNode(true));
                         }
-                        chunkNode.set("processed",doc.getRoot());
+                        chunkNode.set("processed",doc.getOutputDocument().getRoot());
                         if(doc.getResultMetadata()!=null)
                             chunkNode.set("resultMetadata",doc.getResultMetadata().toJson());
                         writer.write(chunkNode.toString());
