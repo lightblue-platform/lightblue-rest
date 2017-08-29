@@ -18,8 +18,23 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Arrays;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.eclipse.jetty.io.WriterOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.redhat.lightblue.crud.DocCtx;
+import com.redhat.lightblue.crud.ListDocumentStream;
+import com.redhat.lightblue.mediator.StreamingResponse;
+import com.redhat.lightblue.util.JsonDoc;
 
 /**
  * @author nmalik
@@ -57,5 +72,36 @@ public class FindCommandTest extends AbstractRestCommandTest {
         Assert.assertNotNull(output);
 
         Assert.assertTrue(output.contains("Request is not valid"));
+    }
+
+    @Test
+    public void runFindWithStream() throws WebApplicationException, IOException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectNode rootDoc = mapper.createObjectNode().put("foo", "bar");
+        ObjectNode projectedDoc = mapper.createObjectNode();
+
+        DocCtx doc = new DocCtx(new JsonDoc(rootDoc));
+        doc.setOutputDocument(new JsonDoc(projectedDoc));
+
+        Assert.assertNotNull(doc.getRoot());
+        Assert.assertNotNull(doc.getOutputDocument().getRoot());
+        Assert.assertNotNull(doc.getRoot().get("foo"));
+        Assert.assertNull(doc.getOutputDocument().getRoot().get("foo"));
+
+        StreamingResponse sr = new StreamingResponse();
+        sr.documentStream = new ListDocumentStream<>(Arrays.asList(new DocCtx[] { doc }));
+        mediator.streamingResponse = sr;
+
+        FindCommand command = new FindCommand(mediator, "name", "version", "{\"request\":\"data\"}", true);
+
+        command.run();
+
+        Assert.assertEquals("findAndStream", mediator.methodCalled);
+
+        StringWriter sw = new StringWriter();
+        command.getResponseStream().write(new WriterOutputStream(sw));
+
+        Assert.assertTrue("Should return projected doc: {}, but the response is "+sw.toString(), sw.toString().endsWith("\"processed\":{}}"));
     }
 }
