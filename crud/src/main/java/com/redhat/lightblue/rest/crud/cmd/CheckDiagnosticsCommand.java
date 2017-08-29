@@ -59,14 +59,13 @@ public class CheckDiagnosticsCommand extends AbstractRestCommand {
             Response.Status healthCheckResponse = Response.Status.OK;
             Map<String, HealthCheck.Result> healthCheckResults = new LinkedHashMap<>();
             for (Map.Entry<String, Result> entry : healthCheckRegistry.runHealthChecks().entrySet()) {
+                healthCheckResults.put(entry.getKey(), entry.getValue());
                 if (entry.getValue().isHealthy()) {
                     LOGGER.debug("diagnosticCheck is OK", entry.getKey());
-                    healthCheckResults.put(entry.getKey(), entry.getValue());
                 } else {
                     String errorDetails = entry.getKey().toString() + " " + entry.getValue().getDetails();
                     Error.push("diagnosticCheck failed! " + errorDetails);
                     LOGGER.debug("diagnosticCheck failed!", errorDetails);
-                    healthCheckResults.put(entry.getKey(), entry.getValue());
                     healthCheckResponse = Response.Status.SERVICE_UNAVAILABLE;
                 }
             }

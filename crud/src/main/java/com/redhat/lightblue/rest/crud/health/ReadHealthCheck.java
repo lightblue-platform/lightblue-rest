@@ -24,10 +24,16 @@ public class ReadHealthCheck extends HealthCheck {
         RequestMetrics metrics = new DropwizardRequestMetrics(MetricRegistryFactory.getJmxMetricRegistry());
         CallStatus callStatus = new FindCommand(entity, version, request, metrics).run();
 
-        if(!Response.Status.OK.equals(callStatus.getHttpStatus())){
-            return Result.unhealthy("Reads are not healthy: " + callStatus.getReturnValue());
+        ResultBuilder resultBuilder;
+
+        if (Response.Status.OK.equals(callStatus.getHttpStatus())) {
+            resultBuilder = Result.builder().healthy();
+        } else {
+            resultBuilder = Result.builder().unhealthy().withMessage("Reads are not healthy");
         }
-        return Result.healthy();
+        resultBuilder.withDetail("readResponse", callStatus.getReturnValue());
+
+        return resultBuilder.build();
     }
 
     private String getFindTestRequest(String entity, String version) throws Exception {
