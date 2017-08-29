@@ -166,7 +166,7 @@ public class FindCommand extends AbstractRestCommand {
             // Until streaming is supported in mediator, we'll get the
             // results and stream them
             if(stream) {
-                streamResponse=getMediator().findAndStream(ireq);
+                streamResponse = getMediator().findAndStream(ireq);
                 return new CallStatus(new Response());
             } else {
                 r = getMediator().find(ireq);
@@ -182,7 +182,7 @@ public class FindCommand extends AbstractRestCommand {
             LOGGER.error("find:generic_exception failure: {}", e);
             return new CallStatus(error);
         } finally {
-            if (!stream) {
+            if (streamResponse == null) {
                if (r != null) {
                   metricCtx.markAllErrorsAndEndRequestMonitoring(r.getErrors());
                } else {
