@@ -18,18 +18,8 @@
  */
 package com.redhat.lightblue.rest.crud.cmd;
 
-import com.redhat.lightblue.Response;
-import com.redhat.lightblue.config.CrudConfiguration;
-import com.redhat.lightblue.config.MetadataConfiguration;
-import com.redhat.lightblue.crud.DeleteRequest;
-import com.redhat.lightblue.crud.Factory;
-import com.redhat.lightblue.crud.FindRequest;
-import com.redhat.lightblue.crud.InsertionRequest;
-import com.redhat.lightblue.crud.SaveRequest;
-import com.redhat.lightblue.crud.UpdateRequest;
-import com.redhat.lightblue.mediator.Mediator;
-import com.redhat.lightblue.metadata.Metadata;
-import com.redhat.lightblue.rest.RestConfiguration;
+import java.io.File;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -39,7 +29,20 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.After;
 import org.junit.runner.RunWith;
 
-import java.io.File;
+import com.redhat.lightblue.Response;
+import com.redhat.lightblue.config.CrudConfiguration;
+import com.redhat.lightblue.config.MetadataConfiguration;
+import com.redhat.lightblue.crud.DeleteRequest;
+import com.redhat.lightblue.crud.DocCtx;
+import com.redhat.lightblue.crud.Factory;
+import com.redhat.lightblue.crud.FindRequest;
+import com.redhat.lightblue.crud.InsertionRequest;
+import com.redhat.lightblue.crud.SaveRequest;
+import com.redhat.lightblue.crud.UpdateRequest;
+import com.redhat.lightblue.mediator.Mediator;
+import com.redhat.lightblue.mediator.StreamingResponse;
+import com.redhat.lightblue.metadata.Metadata;
+import com.redhat.lightblue.rest.RestConfiguration;
 
 /**
  *
@@ -113,6 +116,15 @@ public abstract class AbstractRestCommandTest {
             methodCalled = "delete";
             args = new Object[]{req};
             return new Response();
+        }
+
+        StreamingResponse streamingResponse;
+
+        @Override
+        public StreamingResponse findAndStream(FindRequest req) {
+            methodCalled = "findAndStream";
+            args = new Object[] {req};
+            return streamingResponse;
         }
     }
 
