@@ -115,6 +115,20 @@ public class FindCommandTest extends AbstractRestCommandTest {
     }
 
     @Test
+    public void runFindWithReturnAndMetrics() {
+        FindCommand command = new FindCommand(mediator, "name", "version", "{\"request\":\"data\"}", requestMetrics);
+
+        command.run();
+        
+        Counter activeRequestCounter = metricsRegistry.counter("api.find.name.version.requests.active");
+        Timer completedRequestTimer = metricsRegistry.timer("api.find.name.version.requests.latency");
+        
+        Assert.assertEquals("find", mediator.methodCalled);
+        Assert.assertEquals(0, activeRequestCounter.getCount());
+        Assert.assertEquals(1, completedRequestTimer.getCount());
+    }
+    
+    @Test
     public void runFindWithParseProblemAndMetrics() {
         FindCommand command = new FindCommand(mediator, "name", "version", "{\"request\":\"invalid}", requestMetrics);
 
