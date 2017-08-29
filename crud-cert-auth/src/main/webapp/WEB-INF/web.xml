@@ -26,21 +26,21 @@
 
     <security-constraint>
         <web-resource-collection>
-            <web-resource-name>Version servlet (Unauth)</web-resource-name>
+            <web-resource-name>Version endpoint (Unauth)</web-resource-name>
             <url-pattern>/version</url-pattern>
         </web-resource-collection>
     </security-constraint>
 
     <security-constraint>
         <web-resource-collection>
-            <web-resource-name>Health servlet (Unauth)</web-resource-name>
+            <web-resource-name>Health endpoint (Unauth)</web-resource-name>
             <url-pattern>/health</url-pattern>
         </web-resource-collection>
     </security-constraint>
 
     <security-constraint>
         <web-resource-collection>
-            <web-resource-name>Diagnostics servlet (Unauth)</web-resource-name>
+            <web-resource-name>Diagnostics endpoint (Unauth)</web-resource-name>
             <url-pattern>/diagnostics</url-pattern>
         </web-resource-collection>
     </security-constraint>
