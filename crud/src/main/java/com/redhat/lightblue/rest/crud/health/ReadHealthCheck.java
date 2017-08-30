@@ -31,7 +31,7 @@ public class ReadHealthCheck extends HealthCheck {
         } else {
             resultBuilder = Result.builder().unhealthy().withMessage("Reads are not healthy");
         }
-        resultBuilder.withDetail("readResponse", callStatus.getReturnValue());
+        resultBuilder.withDetail("readResponse", callStatus.getReturnValue().toJson());
 
         return resultBuilder.build();
     }

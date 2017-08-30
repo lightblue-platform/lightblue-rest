@@ -27,9 +27,13 @@ public class CrudCheckResponse extends JsonObject {
 
             if (result.getValue().getDetails() != null) {
               for (Map.Entry<String, Object> entry : result.getValue().getDetails().entrySet()) {
-                  if(null != entry.getValue()) {
-                      resultResponse.put(entry.getKey(), entry.getValue().toString());
+                if(null != entry.getValue()) {
+                  if(entry.getValue() instanceof ObjectNode) {
+                    resultResponse.put(entry.getKey(), (ObjectNode)entry.getValue());
+                  } else {
+                    resultResponse.put(entry.getKey(), entry.getValue().toString());
                   }
+                }
               }
             }
 
