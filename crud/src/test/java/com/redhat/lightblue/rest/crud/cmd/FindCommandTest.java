@@ -136,7 +136,7 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         Counter activeRequestCounter = metricsRegistry.counter("api.find.name.version.requests.active");
         Timer completedRequestTimer = metricsRegistry.timer("api.find.name.version.requests.latency");
-        Meter restExceptionMeter = metricsRegistry.meter("api.find.name.version.requests.exception.Error.rest-crud-RestFindError");
+        Meter restExceptionMeter = metricsRegistry.meter("api.find.name.version.requests.exception.Error.rest_crud_RestFindError");
         
         Assert.assertTrue(output.contains("Error during the parse of the request"));
         Assert.assertEquals(0, activeRequestCounter.getCount());
@@ -152,7 +152,7 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         Counter activeRequestCounter = metricsRegistry.counter("api.find.version.requests.active");
         Timer completedRequestTimer = metricsRegistry.timer("api.find.version.requests.latency");
-        Meter restExceptionMeter = metricsRegistry.meter("api.find.version.requests.exception.Error.rest-crud-RestFindError");
+        Meter restExceptionMeter = metricsRegistry.meter("api.find.version.requests.exception.Error.rest_crud_RestFindError");
         
         Assert.assertTrue(output.contains("Request is not valid"));
         Assert.assertEquals(0, activeRequestCounter.getCount());
@@ -168,7 +168,7 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         Counter activeRequestCounter = metricsRegistry.counter("api.stream.find.name.version.requests.active");
         Timer completedRequestTimer = metricsRegistry.timer("api.stream.find.name.version.requests.latency");
-        Meter restExceptionMeter = metricsRegistry.meter("api.stream.find.name.version.requests.exception.Error.rest-crud-RestFindError");
+        Meter restExceptionMeter = metricsRegistry.meter("api.stream.find.name.version.requests.exception.Error.rest_crud_RestFindError");
         
         Assert.assertTrue(output.contains("Error during the parse of the request"));
         Assert.assertEquals(0, activeRequestCounter.getCount());
@@ -184,7 +184,7 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         Counter activeRequestCounter = metricsRegistry.counter("api.stream.find.version.requests.active");
         Timer completedRequestTimer = metricsRegistry.timer("api.stream.find.version.requests.latency");
-        Meter restExceptionMeter = metricsRegistry.meter("api.stream.find.version.requests.exception.Error.rest-crud-RestFindError");
+        Meter restExceptionMeter = metricsRegistry.meter("api.stream.find.version.requests.exception.Error.rest_crud_RestFindError");
         
         Assert.assertTrue(output.contains("Request is not valid"));
         Assert.assertEquals(0, activeRequestCounter.getCount());
