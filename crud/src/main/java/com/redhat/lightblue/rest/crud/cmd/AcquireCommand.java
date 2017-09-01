@@ -21,13 +21,14 @@ package com.redhat.lightblue.rest.crud.cmd;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.redhat.lightblue.extensions.synch.Locking;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 
 public class AcquireCommand extends AbstractLockCommand {
 
     private final Long ttl;
 
-    public AcquireCommand(String domain, String caller, String resource, Long ttl) {
-        super(domain, caller, resource);
+    public AcquireCommand(String domain, String caller, String resource, Long ttl, RequestMetrics metrics) {
+        super(domain, caller, resource, metrics);
         this.ttl = ttl;
     }
 
@@ -36,4 +37,9 @@ public class AcquireCommand extends AbstractLockCommand {
         boolean ret = locking.acquire(caller, resource, ttl);
         return NODE_FACTORY.booleanNode(ret);
     }
+    
+    @Override
+    public String getLockCommandName() {
+        return "acquire";
+    }       
 }

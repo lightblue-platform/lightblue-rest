@@ -21,6 +21,8 @@ package com.redhat.lightblue.rest.crud.cmd;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.redhat.lightblue.util.metrics.NoopRequestMetrics;
+
 /**
  *
  * @author nmalik
@@ -28,7 +30,7 @@ import org.junit.Test;
 public class UpdateCommandTest extends AbstractRestCommandTest {
     @Test
     public void execute() {
-        UpdateCommand command = new UpdateCommand(mediator, "name", "version", "{\"request\":\"data\"}");
+        UpdateCommand command = new UpdateCommand(mediator, "name", "version", "{\"request\":\"data\"}", new NoopRequestMetrics());
 
         String output = command.run().toString();
 

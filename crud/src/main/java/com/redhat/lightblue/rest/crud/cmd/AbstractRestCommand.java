@@ -21,6 +21,8 @@ package com.redhat.lightblue.rest.crud.cmd;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.redhat.lightblue.ClientIdentification;
@@ -28,12 +30,10 @@ import com.redhat.lightblue.EntityVersion;
 import com.redhat.lightblue.Request;
 import com.redhat.lightblue.config.JsonTranslator;
 import com.redhat.lightblue.mediator.Mediator;
-import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.CallStatus;
+import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.Error;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Note that passing a Mediator in the constructor is optional. If not provided,

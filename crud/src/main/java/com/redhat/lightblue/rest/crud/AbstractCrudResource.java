@@ -49,6 +49,9 @@ import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
 import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
 import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
 import com.redhat.lightblue.rest.crud.cmd.RunSavedSearchCommand;
+import com.redhat.lightblue.util.metrics.DropwizardRequestMetrics;
+import com.redhat.lightblue.util.metrics.MetricRegistryFactory;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.redhat.lightblue.rest.util.QueryTemplateUtils;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
@@ -93,6 +96,12 @@ public abstract class AbstractCrudResource {
         java.security.Security.setProperty("networkaddress.cache.ttl", "30");
     }
 
+    /**
+     * Thread-safe, shared static instance for all requests. 
+     */
+    private static final RequestMetrics metrics =
+            new DropwizardRequestMetrics(MetricRegistryFactory.getJmxMetricRegistry());
+
     @GET
     @LZF
     @Path("/search/{entity}")
@@ -111,7 +120,7 @@ public abstract class AbstractCrudResource {
         }
         CallStatus st=new FindCommand(freq.getEntityVersion().getEntity(),
                                       freq.getEntityVersion().getVersion(),
-                                      freq.toJson().toString()).run();
+                                      freq.toJson().toString(), metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -228,7 +237,7 @@ public abstract class AbstractCrudResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         Error.reset();
-        CallStatus st=new RunSavedSearchCommand(searchName,entity,version,p,s,f,t,parameters).run();
+        CallStatus st=new RunSavedSearchCommand(searchName,entity,version,p,s,f,t,parameters, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }        
     
@@ -237,7 +246,7 @@ public abstract class AbstractCrudResource {
     @Path("/lock/")
     public Response lock(String request) {
         Error.reset();
-        CallStatus st = getLockCommand(request).run();
+        CallStatus st = getLockCommand(request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -248,7 +257,7 @@ public abstract class AbstractCrudResource {
                             @PathParam("resourceId") String resourceId,
                             @QueryParam("ttl") Long ttl) {
         Error.reset();
-        CallStatus st = new AcquireCommand(domain, callerId, resourceId, ttl).run();
+        CallStatus st = new AcquireCommand(domain, callerId, resourceId, ttl, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -258,7 +267,7 @@ public abstract class AbstractCrudResource {
                             @PathParam("callerId") String callerId,
                             @PathParam("resourceId") String resourceId) {
         Error.reset();
-        CallStatus st = new ReleaseCommand(domain, callerId, resourceId).run();
+        CallStatus st = new ReleaseCommand(domain, callerId, resourceId, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -268,7 +277,7 @@ public abstract class AbstractCrudResource {
                                  @PathParam("callerId") String callerId,
                                  @PathParam("resourceId") String resourceId) {
         Error.reset();
-        CallStatus st = new GetLockCountCommand(domain, callerId, resourceId).run();
+        CallStatus st = new GetLockCountCommand(domain, callerId, resourceId, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -278,7 +287,7 @@ public abstract class AbstractCrudResource {
                          @PathParam("callerId") String callerId,
                          @PathParam("resourceId") String resourceId) {
         Error.reset();
-        CallStatus st = new LockPingCommand(domain, callerId, resourceId).run();
+        CallStatus st = new LockPingCommand(domain, callerId, resourceId, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -324,7 +333,7 @@ public abstract class AbstractCrudResource {
                            @PathParam(PARAM_VERSION) String version,
                            String request) {
         Error.reset();
-        CallStatus st = new InsertCommand(entity, version, request).run();
+        CallStatus st = new InsertCommand(entity, version, request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -343,7 +352,7 @@ public abstract class AbstractCrudResource {
                          @PathParam(PARAM_VERSION) String version,
                          String request) {
         Error.reset();
-        CallStatus st = new SaveCommand(entity, version, request).run();
+        CallStatus st = new SaveCommand(entity, version, request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -362,7 +371,7 @@ public abstract class AbstractCrudResource {
                            @PathParam(PARAM_VERSION) String version,
                            String request) {
         Error.reset();
-        CallStatus st = new UpdateCommand(entity, version, request).run();
+        CallStatus st = new UpdateCommand(entity, version, request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -381,7 +390,7 @@ public abstract class AbstractCrudResource {
                            @PathParam(PARAM_VERSION) String version,
                            String req) {
         Error.reset();
-        CallStatus st = new DeleteCommand(entity, version, req).run();
+        CallStatus st = new DeleteCommand(entity, version, req, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -411,7 +420,7 @@ public abstract class AbstractCrudResource {
                          String request) {
         Error.reset();
         boolean bstream=stream!=null&&stream;
-        FindCommand f=new FindCommand(entity, version, request,bstream);
+        FindCommand f=new FindCommand(entity, version, request, bstream, metrics);
         CallStatus st=f.run();
         if(!st.hasErrors()&&bstream) {
             // This is how you stream. You put a response stream into
@@ -437,7 +446,7 @@ public abstract class AbstractCrudResource {
                             @PathParam(PARAM_VERSION) String version,
                             String request) {
         Error.reset();
-        CallStatus st = new ExplainCommand(entity, version, request).run();
+        CallStatus st = new ExplainCommand(entity, version, request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -446,7 +455,7 @@ public abstract class AbstractCrudResource {
     @Path("/bulk")
     public Response bulk(String request) {
         Error.reset();
-        CallStatus st = new BulkRequestCommand(request).run();
+        CallStatus st = new BulkRequestCommand(request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -468,7 +477,7 @@ public abstract class AbstractCrudResource {
                              @PathParam("version") String version,
                              @PathParam("path") String path,
                              @QueryParam("n") Integer n) {
-        CallStatus st = new GenerateCommand(entity, version, path, n == null ? 1 : n).run();
+        CallStatus st = new GenerateCommand(entity, version, path, n == null ? 1 : n, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -509,7 +518,7 @@ public abstract class AbstractCrudResource {
                                @QueryParam("maxResults") Long maxResults) throws IOException {
         Error.reset();
         String request=buildSimpleRequest(entity,version,q,p,s,from,to,maxResults).toString();
-        CallStatus st = new FindCommand(null, entity, version, request).run();
+        CallStatus st = new FindCommand(null, entity, version, request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 
@@ -541,7 +550,7 @@ public abstract class AbstractCrudResource {
                                   @QueryParam("maxResults") Long maxResults) throws IOException {
         Error.reset();
         String request=buildSimpleRequest(entity,version,q,p,s,from,to,maxResults).toString();
-        CallStatus st = new ExplainCommand(null, entity, version, request).run();
+        CallStatus st = new ExplainCommand(null, entity, version, request, metrics).run();
         return Response.status(st.getHttpStatus()).entity(st.toString()).build();
     }
 

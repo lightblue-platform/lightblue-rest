@@ -21,6 +21,8 @@ package com.redhat.lightblue.rest.crud.cmd;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.redhat.lightblue.util.metrics.NoopRequestMetrics;
+
 /**
  * @author nmalik
  */
@@ -28,7 +30,7 @@ public class SaveCommandTest extends AbstractRestCommandTest {
 
     @Test
     public void execute() {
-        SaveCommand command = new SaveCommand(mediator, "name", "version", "{\"request\":\"data\"}");
+        SaveCommand command = new SaveCommand(mediator, "name", "version", "{\"request\":\"data\"}", new NoopRequestMetrics());
 
         String output = command.run().toString();
 
