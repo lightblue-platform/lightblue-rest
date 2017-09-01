@@ -18,17 +18,6 @@
  */
 package com.redhat.lightblue.rest.auth.ldap;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import javax.net.ssl.SSLSocketFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.redhat.lightblue.rest.auth.RolesProvider;
 import com.redhat.lightblue.rest.auth.health.RolesProviderHealth;
 import com.unboundid.ldap.sdk.BindRequest;
@@ -48,6 +37,17 @@ import com.unboundid.ldap.sdk.SimpleBindRequest;
 import com.unboundid.util.DebugType;
 import com.unboundid.util.ssl.SSLUtil;
 import com.unboundid.util.ssl.TrustStoreTrustManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.SSLSocketFactory;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 
 
@@ -193,34 +193,29 @@ public class LdapRolesProvider implements RolesProvider {
 
     @Override
     public RolesProviderHealth checkHealth() {
-
         boolean isHealthy = true;
-        StringBuilder details = null;
-        String failureReason = null;
-
+        Map<String, Object> details = new LinkedHashMap<>();
         try {
             LDAPConnection ldapConnection = connectionPool.getConnection();
-
             if (!ldapConnection.isConnected()) {
                 isHealthy = false;
             }
-
             connectionPool.getHealthCheck().ensureConnectionValidForContinuedUse(ldapConnection);
-
         } catch (LDAPException e) {
-            failureReason = e.getExceptionMessage();
+            details.put("exception", e);
             isHealthy = false;
         }
 
-        details = new StringBuilder("LDAPConnection [DN: ").append(ldapConfiguration.getBindDn()).append(", Status: ")
-                .append(isHealthy);
+        details.put("bindDn", ldapConfiguration.getBindDn());
+        details.put("connectionTimeoutMS", ldapConfiguration.getConnectionTimeoutMS());
+        details.put("poolMaxConnectionAgeMS", ldapConfiguration.getPoolMaxConnectionAgeMS());
+        details.put("ppolSize", ldapConfiguration.getPoolSize());
+        details.put("port", ldapConfiguration.getPort());
+        details.put("responseTimeInMS", ldapConfiguration.getResponseTimeoutMS());
+        details.put("server", ldapConfiguration.getServer());
+        details.put("trustStore", ldapConfiguration.getTrustStore());
+        details.put("useSSL", ldapConfiguration.getUseSSL());
 
-        if (failureReason != null) {
-            details.append(ldapConfiguration.getBindDn()).append(", Failure Reason: ").append(failureReason);
-        }
-
-        details.append("]");
-
-        return new RolesProviderHealth(isHealthy, details.toString());
+        return new RolesProviderHealth(isHealthy, details);
     }
 }

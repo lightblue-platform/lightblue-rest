@@ -36,10 +36,10 @@ public abstract class CrudWebXmls {
         restEasy.appendChild(webXml.createElement("servlet-class"))
                 .appendChild(webXml.createTextNode(HttpServletDispatcher.class.getName()));
         Node restEasyParams = restEasy.appendChild(webXml.createElement("init-param"));
-        restEasyParams.appendChild(webXml.createElement("param-name")
-                .appendChild(webXml.createTextNode("javax.ws.rs.Application")));
-        restEasyParams.appendChild(webXml.createElement("param-value")
-                .appendChild(webXml.createTextNode(restApplicationClass.getName())));
+        restEasyParams.appendChild(webXml.createElement("param-name"))
+                .appendChild(webXml.createTextNode("javax.ws.rs.Application"));
+        restEasyParams.appendChild(webXml.createElement("param-value"))
+                .appendChild(webXml.createTextNode(restApplicationClass.getName()));
 
         Node restEasyMapping = webApp.appendChild(webXml.createElement("servlet-mapping"));
         restEasyMapping.appendChild(webXml.createElement("servlet-name"))

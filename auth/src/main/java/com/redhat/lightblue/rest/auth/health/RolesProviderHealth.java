@@ -1,14 +1,16 @@
 package com.redhat.lightblue.rest.auth.health;
 
+import java.util.Map;
+
 /**
  * Contains health information for the Roles Providers
  */
 public class RolesProviderHealth {
 
     private final boolean isHealthy;
-    private final String details;
+    private final Map<String, Object> details;
 
-    public RolesProviderHealth(boolean isHealthy, String details) {
+    public RolesProviderHealth(boolean isHealthy, Map<String, Object> details) {
         this.isHealthy = isHealthy;
         this.details = details;
     }
@@ -17,7 +19,7 @@ public class RolesProviderHealth {
         return isHealthy;
     }
 
-    public String details() {
+    public Map<String, Object> details() {
         return details;
     }
 

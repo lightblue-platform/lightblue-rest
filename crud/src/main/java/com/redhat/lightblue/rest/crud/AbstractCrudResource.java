@@ -18,26 +18,23 @@
  */
 package com.redhat.lightblue.rest.crud;
 
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Iterator;
-
+import com.codahale.metrics.health.HealthCheckRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.NullNode;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.redhat.lightblue.EntityVersion;
 import com.redhat.lightblue.crud.FindRequest;
+import com.redhat.lightblue.query.FieldProjection;
 import com.redhat.lightblue.query.Projection;
 import com.redhat.lightblue.query.QueryExpression;
-import com.redhat.lightblue.query.FieldProjection;
 import com.redhat.lightblue.query.Sort;
 import com.redhat.lightblue.query.SortKey;
 import com.redhat.lightblue.rest.CallStatus;
 import com.redhat.lightblue.rest.RestConfiguration;
 import com.redhat.lightblue.rest.crud.cmd.AcquireCommand;
 import com.redhat.lightblue.rest.crud.cmd.BulkRequestCommand;
+import com.redhat.lightblue.rest.crud.cmd.CheckDiagnosticsCommand;
+import com.redhat.lightblue.rest.crud.cmd.CheckHealthCommand;
 import com.redhat.lightblue.rest.crud.cmd.DeleteCommand;
 import com.redhat.lightblue.rest.crud.cmd.ExplainCommand;
 import com.redhat.lightblue.rest.crud.cmd.FindCommand;
@@ -46,15 +43,16 @@ import com.redhat.lightblue.rest.crud.cmd.GetLockCountCommand;
 import com.redhat.lightblue.rest.crud.cmd.InsertCommand;
 import com.redhat.lightblue.rest.crud.cmd.LockPingCommand;
 import com.redhat.lightblue.rest.crud.cmd.ReleaseCommand;
+import com.redhat.lightblue.rest.crud.cmd.RunSavedSearchCommand;
 import com.redhat.lightblue.rest.crud.cmd.SaveCommand;
 import com.redhat.lightblue.rest.crud.cmd.UpdateCommand;
-import com.redhat.lightblue.rest.crud.cmd.RunSavedSearchCommand;
-import com.redhat.lightblue.util.metrics.DropwizardRequestMetrics;
-import com.redhat.lightblue.util.metrics.MetricRegistryFactory;
-import com.redhat.lightblue.util.metrics.RequestMetrics;
+import com.redhat.lightblue.rest.crud.health.CrudCheckRegistry;
 import com.redhat.lightblue.rest.util.QueryTemplateUtils;
 import com.redhat.lightblue.util.Error;
 import com.redhat.lightblue.util.JsonUtils;
+import com.redhat.lightblue.util.metrics.DropwizardRequestMetrics;
+import com.redhat.lightblue.util.metrics.MetricRegistryFactory;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
 import com.restcompress.provider.LZF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,11 +66,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Context;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import static com.redhat.lightblue.rest.crud.cmd.AbstractLockCommand.getLockCommand;
 
@@ -101,6 +103,30 @@ public abstract class AbstractCrudResource {
      */
     private static final RequestMetrics metrics =
             new DropwizardRequestMetrics(MetricRegistryFactory.getJmxMetricRegistry());
+
+    private static final HealthCheckRegistry healthCheckRegistry =
+            CrudCheckRegistry.getHealthCheckRegistry();
+
+    private static final HealthCheckRegistry diagnosticsCheckRegistry =
+            CrudCheckRegistry.getDiagnosticCheckRegistry();
+
+    @GET
+    @LZF
+    @Path("/health")
+    public Response health() {
+        Error.reset();
+        CallStatus st = new CheckHealthCommand(healthCheckRegistry, metrics).run();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
+
+    @GET
+    @LZF
+    @Path("/diagnostics")
+    public Response diagnostics() {
+        Error.reset();
+        CallStatus st = new CheckDiagnosticsCommand(diagnosticsCheckRegistry, metrics).run();
+        return Response.status(st.getHttpStatus()).entity(st.toString()).build();
+    }
 
     @GET
     @LZF
