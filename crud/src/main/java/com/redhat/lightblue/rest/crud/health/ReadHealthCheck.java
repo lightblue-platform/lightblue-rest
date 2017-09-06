@@ -18,11 +18,10 @@ public class ReadHealthCheck extends HealthCheck {
     @Override
     protected Result check() throws Exception {
         String entity = "test";
-        String version = "1.0.0";
-        String request = getFindTestRequest(entity, version);
+        String request = getFindTestRequest(entity, null);
 
         RequestMetrics metrics = new DropwizardRequestMetrics(MetricRegistryFactory.getJmxMetricRegistry());
-        CallStatus callStatus = new FindCommand(entity, version, request, metrics).run();
+        CallStatus callStatus = new FindCommand(entity, null, request, metrics).run();
 
         ResultBuilder resultBuilder;
 
