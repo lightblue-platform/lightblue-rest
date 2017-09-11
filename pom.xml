@@ -51,7 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>org.esbtools.lightblue-notification-hook</groupId>
                 <artifactId>lightblue-notification-hook</artifactId>
-                <version>0.1.4-SNAPSHOT</version>
+                <version>${lightblue.notificationhook.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
@@ -141,14 +141,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>com.redhat.lightblue.hook</groupId>
                 <artifactId>lightblue-audit-hook</artifactId>
-                <version>1.11.0-SNAPSHOT</version>
+                <version>${lightblue.audithook.version}</version>
                 <scope>test</scope>
                 <!-- TODO: Testing the audit hook should not be done in the lightblue-rest project -->
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.ldap</groupId>
                 <artifactId>lightblue-ldap-test</artifactId>
-                <version>1.12.0-SNAPSHOT</version>
+                <version>${lightblue.ldap.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
