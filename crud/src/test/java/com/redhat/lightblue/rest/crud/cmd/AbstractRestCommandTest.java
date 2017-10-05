@@ -29,6 +29,8 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.After;
 import org.junit.runner.RunWith;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.redhat.lightblue.OperationStatus;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.config.CrudConfiguration;
 import com.redhat.lightblue.config.MetadataConfiguration;
@@ -83,39 +85,43 @@ public abstract class AbstractRestCommandTest {
             args = null;
         }
 
+        public static Response testResponse() {
+            return new Response(JsonNodeFactory.instance, OperationStatus.COMPLETE);
+        }
+
         @Override
         public Response insert(InsertionRequest req) {
             methodCalled = "insert";
             args = new Object[]{req};
-            return new Response();
+            return testResponse();
         }
 
         @Override
         public Response save(SaveRequest req) {
             methodCalled = "save";
             args = new Object[]{req};
-            return new Response();
+            return testResponse();
         }
 
         @Override
         public Response update(UpdateRequest req) {
             methodCalled = "update";
             args = new Object[]{req};
-            return new Response();
+            return testResponse();
         }
 
         @Override
         public Response find(FindRequest req) {
             methodCalled = "find";
             args = new Object[]{req};
-            return new Response();
+            return testResponse();
         }
 
         @Override
         public Response delete(DeleteRequest req) {
             methodCalled = "delete";
             args = new Object[]{req};
-            return new Response();
+            return testResponse();
         }
 
         StreamingResponse streamingResponse;

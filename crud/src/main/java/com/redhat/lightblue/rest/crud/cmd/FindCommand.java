@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.redhat.lightblue.OperationStatus;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.crud.DocCtx;
 import com.redhat.lightblue.crud.FindRequest;
@@ -167,7 +168,7 @@ public class FindCommand extends AbstractRestCommand {
             // results and stream them
             if(stream) {
                 streamResponse = getMediator().findAndStream(ireq);
-                return new CallStatus(new Response());
+                return new CallStatus(new Response(JsonNodeFactory.withExactBigDecimals(true), OperationStatus.COMPLETE));
             } else {
                 r = getMediator().find(ireq);
                 return new CallStatus(r);
