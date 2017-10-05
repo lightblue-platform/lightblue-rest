@@ -124,7 +124,9 @@ public class FindCommand extends AbstractRestCommand {
                     metricCtx.markRequestException(e);
                 }
                 finally {
-                    streamResponse.documentStream.close();
+                    if (streamResponse.documentStream != null) {
+                        streamResponse.documentStream.close();
+                    }
                     metricCtx.endRequestMonitoring();
                 }
             }
