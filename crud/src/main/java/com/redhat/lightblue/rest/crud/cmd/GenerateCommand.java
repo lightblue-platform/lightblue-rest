@@ -106,8 +106,7 @@ public class GenerateCommand extends AbstractRestCommand {
                         JsonNode node = GeneratedFields.generate(factory, fld, emd);
                         arr.add(node);
                     }
-                    com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
-                    r.setStatus(OperationStatus.COMPLETE);
+                    com.redhat.lightblue.Response r = new com.redhat.lightblue.Response(JsonNodeFactory.withExactBigDecimals(true), OperationStatus.COMPLETE);
                     r.setEntityData(arr);
                     return new CallStatus(r);
                 }
@@ -124,8 +123,7 @@ public class GenerateCommand extends AbstractRestCommand {
         } finally {
             metricCtx.endRequestMonitoring();
         }
-        com.redhat.lightblue.Response r = new com.redhat.lightblue.Response();
-        r.setStatus(OperationStatus.COMPLETE);
+        com.redhat.lightblue.Response r = new com.redhat.lightblue.Response(JsonNodeFactory.withExactBigDecimals(true), OperationStatus.COMPLETE);
         return new CallStatus(r);
     }
 }

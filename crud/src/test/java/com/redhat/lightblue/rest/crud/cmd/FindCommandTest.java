@@ -33,7 +33,9 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.redhat.lightblue.OperationStatus;
 import com.redhat.lightblue.crud.DocCtx;
 import com.redhat.lightblue.crud.ListDocumentStream;
 import com.redhat.lightblue.mediator.StreamingResponse;
@@ -98,7 +100,7 @@ public class FindCommandTest extends AbstractRestCommandTest {
         Assert.assertNotNull(doc.getRoot().get("foo"));
         Assert.assertNull(doc.getOutputDocument().getRoot().get("foo"));
 
-        StreamingResponse sr = new StreamingResponse();
+        StreamingResponse sr = new StreamingResponse(JsonNodeFactory.instance, OperationStatus.COMPLETE);
         sr.documentStream = new ListDocumentStream<>(Arrays.asList(new DocCtx[] { doc }));
         mediator.streamingResponse = sr;
 
@@ -202,7 +204,7 @@ public class FindCommandTest extends AbstractRestCommandTest {
         DocCtx doc = new DocCtx(new JsonDoc(rootDoc));
         doc.setOutputDocument(new JsonDoc(projectedDoc));
 
-        StreamingResponse sr = new StreamingResponse();
+        StreamingResponse sr = new StreamingResponse(JsonNodeFactory.instance, OperationStatus.COMPLETE);
         sr.documentStream = new ListDocumentStream<>(Arrays.asList(new DocCtx[] { doc }));
         mediator.streamingResponse = sr;
 

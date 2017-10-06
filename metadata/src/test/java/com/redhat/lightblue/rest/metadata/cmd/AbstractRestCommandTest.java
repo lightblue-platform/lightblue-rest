@@ -21,6 +21,8 @@ package com.redhat.lightblue.rest.metadata.cmd;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.redhat.lightblue.OperationStatus;
 import com.redhat.lightblue.Response;
 import com.redhat.lightblue.metadata.EntityInfo;
 import com.redhat.lightblue.metadata.EntityMetadata;
@@ -37,16 +39,20 @@ public abstract class AbstractRestCommandTest {
     public static class TestMetadata implements Metadata {
         public Object[] args;
 
+        public static Response testResponse() {
+            return new Response(JsonNodeFactory.instance, OperationStatus.COMPLETE);
+        }
+
         @Override
         public Response getDependencies(String entityName, String version) {
             args = new Object[]{entityName, version};
-            return new Response();
+            return testResponse();
         }
 
         @Override
         public Response getAccess(String entityName, String version) {
             args = new Object[]{entityName, version};
-            return new Response();
+            return testResponse();
         }
 
         @Override
