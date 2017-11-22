@@ -170,14 +170,10 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
 
             LOGGER.debug("Certificate principal:" + certPrincipal);
 
-            //first try getting search name from uid in certificate principle (new certificates)
             String searchName = getLDAPAttribute(certPrincipal, UID);
-            if(StringUtils.isNotBlank(searchName)) {
-                //only try to validate environment if it is a certificate that contains uid
+
+            if(StringUtils.isNotBlank(environment)) {
                 validateEnvironment(certPrincipal);
-            } else {
-                // fallback to getting search name from cn in certificate principle (legacy certificates)
-                searchName = getLDAPAttribute(certPrincipal, CN);
             }
 
             Collection<String> groupNames = rolesProvider.getUserRoles(searchName);
