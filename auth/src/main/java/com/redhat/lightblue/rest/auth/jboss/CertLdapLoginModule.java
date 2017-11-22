@@ -27,9 +27,9 @@ import com.redhat.lightblue.rest.auth.RolesProvider;
 import com.redhat.lightblue.rest.auth.ldap.LdapConfiguration;
 import com.redhat.lightblue.rest.auth.ldap.LdapRolesProvider;
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.logging.Logger;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.auth.spi.BaseCertLoginModule;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.naming.NamingException;
@@ -53,8 +53,9 @@ import java.util.Map;
  *
  */
 public class CertLdapLoginModule extends BaseCertLoginModule {
-    private final Logger LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class);
-    private final Logger ACCESS_LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class + "access");
+    private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class);
+    private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
+
 
     public static final String AUTH_ROLE_NAME = "authRoleName";
     public static final String SERVER = "ldapServer";
