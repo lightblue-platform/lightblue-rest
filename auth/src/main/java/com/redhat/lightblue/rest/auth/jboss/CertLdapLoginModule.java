@@ -53,10 +53,9 @@ import java.util.Map;
  *
  */
 public class CertLdapLoginModule extends BaseCertLoginModule {
-    public static final String UID = "uid";
-    public static final String CN = "cn";
-    public static final String LOCATION = "l";
     private final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CertLdapLoginModule.class);
+    private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
+
 
     public static final String AUTH_ROLE_NAME = "authRoleName";
     public static final String SERVER = "ldapServer";
@@ -74,25 +73,24 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String DEBUG = "debug";
     public static final String KEEP_ALIVE = "keepAlive";
     public static final String ROLES_CACHE_EXPIRY_MS = "rolesCacheExpiryMS";
-
     public static final String ENVIRONMENT = "environment";
+    public static final String ALL_ACCESS_OU = "allAccessOu";
 
-    private static final String[] ALL_VALID_OPTIONS = {AUTH_ROLE_NAME, SERVER, PORT, SEARCH_BASE, BIND_DN, BIND_PWD, USE_SSL, TRUST_STORE, TRUST_STORE_PASSWORD, POOL_SIZE, POOL_MAX_CONNECTION_AGE_MS, ENVIRONMENT,CONNECTION_TIMEOUT_MS,RESPONSE_TIMEOUT_MS,DEBUG,KEEP_ALIVE,ROLES_CACHE_EXPIRY_MS};
+    private static final String[] ALL_VALID_OPTIONS = {
+            AUTH_ROLE_NAME, SERVER, PORT, SEARCH_BASE, BIND_DN, BIND_PWD, USE_SSL,
+            TRUST_STORE, TRUST_STORE_PASSWORD, POOL_SIZE, POOL_MAX_CONNECTION_AGE_MS,
+            CONNECTION_TIMEOUT_MS,RESPONSE_TIMEOUT_MS,DEBUG,KEEP_ALIVE,
+            ROLES_CACHE_EXPIRY_MS, ENVIRONMENT, ALL_ACCESS_OU};
 
-    private static final Logger ACCESS_LOGGER = Logger.getLogger(CertLdapLoginModule.class, "access");
+    public static final String UID = "uid";
+    public static final String CN = "cn";
+    public static final String LOCATION = "l";
+    public static final String OU = "ou";
 
     private static String environment;
+    private static String allAccessOu;
 
-    // LightblueRoleProvider singleton
-    private static volatile RolesProvider lbLdap = null;
-    
-    public static RolesProvider getRolesProvider(){
-        return lbLdap;
-    }
-
-    public CertLdapLoginModule() {
-
-    }
+    private static volatile RolesProvider rolesProvider = null;
 
     @Override
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
@@ -102,11 +100,12 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     }
 
     public void initializeRolesProvider() throws Exception {
-        LOGGER.debug("CertLdapLoginModule#initializeRolesProvider was invoked");
-        if (lbLdap == null) {
+        LOGGER.debug("CertLdapLoginModule#initializeLdap was invoked");
+        if (rolesProvider == null) {
             synchronized(LdapRolesProvider.class) {
-                if (lbLdap == null) {
+                if (rolesProvider == null) {
                     environment = (String) options.get(ENVIRONMENT);
+                    allAccessOu = (String) options.get(ALL_ACCESS_OU);
 
                     LdapConfiguration ldapConf = new LdapConfiguration();
                     ldapConf.server((String) options.get(SERVER));
@@ -141,7 +140,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
                         rolesCacheExpiry = Integer.parseInt((String)options.get(ROLES_CACHE_EXPIRY_MS));
                     }
 
-                    lbLdap = new CachedRolesProvider(new LdapRolesProvider(searchBase, ldapConf), new RolesCache(rolesCacheExpiry));
+                    rolesProvider = new CachedRolesProvider(new LdapRolesProvider(searchBase, ldapConf), new RolesCache(rolesCacheExpiry));
                 }
             }
         }
@@ -177,7 +176,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
                 searchName = getLDAPAttribute(certPrincipal, CN);
             }
 
-            Collection<String> groupNames = lbLdap.getUserRoles(searchName);
+            Collection<String> groupNames = rolesProvider.getUserRoles(searchName);
 
             p = super.createIdentity(roleName);
 
@@ -202,11 +201,25 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     }
 
     private void validateEnvironment(String certificatePrincipal) throws NamingException {
-        if(StringUtils.isNotBlank(environment)) {
-            String location = getLDAPAttribute(certificatePrincipal, LOCATION);
 
-            if(!StringUtils.equals(environment, location)) {
-                throw new NoSuchAttributeException("Location from certificate does not match configured environment");
+        String ou = getLDAPAttribute(certificatePrincipal, OU);
+        LOGGER.debug("OU from certificate: ", ou);
+        String location = getLDAPAttribute(certificatePrincipal, LOCATION);
+        LOGGER.debug("Location from certificate: ", location);
+
+        if(StringUtils.isBlank(ou)) {
+            throw new NoSuchAttributeException("No ou in dn, you may need to update your certificate: " + certificatePrincipal);
+        } else {
+            if(allAccessOu.equalsIgnoreCase(StringUtils.replace(ou, " ", ""))){
+                LOGGER.debug("Skipping environment validation, user ou matches {} ", allAccessOu);
+            } else {
+                //if dn not from allAccessOu, verify the location (l) field
+                //in the cert matches the configured environment
+                if(StringUtils.isBlank(location)) {
+                    throw new NoSuchAttributeException("No location in dn, you may need to update your certificate: " + certificatePrincipal);
+                } else if(!environment.equalsIgnoreCase(location)){
+                    throw new NoSuchAttributeException("Invalid location from dn, expected " + environment + " but found l=" + location);
+                }
             }
         }
     }
