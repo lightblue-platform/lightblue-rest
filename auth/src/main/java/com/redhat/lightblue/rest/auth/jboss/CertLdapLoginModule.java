@@ -43,6 +43,7 @@ import java.security.Principal;
 import java.security.acl.Group;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -87,6 +88,8 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
     public static final String LOCATION = "l";
     public static final String OU = "ou";
 
+    public static final String ENVIRONMENT_SEPARATOR= ",";
+
     private static String environment;
     private static String allAccessOu;
 
@@ -105,6 +108,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
             synchronized(LdapRolesProvider.class) {
                 if (rolesProvider == null) {
                     environment = (String) options.get(ENVIRONMENT);
+
                     allAccessOu = (String) options.get(ALL_ACCESS_OU);
 
                     LdapConfiguration ldapConf = new LdapConfiguration();
@@ -217,7 +221,7 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
                 //in the cert matches the configured environment
                 if(StringUtils.isBlank(location)) {
                     throw new NoSuchAttributeException("No location in dn, you may need to update your certificate: " + certificatePrincipal);
-                } else if(!environment.equalsIgnoreCase(location)){
+                } else if(!locationMatchesEnvironment(location)){
                     throw new NoSuchAttributeException("Invalid location from dn, expected " + environment + " but found l=" + location);
                 }
             }
@@ -234,5 +238,21 @@ public class CertLdapLoginModule extends BaseCertLoginModule {
             }
         }
         return searchName;
+    }
+
+    private boolean locationMatchesEnvironment(String location) {
+        List<String> environments;
+        if(environment.contains(ENVIRONMENT_SEPARATOR)) {
+            environments = Arrays.asList(environment.split(ENVIRONMENT_SEPARATOR));
+
+        } else {
+            environments = Arrays.asList(new String[] {environment});
+        }
+        for(String environment : environments) {
+            if(environment.equalsIgnoreCase(location)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
