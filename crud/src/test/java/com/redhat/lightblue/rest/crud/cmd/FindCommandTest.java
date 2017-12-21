@@ -39,9 +39,13 @@ import com.redhat.lightblue.OperationStatus;
 import com.redhat.lightblue.crud.DocCtx;
 import com.redhat.lightblue.crud.ListDocumentStream;
 import com.redhat.lightblue.mediator.StreamingResponse;
+import com.redhat.lightblue.rest.crud.RestCrudConstants;
 import com.redhat.lightblue.util.JsonDoc;
+import com.redhat.lightblue.util.metrics.DefaultMetricNamer;
 import com.redhat.lightblue.util.metrics.DropwizardRequestMetrics;
+import com.redhat.lightblue.util.metrics.DropwizardRequestMetrics.MetricNamer;
 import com.redhat.lightblue.util.metrics.NoopRequestMetrics;
+import com.redhat.lightblue.util.metrics.RequestMetric;
 import com.redhat.lightblue.util.metrics.RequestMetrics;
 
 /**
@@ -50,7 +54,8 @@ import com.redhat.lightblue.util.metrics.RequestMetrics;
 public class FindCommandTest extends AbstractRestCommandTest {
 	
     MetricRegistry metricsRegistry = new MetricRegistry();
-    RequestMetrics requestMetrics = new DropwizardRequestMetrics(metricsRegistry);
+    MetricNamer metricNamer = new DefaultMetricNamer();
+    RequestMetrics requestMetrics = new DropwizardRequestMetrics(metricsRegistry, metricNamer);
 
     @Test
     public void runFindWithReturn() {
@@ -121,12 +126,11 @@ public class FindCommandTest extends AbstractRestCommandTest {
         FindCommand command = new FindCommand(mediator, "name", "version", "{\"request\":\"data\"}", requestMetrics);
 
         command.run();
-        
-        Counter activeRequestCounter = metricsRegistry.counter("api.find.name.version.requests.active");
-        Timer completedRequestTimer = metricsRegistry.timer("api.find.name.version.requests.latency");
+
+        RequestMetric findName = metricNamer.crud("find", "name", "version");
+        Timer completedRequestTimer = findName.requestTimer(metricsRegistry);
         
         Assert.assertEquals("find", mediator.methodCalled);
-        Assert.assertEquals(0, activeRequestCounter.getCount());
         Assert.assertEquals(1, completedRequestTimer.getCount());
     }
     
@@ -136,12 +140,11 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         String output = command.run().toString();
 
-        Counter activeRequestCounter = metricsRegistry.counter("api.find.name.version.requests.active");
-        Timer completedRequestTimer = metricsRegistry.timer("api.find.name.version.requests.latency");
-        Meter restExceptionMeter = metricsRegistry.meter("api.find.name.version.requests.exception.Error.rest_crud_RestFindError");
+        RequestMetric findName = metricNamer.crud("find", "name", "version");
+        Timer completedRequestTimer = findName.requestTimer(metricsRegistry);
+        Meter restExceptionMeter = findName.errorMeter(metricsRegistry, RestCrudConstants.ERR_REST_FIND);
         
         Assert.assertTrue(output.contains("Error during the parse of the request"));
-        Assert.assertEquals(0, activeRequestCounter.getCount());
         Assert.assertEquals(1, completedRequestTimer.getCount());
         Assert.assertEquals(1, restExceptionMeter.getCount());
     }
@@ -152,12 +155,11 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         String output = command.run().toString();
 
-        Counter activeRequestCounter = metricsRegistry.counter("api.find.version.requests.active");
-        Timer completedRequestTimer = metricsRegistry.timer("api.find.version.requests.latency");
-        Meter restExceptionMeter = metricsRegistry.meter("api.find.version.requests.exception.Error.rest_crud_RestFindError");
+        RequestMetric findName = metricNamer.crud("find", null, "version");
+        Timer completedRequestTimer = findName.requestTimer(metricsRegistry);
+        Meter restExceptionMeter = findName.errorMeter(metricsRegistry, RestCrudConstants.ERR_REST_FIND);
         
         Assert.assertTrue(output.contains("Request is not valid"));
-        Assert.assertEquals(0, activeRequestCounter.getCount());
         Assert.assertEquals(1, completedRequestTimer.getCount());
         Assert.assertEquals(1, restExceptionMeter.getCount());
     }
@@ -168,12 +170,11 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         String output = command.run().toString();
 
-        Counter activeRequestCounter = metricsRegistry.counter("api.stream.find.name.version.requests.active");
-        Timer completedRequestTimer = metricsRegistry.timer("api.stream.find.name.version.requests.latency");
-        Meter restExceptionMeter = metricsRegistry.meter("api.stream.find.name.version.requests.exception.Error.rest_crud_RestFindError");
+        RequestMetric findName = metricNamer.streamingCrud("find", "name", "version");
+        Timer completedRequestTimer = findName.requestTimer(metricsRegistry);
+        Meter restExceptionMeter = findName.errorMeter(metricsRegistry, RestCrudConstants.ERR_REST_FIND);
         
         Assert.assertTrue(output.contains("Error during the parse of the request"));
-        Assert.assertEquals(0, activeRequestCounter.getCount());
         Assert.assertEquals(1, completedRequestTimer.getCount());
         Assert.assertEquals(1, restExceptionMeter.getCount());
     }
@@ -184,12 +185,11 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         String output = command.run().toString();
 
-        Counter activeRequestCounter = metricsRegistry.counter("api.stream.find.version.requests.active");
-        Timer completedRequestTimer = metricsRegistry.timer("api.stream.find.version.requests.latency");
-        Meter restExceptionMeter = metricsRegistry.meter("api.stream.find.version.requests.exception.Error.rest_crud_RestFindError");
+        RequestMetric findName = metricNamer.streamingCrud("find", null, "version");
+        Timer completedRequestTimer = findName.requestTimer(metricsRegistry);
+        Meter restExceptionMeter = findName.errorMeter(metricsRegistry, RestCrudConstants.ERR_REST_FIND);
         
         Assert.assertTrue(output.contains("Request is not valid"));
-        Assert.assertEquals(0, activeRequestCounter.getCount());
         Assert.assertEquals(1, completedRequestTimer.getCount());
         Assert.assertEquals(1, restExceptionMeter.getCount());
     }
@@ -210,8 +210,9 @@ public class FindCommandTest extends AbstractRestCommandTest {
 
         FindCommand command = new FindCommand(mediator, "name", "version", "{\"request\":\"data\"}", true, requestMetrics);
 
-        Counter activeRequestCounter = metricsRegistry.counter("api.stream.find.name.version.requests.active");
-        Timer completedRequestTimer = metricsRegistry.timer("api.stream.find.name.version.requests.latency");
+        RequestMetric findName = metricNamer.streamingCrud("find", "name", "version");
+        Timer completedRequestTimer = findName.requestTimer(metricsRegistry);
+        Counter activeRequestCounter = findName.activeRequestCounter(metricsRegistry);
         
         command.run();
         
