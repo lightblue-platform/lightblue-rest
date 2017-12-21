@@ -52,7 +52,7 @@ public class ExplainCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context metricCtx = metrics.startEntityRequest("explain", entity, version);
+        RequestMetrics.Context metricCtx = metrics.startCrudRequest("explain", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

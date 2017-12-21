@@ -136,9 +136,9 @@ public class FindCommand extends AbstractRestCommand {
     @Override
     public CallStatus run() {
         if (stream) {
-           metricCtx = metrics.startStreamingEntityRequest("find", entity, version);
+           metricCtx = metrics.startStreamingCrudRequest("find", entity, version);
          } else {
-           metricCtx = metrics.startEntityRequest("find", entity, version);
+           metricCtx = metrics.startCrudRequest("find", entity, version);
         }
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
