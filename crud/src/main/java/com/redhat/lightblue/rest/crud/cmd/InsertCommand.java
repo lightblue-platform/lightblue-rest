@@ -56,7 +56,7 @@ public class InsertCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context metricCtx = metrics.startEntityRequest("insert", entity, version);
+        RequestMetrics.Context metricCtx = metrics.startCrudRequest("insert", entity, version);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");

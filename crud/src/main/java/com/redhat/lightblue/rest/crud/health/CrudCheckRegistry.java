@@ -13,6 +13,8 @@ import com.redhat.lightblue.rest.auth.ldap.LdapConfiguration;
 import com.redhat.lightblue.rest.auth.ldap.LdapRolesProvider;
 import com.redhat.lightblue.rest.health.ControllerHealthCheck;
 import com.redhat.lightblue.util.JsonUtils;
+import com.redhat.lightblue.util.metrics.RequestMetrics;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +40,17 @@ public class CrudCheckRegistry {
         return diagnosticCheckRegistry;
     }
 
-    public static HealthCheckRegistry getHealthCheckRegistry() {
+    public static HealthCheckRegistry getHealthCheckRegistry(RequestMetrics metrics) {
         if(healthCheckRegistry == null) {
-            healthCheckRegistry = createHealthCheckRegistry();
+            healthCheckRegistry = createHealthCheckRegistry(metrics);
         }
         return healthCheckRegistry;
     }
 
-    private static HealthCheckRegistry createHealthCheckRegistry() {
+    private static HealthCheckRegistry createHealthCheckRegistry(RequestMetrics metrics) {
         LOGGER.debug("Initializing healthCheckRegistry");
         HealthCheckRegistry healthCheckRegistry = new HealthCheckRegistry();
-        healthCheckRegistry.register("readHealthCheck", new ReadHealthCheck());
+        healthCheckRegistry.register("readHealthCheck", new ReadHealthCheck(metrics));
         return healthCheckRegistry;
     }
 

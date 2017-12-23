@@ -68,7 +68,7 @@ public class GenerateCommand extends AbstractRestCommand {
 
     @Override
     public CallStatus run() {
-        RequestMetrics.Context metricCtx = metrics.startEntityRequest("generate", entity, version);
+        RequestMetrics.Context metricCtx = metrics.startGenerateRequest(entity, version, field);
         LOGGER.debug("run: entity={}, version={}", entity, version);
         Error.reset();
         Error.push("rest");
