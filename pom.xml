@@ -105,50 +105,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-api</artifactId>
-                <version>2.14.0</version>
+                <version>${lightblue.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-misc</artifactId>
-                <version>2.14.0</version>
+                <version>${lightblue.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-util</artifactId>
-                <version>2.14.0</version>
+                <version>${lightblue.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-config</artifactId>
-                <version>2.14.0</version>
+                <version>${lightblue.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-crud</artifactId>
-                <version>2.14.0</version>
+                <version>${lightblue.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo</artifactId>
-                <version>1.33.0</version>
+                <version>${lightblue.mongo.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.mongo</groupId>
                 <artifactId>lightblue-mongo-test</artifactId>
-                <version>1.33.0</version>
+                <version>${lightblue.mongo.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.hook</groupId>
                 <artifactId>lightblue-audit-hook</artifactId>
-                <version>1.10.0</version>
+                <version>${lightblue.audithook.version}</version>
                 <scope>test</scope>
                 <!-- TODO: Testing the audit hook should not be done in the lightblue-rest project -->
             </dependency>
             <dependency>
                 <groupId>com.redhat.lightblue.ldap</groupId>
                 <artifactId>lightblue-ldap-test</artifactId>
-                <version>1.11.0</version>
+                <version>${lightblue.ldap.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -215,7 +215,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>com.redhat.lightblue</groupId>
                 <artifactId>lightblue-core-test</artifactId>
-                <version>2.14.0</version>
+                <version>${lightblue.core.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -356,10 +356,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.compiler.debuglevel>lines,vars,source</maven.compiler.debuglevel>
         <maven.compiler.verbose>true</maven.compiler.verbose>
 
-        <lightblue.core.version>2.14.0-SNAPSHOT</lightblue.core.version>
-        <lightblue.mongo.version>1.33.0-SNAPSHOT</lightblue.mongo.version>
-        <lightblue.ldap.version>1.12.0-SNAPSHOT</lightblue.ldap.version>
-        <lightblue.audithook.version>1.11.0-SNAPSHOT</lightblue.audithook.version>
+        <lightblue.core.version>2.16.0</lightblue.core.version>
+        <lightblue.mongo.version>1.33.0</lightblue.mongo.version>
+        <lightblue.ldap.version>1.11.0</lightblue.ldap.version>
+        <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
         <lightblue.notificationhook.version>0.1.3</lightblue.notificationhook.version>
         <dropwizard.metrics.version>3.2.2</dropwizard.metrics.version>
     </properties>
