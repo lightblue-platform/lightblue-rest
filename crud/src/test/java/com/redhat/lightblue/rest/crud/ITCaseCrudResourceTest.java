@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
 import com.redhat.lightblue.config.CrudConfiguration;
 import com.redhat.lightblue.config.MetadataConfiguration;
 import com.redhat.lightblue.metadata.EntityMetadata;
@@ -38,16 +38,14 @@ import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.DownloadConfigBuilder;
-import de.flapdoodle.embed.mongo.config.ExtractedArtifactStoreBuilder;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
+import de.flapdoodle.embed.mongo.config.Defaults;
+import de.flapdoodle.embed.mongo.config.MongodConfig;
 import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import de.flapdoodle.embed.process.config.RuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
-import de.flapdoodle.embed.process.config.store.TimeoutConfigBuilder;
-import de.flapdoodle.embed.process.io.IStreamProcessor;
+import de.flapdoodle.embed.process.config.store.TimeoutConfig;
 import de.flapdoodle.embed.process.io.Processors;
+import de.flapdoodle.embed.process.io.StreamProcessor;
 import de.flapdoodle.embed.process.runtime.Network;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -94,7 +92,7 @@ public class ITCaseCrudResourceTest {
     @Rule
     public final RestConfigurationRule resetRuleConfiguration = new RestConfigurationRule();
 
-    public static class FileStreamProcessor implements IStreamProcessor {
+    public static class FileStreamProcessor implements StreamProcessor {
         private final FileOutputStream outputStream;
 
         public FileStreamProcessor(File file) throws FileNotFoundException {
@@ -129,34 +127,31 @@ public class ITCaseCrudResourceTest {
 
     private static MongodExecutable mongodExe;
     private static MongodProcess mongod;
-    private static Mongo mongo;
+    private static MongoClient mongo;
     private static DB db;
 
     static {
         try {
-            IStreamProcessor mongodOutput = Processors.named("[mongod>]",
+            StreamProcessor mongodOutput = Processors.named("[mongod>]",
                     new FileStreamProcessor(File.createTempFile("mongod", "log")));
-            IStreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
-            IStreamProcessor commandsOutput = Processors.namedConsole("[console>]");
+            StreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
+            StreamProcessor commandsOutput = Processors.namedConsole("[console>]");
 
             Command mongoD = Command.MongoD;
-            IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                .defaults(mongoD)
+            RuntimeConfig runtimeConfig = Defaults.runtimeConfigFor(mongoD)
                 .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-                .artifactStore(new ExtractedArtifactStoreBuilder()
-                    .defaults(mongoD)
-                    .download(new DownloadConfigBuilder()
-                        .defaultsForCommand(mongoD)
-                        .timeoutConfig(new TimeoutConfigBuilder()
+                .artifactStore(Defaults.extractedArtifactStoreFor(mongoD)
+                    .withDownloadConfig(Defaults.downloadConfigFor(mongoD)
+                        .timeoutConfig(TimeoutConfig.builder()
                             .connectionTimeout((int) Duration.ofMinutes(1).toMillis())
                             .readTimeout((int) Duration.ofMinutes(5).toMillis())
-                            .build())))
+                            .build()).build()))
                 .build();
 
             MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
             mongodExe = runtime.prepare(
-                    new MongodConfigBuilder()
-                    .version(de.flapdoodle.embed.mongo.distribution.Version.V2_6_0)
+                    MongodConfig.builder()
+                    .version(de.flapdoodle.embed.mongo.distribution.Version.V3_1_6)
                     .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
                     .build()
             );
@@ -166,7 +161,8 @@ public class ITCaseCrudResourceTest {
                 // try again, could be killed breakpoint in IDE
                 mongod = mongodExe.start();
             }
-            mongo = new Mongo(IN_MEM_CONNECTION_URL);
+            MongoClient mongoClient = new MongoClient(IN_MEM_CONNECTION_URL);
+            mongo = mongoClient;
 
             MongoConfiguration config = new MongoConfiguration();
             // disable ssl for test (enabled by default)
