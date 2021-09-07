@@ -224,7 +224,7 @@ public class ITMongoIndexManipulationTest {
     private AbstractMetadataResource metadataResource;
 
     @Test
-    @Ignore
+    
     public void createWithSimpleIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-createWithSimpleIndex-metadata.json");
         String entityName = "test";
@@ -247,7 +247,7 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-    @Ignore
+    
     public void addSimpleIndex_forced() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-addSimpleIndex-metadata.json");
         String entityName = "test";
@@ -274,7 +274,7 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-    @Ignore
+    
     public void addSimpleIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-addSimpleIndex-metadata.json");
         String entityInfo = readFile(getClass().getSimpleName() + "-addSimpleIndex-entityInfo.json");
@@ -304,7 +304,7 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-    @Ignore
+    
     public void deleteSimpleIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-metadata.json");
         String entityInfo = readFile(getClass().getSimpleName() + "-deleteSimpleIndex-entityInfo.json");
@@ -334,7 +334,7 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-    @Ignore
+    
     public void createWithArrayIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-createWithArrayIndex-metadata.json");
         String entityName = "test";
@@ -357,7 +357,7 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-    @Ignore
+    
     public void addArrayIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-addArrayIndex-metadata.json");
         String entityInfo = readFile(getClass().getSimpleName() + "-addArrayIndex-entityInfo.json");
@@ -387,7 +387,7 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-    @Ignore
+    
     public void esbMessage() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-esbMessage-metadata.json");
         String entityInfo = readFile(getClass().getSimpleName() + "-esbMessage-entityInfo.json");
@@ -431,7 +431,7 @@ public class ITMongoIndexManipulationTest {
     }
 
     @Test
-    @Ignore
+    
     public void deleteArrayIndex() throws Exception {
         String metadata = readFile(getClass().getSimpleName() + "-deleteArrayIndex-metadata.json");
         String entityInfo = readFile(getClass().getSimpleName() + "-deleteArrayIndex-entityInfo.json");
