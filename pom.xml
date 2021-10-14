@@ -51,7 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>org.esbtools.lightblue-notification-hook</groupId>
                 <artifactId>lightblue-notification-hook</artifactId>
-                <version>0.1.5-SNAPSHOT</version>
+                <version>0.1.4</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian</groupId>
