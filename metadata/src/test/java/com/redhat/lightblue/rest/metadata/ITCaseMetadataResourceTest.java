@@ -20,10 +20,29 @@ package com.redhat.lightblue.rest.metadata;
 
 import static com.redhat.lightblue.util.test.FileUtil.readFile;
 
+import com.mongodb.DB;
+import com.mongodb.MongoClient;
+import com.redhat.lightblue.mongo.config.MongoConfiguration;
+import de.flapdoodle.embed.mongo.Command;
+import de.flapdoodle.embed.mongo.MongodExecutable;
+import de.flapdoodle.embed.mongo.MongodProcess;
+import de.flapdoodle.embed.mongo.MongodStarter;
+import de.flapdoodle.embed.mongo.config.Defaults;
+import de.flapdoodle.embed.mongo.config.MongodConfig;
+import de.flapdoodle.embed.mongo.config.Net;
+import de.flapdoodle.embed.process.config.RuntimeConfig;
+import de.flapdoodle.embed.process.config.io.ProcessOutput;
+import de.flapdoodle.embed.process.config.store.TimeoutConfig;
+import de.flapdoodle.embed.process.io.Processors;
+import de.flapdoodle.embed.process.io.StreamProcessor;
+import de.flapdoodle.embed.process.runtime.Network;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import java.time.Duration;
 import javax.inject.Inject;
 import javax.ws.rs.core.SecurityContext;
 
@@ -35,6 +54,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.json.JSONException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -60,19 +80,123 @@ public class ITCaseMetadataResourceTest {
     @Rule
     public final RestConfigurationRule resetRuleConfiguration = new RestConfigurationRule();
 
-    private static EmbeddedMongo mongo = EmbeddedMongo.getInstance();
+    public static class FileStreamProcessor implements StreamProcessor {
+        private final FileOutputStream outputStream;
+
+        public FileStreamProcessor(File file) throws FileNotFoundException {
+            outputStream = new FileOutputStream(file);
+        }
+
+        @Override
+        public void process(String block) {
+            try {
+                outputStream.write(block.getBytes());
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        @Override
+        public void onProcessed() {
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+    }
+
+    private static final String MONGO_HOST = "localhost";
+    private static final int MONGO_PORT = 27757;
+    private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
+
+    private static final String DB_NAME = "mongo";
+
+    private static MongodExecutable mongodExe;
+    private static MongodProcess mongod;
+    private static MongoClient mongo;
+    private static DB db;
+
+    static {
+        try {
+            StreamProcessor mongodOutput = Processors.named("[mongod>]",
+                new FileStreamProcessor(File.createTempFile("mongod", "log")));
+            StreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
+            StreamProcessor commandsOutput = Processors.namedConsole("[console>]");
+
+            Command mongoD = Command.MongoD;
+            RuntimeConfig runtimeConfig = Defaults.runtimeConfigFor(mongoD)
+                .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
+                .artifactStore(Defaults.extractedArtifactStoreFor(mongoD)
+                    .withDownloadConfig(Defaults.downloadConfigFor(mongoD)
+                        .timeoutConfig(TimeoutConfig.builder()
+                            .connectionTimeout((int) Duration.ofMinutes(1).toMillis())
+                            .readTimeout((int) Duration.ofMinutes(5).toMillis())
+                            .build()).build()))
+                .build();
+
+            MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
+            mongodExe = runtime.prepare(
+                MongodConfig.builder()
+                    .version(de.flapdoodle.embed.mongo.distribution.Version.V3_1_6)
+                    .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
+                    .build()
+            );
+            try {
+                mongod = mongodExe.start();
+            } catch (Throwable t) {
+                // try again, could be killed breakpoint in IDE
+                mongod = mongodExe.start();
+            }
+            MongoClient mongoClient = new MongoClient(IN_MEM_CONNECTION_URL);
+            mongo = mongoClient;
+
+            MongoConfiguration config = new MongoConfiguration();
+            // disable ssl for test (enabled by default)
+            config.setDatabase(DB_NAME);
+            config.setSsl(Boolean.FALSE);
+            config.addServerAddress(MONGO_HOST, MONGO_PORT);
+
+            db = config.getDB();
+
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    super.run();
+                    clearDatabase();
+                }
+
+            });
+        } catch (IOException e) {
+            throw new java.lang.Error(e);
+        }
+    }
 
     @Before
-    public void setup() {
-        mongo.getDB().createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
+    public void setup() throws Exception {
+        db.createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
         BasicDBObject index = new BasicDBObject("name", 1);
         index.put("version.value", 1);
-        mongo.getDB().getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).createIndex(index, "name", true);
+        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).createIndex(index, "name", true);
     }
 
     @After
     public void teardown() {
-        mongo.reset();
+        if (mongo != null) {
+            mongo.dropDatabase(DB_NAME);
+        }
+    }
+
+    public static void clearDatabase() {
+        if (mongod != null) {
+            mongod.stop();
+            mongodExe.stop();
+        }
+        db = null;
+        mongo = null;
+        mongod = null;
+        mongodExe = null;
     }
 
     @Deployment
