@@ -357,7 +357,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.compiler.verbose>true</maven.compiler.verbose>
 
         <lightblue.core.version>2.17.0</lightblue.core.version>
-        <lightblue.mongo.version>1.36.0</lightblue.mongo.version>
+        <lightblue.mongo.version>1.37.0-SNAPSHOT</lightblue.mongo.version>
         <lightblue.ldap.version>1.11.0</lightblue.ldap.version>
         <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
         <lightblue.notificationhook.version>0.1.4</lightblue.notificationhook.version>
