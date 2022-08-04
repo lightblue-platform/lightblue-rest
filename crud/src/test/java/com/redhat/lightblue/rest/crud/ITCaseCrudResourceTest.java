@@ -41,6 +41,7 @@ import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.Defaults;
 import de.flapdoodle.embed.mongo.config.MongodConfig;
 import de.flapdoodle.embed.mongo.config.Net;
+import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.config.RuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.config.store.TimeoutConfig;
@@ -151,7 +152,7 @@ public class ITCaseCrudResourceTest {
             MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
             mongodExe = runtime.prepare(
                     MongodConfig.builder()
-                    .version(de.flapdoodle.embed.mongo.distribution.Version.V3_1_6)
+                    .version(Version.V5_0_2)
                     .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
                     .build()
             );
