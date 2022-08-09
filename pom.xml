@@ -94,7 +94,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>4.13.2</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -360,7 +360,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <lightblue.mongo.version>1.37.0-SNAPSHOT</lightblue.mongo.version>
         <lightblue.ldap.version>1.11.0</lightblue.ldap.version>
         <lightblue.audithook.version>1.10.0</lightblue.audithook.version>
-        <lightblue.notificationhook.version>0.1.4</lightblue.notificationhook.version>
+        <lightblue.notificationhook.version>0.1.5-SNAPSHOT</lightblue.notificationhook.version>
         <dropwizard.metrics.version>3.2.2</dropwizard.metrics.version>
     </properties>
     <build>

@@ -18,6 +18,9 @@
  */
 package com.redhat.lightblue.rest.crud;
 
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
@@ -34,7 +37,6 @@ import com.redhat.lightblue.rest.test.support.Assets;
 import com.redhat.lightblue.rest.test.support.CrudWebXmls;
 import com.redhat.lightblue.util.JsonUtils;
 import com.redhat.lightblue.util.test.FileUtil;
-import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
@@ -42,12 +44,29 @@ import de.flapdoodle.embed.mongo.config.Defaults;
 import de.flapdoodle.embed.mongo.config.MongodConfig;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
+import de.flapdoodle.embed.mongo.packageresolver.Command;
 import de.flapdoodle.embed.process.config.RuntimeConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.config.store.TimeoutConfig;
-import de.flapdoodle.embed.process.io.Processors;
+import de.flapdoodle.embed.process.extract.DirectoryAndExecutableNaming;
+import de.flapdoodle.embed.process.extract.UserTempNaming;
 import de.flapdoodle.embed.process.io.StreamProcessor;
+import de.flapdoodle.embed.process.io.directories.PlatformTempDir;
 import de.flapdoodle.embed.process.runtime.Network;
+import de.flapdoodle.embed.process.store.Downloader;
+import de.flapdoodle.embed.process.store.ExtractedArtifactStore;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
+import javax.inject.Inject;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
@@ -66,421 +85,445 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
-
-import javax.inject.Inject;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriBuilder;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Duration;
-
-import static org.junit.Assert.assertTrue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author lcestari
  */
 @RunWith(Arquillian.class)
 public class ITCaseCrudResourceTest {
 
-    @Rule
-    public final RestConfigurationRule resetRuleConfiguration = new RestConfigurationRule();
+  private static final Logger LOGGER = LoggerFactory.getLogger("ITCaseCrudResourceTest");
+  @Rule
+  public final RestConfigurationRule resetRuleConfiguration = new RestConfigurationRule();
 
-    public static class FileStreamProcessor implements StreamProcessor {
-        private final FileOutputStream outputStream;
+  public static class FileStreamProcessor implements StreamProcessor {
 
-        public FileStreamProcessor(File file) throws FileNotFoundException {
-            outputStream = new FileOutputStream(file);
-        }
+    private final FileOutputStream outputStream;
 
+    public FileStreamProcessor(File file) throws FileNotFoundException {
+      outputStream = new FileOutputStream(file);
+    }
+
+    @Override
+    public void process(String block) {
+      try {
+        outputStream.write(block.getBytes());
+      } catch (IOException e) {
+        throw new IllegalStateException(e);
+      }
+    }
+
+    @Override
+    public void onProcessed() {
+      try {
+        outputStream.close();
+      } catch (IOException e) {
+        throw new IllegalStateException(e);
+      }
+    }
+
+  }
+
+  private static final String MONGO_HOST = "localhost";
+  private static final int MONGO_PORT = 27757;
+  private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
+
+  private static final String DB_NAME = "mongo";
+
+  private static MongodExecutable mongodExe;
+  private static MongodProcess mongod;
+  private static MongoClient mongo;
+  private static DB db;
+
+  static {
+    try {
+
+      RuntimeConfig runtimeConfig = Defaults.runtimeConfigFor(Command.MongoD)
+          .artifactStore(ExtractedArtifactStore.builder()
+              .extraction(DirectoryAndExecutableNaming.builder()
+                  .executableNaming(new UserTempNaming())
+                  .directory(new PlatformTempDir()).build())
+              .downloader(Downloader.platformDefault())
+              .temp(DirectoryAndExecutableNaming.builder()
+                  .executableNaming(new UserTempNaming())
+                  .directory(new PlatformTempDir()).build())
+              .downloadConfig(Defaults.downloadConfigFor(Command.MongoD)
+                  .timeoutConfig(TimeoutConfig.builder()
+                      .connectionTimeout((int) Duration.ofMinutes(1).toMillis())
+                      .readTimeout((int) Duration.ofMinutes(5).toMillis())
+                      .build())
+                  .fileNaming(new UserTempNaming()).build())
+              .build())
+          .build();
+
+      MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
+      mongodExe = runtime.prepare(
+          MongodConfig.builder()
+              .version(Version.V5_0_2)
+              .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
+              .build()
+      );
+      try {
+        mongod = mongodExe.start();
+      } catch (Throwable t) {
+        // try again, could be killed breakpoint in IDE
+        mongod = mongodExe.start();
+      }
+      mongo = new MongoClient(IN_MEM_CONNECTION_URL);
+
+      MongoConfiguration config = new MongoConfiguration();
+      // disable ssl for test (enabled by default)
+      config.setDatabase(DB_NAME);
+      config.setSsl(Boolean.FALSE);
+      config.addServerAddress(MONGO_HOST, MONGO_PORT);
+
+      db = config.getDB();
+
+      Runtime.getRuntime().addShutdownHook(new Thread() {
         @Override
-        public void process(String block) {
-            try {
-                outputStream.write(block.getBytes());
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
+        public void run() {
+          super.run();
+          clearDatabase();
         }
 
-        @Override
-        public void onProcessed() {
-            try {
-                outputStream.close();
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
+      });
+    } catch (IOException e) {
+      throw new java.lang.Error(e);
+    }
+  }
 
+  @Before
+  public void setup() {
+    db.createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
+    db.createCollection("audit", null);
+    BasicDBObject index = new BasicDBObject("name", 1);
+    index.put("version.value", 1);
+    db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).createIndex(index, "name", true);
+  }
+
+  @After
+  public void teardown() {
+    if (mongo != null) {
+      mongo.dropDatabase(DB_NAME);
+    }
+  }
+
+  public static void clearDatabase() {
+    if (mongod != null) {
+      mongod.stop();
+      mongodExe.stop();
+    }
+    db = null;
+    mongo = null;
+    mongod = null;
+    mongodExe = null;
+  }
+
+  @Deployment
+  public static WebArchive createDeployment() throws Exception {
+    File[] libs = Maven.resolver()
+        .loadPomFromFile("pom.xml")
+        .importRuntimeDependencies()
+        .resolve()
+        .withTransitivity()
+        .asFile();
+
+    Path configBase = Paths.get("src/test/resources/",
+        ITCaseCrudResourceTest.class.getSimpleName(),
+        "/config/");
+
+    WebArchive archive = ShrinkWrap.create(WebArchive.class, "lightblue.war")
+        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+        .addAsWebInfResource(
+            Assets.forDocument(CrudWebXmls.forNonEE6Container(RestApplication.class)), "web.xml")
+        .addAsLibraries(Maven.configureResolver()
+            .workOffline()
+            .loadPomFromFile("pom.xml")
+            .resolve("org.jboss.weld.servlet:weld-servlet")
+            .withTransitivity()
+            .asFile())
+        .addPackages(true, "com.redhat.lightblue")
+        .addAsResource(configBase.resolve(MetadataConfiguration.FILENAME).toFile())
+        .addAsResource(configBase.resolve(CrudConfiguration.FILENAME).toFile())
+        .addAsResource(configBase.resolve(RestConfiguration.DATASOURCE_FILENAME).toFile())
+        .addAsResource(configBase.resolve("config.properties").toFile());
+
+    for (File file : libs) {
+      if (!file.toString().contains("lightblue-")) {
+        archive.addAsLibrary(file);
+      }
     }
 
-    private static final String MONGO_HOST = "localhost";
-    private static final int MONGO_PORT = 27757;
-    private static final String IN_MEM_CONNECTION_URL = MONGO_HOST + ":" + MONGO_PORT;
+    return archive;
+  }
 
-    private static final String DB_NAME = "mongo";
+  private String readFile(String filename) throws IOException, URISyntaxException {
+    return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
+  }
 
-    private static MongodExecutable mongodExe;
-    private static MongodProcess mongod;
-    private static MongoClient mongo;
-    private static DB db;
+  @Inject
+  private CrudResource cutCrudResource; //class under test
 
-    static {
-        try {
-            StreamProcessor mongodOutput = Processors.named("[mongod>]",
-                    new FileStreamProcessor(File.createTempFile("mongod", "log")));
-            StreamProcessor mongodError = new FileStreamProcessor(File.createTempFile("mongod-error", "log"));
-            StreamProcessor commandsOutput = Processors.namedConsole("[console>]");
+  @Test
+  public void testFirstIntegrationTest()
+      throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
+    Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
 
-            Command mongoD = Command.MongoD;
-            RuntimeConfig runtimeConfig = Defaults.runtimeConfigFor(mongoD)
-                .processOutput(new ProcessOutput(mongodOutput, mongodError, commandsOutput))
-                .artifactStore(Defaults.extractedArtifactStoreFor(mongoD)
-                    .withDownloadConfig(Defaults.downloadConfigFor(mongoD)
-                        .timeoutConfig(TimeoutConfig.builder()
-                            .connectionTimeout((int) Duration.ofMinutes(1).toMillis())
-                            .readTimeout((int) Duration.ofMinutes(5).toMillis())
-                            .build()).build()))
-                .build();
+    String auditExpectedCreated = readFile("auditExpectedCreated.json");
+    String auditMetadata = FileUtil.readFile("metadata/audit.json");
+    EntityMetadata aEm = RestConfiguration.getFactory().getJSONParser()
+        .parseEntityMetadata(JsonUtils.json(auditMetadata));
+    RestConfiguration.getFactory().getMetadata().createNewMetadata(aEm);
+    EntityMetadata aEm2 = RestConfiguration.getFactory().getMetadata()
+        .getEntityMetadata("audit", "1.0.1");
+    String auditResultCreated = RestConfiguration.getFactory().getJSONParser().convert(aEm2)
+        .toString();
+    JSONAssert.assertEquals(auditExpectedCreated, auditResultCreated, false);
 
-            MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
-            mongodExe = runtime.prepare(
-                    MongodConfig.builder()
-                    .version(Version.V5_0_2)
-                    .net(new Net(MONGO_PORT, Network.localhostIsIPv6()))
-                    .build()
-            );
-            try {
-                mongod = mongodExe.start();
-            } catch (Throwable t) {
-                // try again, could be killed breakpoint in IDE
-                mongod = mongodExe.start();
-            }
-            MongoClient mongoClient = new MongoClient(IN_MEM_CONNECTION_URL);
-            mongo = mongoClient;
+    String expectedCreated = readFile("expectedCreated.json");
+    String metadata = readFile("metadata.json");
+    EntityMetadata em = RestConfiguration.getFactory().getJSONParser()
+        .parseEntityMetadata(JsonUtils.json(metadata));
+    RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+    EntityMetadata em2 = RestConfiguration.getFactory().getMetadata()
+        .getEntityMetadata("country", "1.0.0");
+    String resultCreated = RestConfiguration.getFactory().getJSONParser().convert(em2).toString();
+    JSONAssert.assertEquals(expectedCreated, resultCreated, false);
 
-            MongoConfiguration config = new MongoConfiguration();
-            // disable ssl for test (enabled by default)
-            config.setDatabase(DB_NAME);
-            config.setSsl(Boolean.FALSE);
-            config.addServerAddress(MONGO_HOST, MONGO_PORT);
+    String expectedInserted = readFile("expectedInserted.json");
+    String resultInserted = cutCrudResource.insert("country", "1.0.0",
+        readFile("resultInserted.json")).getEntity().toString();
+    JSONAssert.assertEquals(expectedInserted, resultInserted, false);
 
-            db = config.getDB();
+    String auditExpectedFound = readFile("auditExpectedFound.json");
+    String auditResultFound = cutCrudResource.find("audit", "1.0.1", false,
+        readFile("auditResultFound.json")).getEntity().toString();
+    LOGGER.debug("resultFound:" + auditResultFound);
+    auditResultFound = auditResultFound.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
+    auditResultFound = auditResultFound.replaceAll(
+        "\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"",
+        "\"lastUpdateDate\":\"\"");
+    JSONAssert.assertEquals(auditExpectedFound, auditResultFound, false);
 
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    clearDatabase();
-                }
+    String bulkResult = cutCrudResource.bulk(readFile("bulkReq.json")).getEntity().toString();
+    bulkResult = bulkResult.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
+    bulkResult = bulkResult.replaceAll(
+        "\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"",
+        "\"lastUpdateDate\":\"\"");
+    JSONAssert.assertEquals(readFile("bulkResult.json"), bulkResult, false);
 
-            });
-        } catch (IOException e) {
-            throw new java.lang.Error(e);
-        }
-    }
+    String expectedUpdated = readFile("expectedUpdated.json");
+    String resultUpdated = cutCrudResource.update("country", "1.0.0",
+        readFile("resultUpdated.json")).getEntity().toString();
+    JSONAssert.assertEquals(expectedUpdated, resultUpdated, false);
 
-    @Before
-    public void setup() throws Exception {
-        db.createCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION, null);
-        db.createCollection("audit", null);
-        BasicDBObject index = new BasicDBObject("name", 1);
-        index.put("version.value", 1);
-        db.getCollection(MongoMetadata.DEFAULT_METADATA_COLLECTION).createIndex(index, "name", true);
-    }
+    // TODO: once https://github.com/lightblue-platform/lightblue-core/issues/476 is fixed, restore
+    // audit# fields in auditExpectedFound.json
+    // String audit2ExpectedFound = readFile("auditExpectedFoundUpdate.json");
+    // String audit2ResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
+    // audit2ResultFound = audit2ResultFound.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
+    // audit2ResultFound = audit2ResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
+    // JSONAssert.assertEquals(audit2ExpectedFound, audit2ResultFound, false);
+    String expectedFound = readFile("expectedFound.json");
+    String resultFound = cutCrudResource.find("country", "1.0.0", false,
+        readFile("resultFound.json")).getEntity().toString();
+    JSONAssert.assertEquals(expectedFound, resultFound,
+        false); // #TODO #FIX Not finding the right version
 
-    @After
-    public void teardown() {
-        if (mongo != null) {
-            mongo.dropDatabase(DB_NAME);
-        }
-    }
+    String expectedAll = cutCrudResource.find("country", "1.0.0", false,
+        readFile("country-noq.json")).getEntity().toString();
+    LOGGER.debug("returnVAlue:" + expectedAll);
+    JSONAssert.assertEquals(expectedFound, expectedAll, false);
 
-    public static void clearDatabase() {
-        if (mongod != null) {
-            mongod.stop();
-            mongodExe.stop();
-        }
-        db = null;
-        mongo = null;
-        mongod = null;
-        mongodExe = null;
-    }
+    String resultSimpleFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
+        "country",
+        "1.0.0",
+        "iso2code:CA,QE;iso2code:CA;iso2code:CA,EN",
+        "name:1r,iso3code:1,iso2code:0r",
+        "name:a,iso3code:d,iso2code:d",
+        0L,
+        100L, null).getEntity().toString();
+    JSONAssert.assertEquals(expectedFound, resultSimpleFound, false);
 
-    @Deployment
-    public static WebArchive createDeployment() throws Exception {
-        File[] libs = Maven.resolver()
-                .loadPomFromFile("pom.xml")
-                .importRuntimeDependencies()
-                .resolve()
-                .withTransitivity()
-                .asFile();
+    resultSimpleFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
+        "country",
+        "1.0.0",
+        "iso2code:CA,QE;iso2code:CA;iso2code:CA,EN",
+        "name:1r,iso3code:1,iso2code:0r",
+        "name:a,iso3code:d,iso2code:d",
+        0L,
+        null, 1L).getEntity().toString();
+    JSONAssert.assertEquals(expectedFound, resultSimpleFound, false);
 
-        Path configBase = Paths.get("src/test/resources/",
-                ITCaseCrudResourceTest.class.getSimpleName(),
-                "/config/");
+    String resultSimpleFromToNotSetFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
+        "country",
+        "1.0.0",
+        "iso2code:CA,QE;iso2code:CA;iso2code:CA,EN",
+        "name:1r,iso3code:1,iso2code:0r",
+        "name:a,iso3code:d,iso2code:d",
+        null,
+        null, null).getEntity().toString();
+    JSONAssert.assertEquals(expectedFound, resultSimpleFromToNotSetFound, false);
 
-        WebArchive archive = ShrinkWrap.create(WebArchive.class, "lightblue.war")
-            .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-            .addAsWebInfResource(Assets.forDocument(CrudWebXmls.forNonEE6Container(RestApplication.class)), "web.xml")
-            .addAsLibraries(Maven.configureResolver()
-                    .workOffline()
-                    .loadPomFromFile("pom.xml")
-                    .resolve("org.jboss.weld.servlet:weld-servlet")
-                    .withTransitivity()
-                    .asFile())
-            .addPackages(true, "com.redhat.lightblue")
-            .addAsResource(configBase.resolve(MetadataConfiguration.FILENAME).toFile())
-            .addAsResource(configBase.resolve(CrudConfiguration.FILENAME).toFile())
-            .addAsResource(configBase.resolve(RestConfiguration.DATASOURCE_FILENAME).toFile())
-            .addAsResource(configBase.resolve("config.properties").toFile());
+    String expectedDeleted = readFile("expectedDeleted.json");
+    String resultDeleted = cutCrudResource.delete("country", "1.0.0",
+        readFile("resultDeleted.json")).getEntity().toString();
+    JSONAssert.assertEquals(expectedDeleted, resultDeleted, false);
 
-        for (File file : libs) {
-            if (!file.toString().contains("lightblue-")) {
-                archive.addAsLibrary(file);
-            }
-        }
+    String expectedFound2 = readFile("expectedFound2.json");
+    String resultFound2 = cutCrudResource.find("country", "1.0.0", false,
+        readFile("resultFound2.json")).getEntity().toString();
+    JSONAssert.assertEquals(expectedFound2, resultFound2, false);
+  }
 
-        return archive;
-    }
+  @Test
+  public void testLock() {
+    Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+    String result = cutCrudResource.acquire("test", "caller", "resource", null).getEntity()
+        .toString();
+    Assert.assertEquals("{\"result\":true}", result);
+  }
 
-    private String readFile(String filename) throws IOException, URISyntaxException {
-        return FileUtil.readFile(this.getClass().getSimpleName() + "/" + filename);
-    }
+  @Test
+  public void testLockWithPost() {
+    Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
 
-    @Inject
-    private CrudResource cutCrudResource; //class under test
+    String request =
+        "{" +
+            "\"operation\" : \"acquire\"," +
+            "\"domain\" : \"test\"," +
+            "\"callerId\" : \"caller\"," +
+            "\"resourceId\" : \"resource/slash\"" +
+            "}";
 
-    @Test
-    public void testFirstIntegrationTest() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
-        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+    String result = cutCrudResource.lock(request).getEntity().toString();
+    Assert.assertEquals("{\"result\":true}", result);
+  }
 
-        String auditExpectedCreated = readFile("auditExpectedCreated.json");
-        String auditMetadata = FileUtil.readFile("metadata/audit.json");
-        EntityMetadata aEm = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(auditMetadata));
-        RestConfiguration.getFactory().getMetadata().createNewMetadata(aEm);
-        EntityMetadata aEm2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("audit", "1.0.1");
-        String auditResultCreated = RestConfiguration.getFactory().getJSONParser().convert(aEm2).toString();
-        JSONAssert.assertEquals(auditExpectedCreated, auditResultCreated, false);
+  @Test
+  public void testGenerate()
+      throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
+    Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+    String metadata = readFile("generator-md.json");
+    EntityMetadata em = RestConfiguration.getFactory().getJSONParser()
+        .parseEntityMetadata(JsonUtils.json(metadata));
+    RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
 
-        String expectedCreated = readFile("expectedCreated.json");
-        String metadata = readFile("metadata.json");
-        EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
-        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
-        EntityMetadata em2 = RestConfiguration.getFactory().getMetadata().getEntityMetadata("country", "1.0.0");
-        String resultCreated = RestConfiguration.getFactory().getJSONParser().convert(em2).toString();
-        JSONAssert.assertEquals(expectedCreated, resultCreated, false);
+    String result = cutCrudResource.generate("generate", "1.0.0", "number", 1).getEntity()
+        .toString();
+    LOGGER.debug("Generated:" + result);
+    JSONAssert.assertEquals("{\"processed\":[\"50000000\"]}", result, false);
 
-        String expectedInserted = readFile("expectedInserted.json");
-        String resultInserted = cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity().toString();
-        JSONAssert.assertEquals(expectedInserted, resultInserted, false);
+    result = cutCrudResource.generate("generate", "number", 3).getEntity().toString();
+    LOGGER.debug("Generated:" + result);
+    JSONAssert.assertEquals("{\"processed\":[\"50000001\",\"50000002\",\"50000003\"]}", result,
+        false);
+  }
 
-        String auditExpectedFound = readFile("auditExpectedFound.json");
-        String auditResultFound = cutCrudResource.find("audit", "1.0.1", false,readFile("auditResultFound.json")).getEntity().toString();
-        System.out.println("resultFound:" + auditResultFound);
-        auditResultFound = auditResultFound.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
-        auditResultFound = auditResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
-        JSONAssert.assertEquals(auditExpectedFound, auditResultFound, false);
+  @Test
+  public void testSavedSearch()
+      throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException {
+    Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
 
-        String bulkResult = cutCrudResource.bulk(readFile("bulkReq.json")).getEntity().toString();
-        bulkResult = bulkResult.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
-        bulkResult = bulkResult.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
-        JSONAssert.assertEquals(readFile("bulkResult.json"), bulkResult, false);
+    // Saved search metadata
+    LOGGER.debug("Insert saved search md");
+    String metadata = readFile("lb-saved-search.json");
+    EntityMetadata em = RestConfiguration.getFactory().getJSONParser()
+        .parseEntityMetadata(JsonUtils.json(metadata));
+    RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+    LOGGER.debug("saved search md inserted");
 
-        String expectedUpdated = readFile("expectedUpdated.json");
-        String resultUpdated = cutCrudResource.update("country", "1.0.0", readFile("resultUpdated.json")).getEntity().toString();
-        JSONAssert.assertEquals(expectedUpdated, resultUpdated, false);
+    // Country metadata
+    LOGGER.debug("Insert country md");
+    metadata = readFile("metadata.json");
+    em = RestConfiguration.getFactory().getJSONParser()
+        .parseEntityMetadata(JsonUtils.json(metadata));
+    RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+    LOGGER.debug("country md inserted");
+    String auditMetadata = FileUtil.readFile("metadata/audit.json");
+    EntityMetadata aEm = RestConfiguration.getFactory().getJSONParser()
+        .parseEntityMetadata(JsonUtils.json(auditMetadata));
+    RestConfiguration.getFactory().getMetadata().createNewMetadata(aEm);
 
-        // TODO: once https://github.com/lightblue-platform/lightblue-core/issues/476 is fixed, restore
-        // audit# fields in auditExpectedFound.json
-        // String audit2ExpectedFound = readFile("auditExpectedFoundUpdate.json");
-        // String audit2ResultFound = cutCrudResource.find("audit", "1.0.1", readFile("auditResultFound.json")).getEntity().toString();
-        // audit2ResultFound = audit2ResultFound.replaceAll("\"_id\":\".*?\"", "\"_id\":\"\"");
-        // audit2ResultFound = audit2ResultFound.replaceAll("\"lastUpdateDate\":\"\\d{8}T\\d\\d:\\d\\d:\\d\\d\\.\\d{3}[+-]\\d{4}\"", "\"lastUpdateDate\":\"\"");
-        // JSONAssert.assertEquals(audit2ExpectedFound, audit2ResultFound, false);
-        String expectedFound = readFile("expectedFound.json");
-        String resultFound = cutCrudResource.find("country", "1.0.0", false, readFile("resultFound.json")).getEntity().toString();
-        JSONAssert.assertEquals(expectedFound, resultFound, false); // #TODO #FIX Not finding the right version
+    // insert country data
+    LOGGER.debug("Insert country");
+    cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity();
+    LOGGER.debug("country inserted");
 
-        String expectedAll = cutCrudResource.find("country", "1.0.0", false, readFile("country-noq.json")).getEntity().toString();
-        System.out.println("returnVAlue:" + expectedAll);
-        JSONAssert.assertEquals(expectedFound, expectedAll, false);
+    // insert saved search
+    LOGGER.debug("Insert savedSearch");
+    cutCrudResource.insert("savedSearch", "1.0.0",
+        "{'data':{'name':'test','entity':'country','parameters':[{'name':'iso'}],'query':{'field':'iso2code','op':'=','rvalue':'${iso}'}}}".
+            replaceAll("'", "\""));
+    LOGGER.debug("savedSearch inserted");
 
-        String resultSimpleFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
-                "country",
-                "1.0.0",
-                "iso2code:CA,QE;iso2code:CA;iso2code:CA,EN",
-                "name:1r,iso3code:1,iso2code:0r",
-                "name:a,iso3code:d,iso2code:d",
-                0l,
-                100l,null).getEntity().toString();
-        JSONAssert.assertEquals(expectedFound, resultSimpleFound, false);
+    // Run saved search
+    String result = cutCrudResource.runSavedSearch("country", "1.0.0", "test", null, null, null,
+        null, null, "{'iso':'CA'}".replaceAll("'", "\"")).getEntity().toString();
+    assertNotEquals(-1, result.indexOf("\"matchCount\":1"));
+    LOGGER.debug("result:" + result);
 
-         resultSimpleFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
-                "country",
-                "1.0.0",
-                "iso2code:CA,QE;iso2code:CA;iso2code:CA,EN",
-                "name:1r,iso3code:1,iso2code:0r",
-                "name:a,iso3code:d,iso2code:d",
-                0l,
-                null,1l).getEntity().toString();
-        JSONAssert.assertEquals(expectedFound, resultSimpleFound, false);
+  }
 
-        String resultSimpleFromToNotSetFound = cutCrudResource.simpleFind( //?Q&P&S&from&to
-                "country",
-                "1.0.0",
-                "iso2code:CA,QE;iso2code:CA;iso2code:CA,EN",
-                "name:1r,iso3code:1,iso2code:0r",
-                "name:a,iso3code:d,iso2code:d",
-                null,
-                null,null).getEntity().toString();
-        JSONAssert.assertEquals(expectedFound, resultSimpleFromToNotSetFound, false);
+  @Test
+  public void testListSavedSearch()
+      throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException {
+    Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
 
-        String expectedDeleted = readFile("expectedDeleted.json");
-        String resultDeleted = cutCrudResource.delete("country", "1.0.0", readFile("resultDeleted.json")).getEntity().toString();
-        JSONAssert.assertEquals(expectedDeleted, resultDeleted, false);
+    // Saved search metadata
+    LOGGER.debug("Insert saved search md");
+    String metadata = readFile("lb-saved-search.json");
+    EntityMetadata em = RestConfiguration.getFactory().getJSONParser()
+        .parseEntityMetadata(JsonUtils.json(metadata));
+    RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+    LOGGER.debug("saved search md inserted");
 
-        String expectedFound2 = readFile("expectedFound2.json");
-        String resultFound2 = cutCrudResource.find("country", "1.0.0", false,readFile("resultFound2.json")).getEntity().toString();
-        JSONAssert.assertEquals(expectedFound2, resultFound2, false);
-    }
+    // insert saved search
+    LOGGER.debug("Insert savedSearch");
+    cutCrudResource.insert("savedSearch", "1.0.0",
+        "{'data':{'name':'test','entity':'country','parameters':[{'name':'iso'}],'query':{'field':'iso2code','op':'=','rvalue':'${iso}'}}}".
+            replaceAll("'", "\""));
+    LOGGER.debug("savedSearch inserted");
 
-    @Test
-    public void testLock() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
-        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-        String result = cutCrudResource.acquire("test", "caller", "resource", null).getEntity().toString();
-        Assert.assertEquals("{\"result\":true}", result);
-    }
+    // get saved search
+    String result = cutCrudResource.getSearchesForEntity("country", null, null).getEntity()
+        .toString();
+    assertNotEquals(-1, result.indexOf("\"matchCount\":1"));
+    LOGGER.debug("result:" + result);
 
-    @Test
-    public void testLockWithPost() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
-        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
+  }
 
-        String request =
-                "{" +
-                        "\"operation\" : \"acquire\"," +
-                        "\"domain\" : \"test\"," +
-                        "\"callerId\" : \"caller\"," +
-                        "\"resourceId\" : \"resource/slash\"" +
-                        "}";
+  @Test
+  @RunAsClient
+  public void testDiagnosticsCheckAsClient(@ArquillianResource URL url) throws Exception {
+    ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
+        .path("diagnostics")
+        .build()
+        .toString());
+    request.accept(MediaType.APPLICATION_JSON);
+    ClientResponse<String> response = request.get(String.class);
+    ObjectNode jsonNode = (ObjectNode) new ObjectMapper().readTree(response.getEntity());
 
-        String result = cutCrudResource.lock(request).getEntity().toString();
-        Assert.assertEquals("{\"result\":true}", result);
-    }
+    LOGGER.debug(
+        "DiagnosticCheckMessage: " + jsonNode.elements().next().get("message").asText());
+    assertTrue(jsonNode.elements().next().get("healthy").asBoolean());
+  }
 
-    @Test
-    public void testGenerate() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
-        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-        String metadata = readFile("generator-md.json");
-        EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
-        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
+  @Test
+  @RunAsClient
+  public void testHealthCheckAsClient(@ArquillianResource URL url) throws Exception {
+    ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
+        .path("diagnostics")
+        .build()
+        .toString());
+    request.accept(MediaType.APPLICATION_JSON);
+    ClientResponse<String> response = request.get(String.class);
+    ObjectNode jsonNode = (ObjectNode) new ObjectMapper().readTree(response.getEntity());
 
-        String result = cutCrudResource.generate("generate", "1.0.0", "number", 1).getEntity().toString();
-        System.out.println("Generated:" + result);
-        JSONAssert.assertEquals("{\"processed\":[\"50000000\"]}", result, false);
-
-        result = cutCrudResource.generate("generate", "number", 3).getEntity().toString();
-        System.out.println("Generated:" + result);
-        JSONAssert.assertEquals("{\"processed\":[\"50000001\",\"50000002\",\"50000003\"]}", result, false);
-    }
-
-    @Test
-    public void testSavedSearch() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
-        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-
-        // Saved search metadata
-        System.out.println("Insert saved search md");
-        String metadata = readFile("lb-saved-search.json");
-        EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
-        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
-        System.out.println("saved search md inserted");
-
-        // Country metadata
-        System.out.println("Insert country md");
-        metadata = readFile("metadata.json");
-        em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
-        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
-        System.out.println("country md inserted");
-        String auditMetadata = FileUtil.readFile("metadata/audit.json");
-        EntityMetadata aEm = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(auditMetadata));
-        RestConfiguration.getFactory().getMetadata().createNewMetadata(aEm);
-
-        // insert country data
-        System.out.println("Insert country");
-        cutCrudResource.insert("country", "1.0.0", readFile("resultInserted.json")).getEntity().toString();
-        System.out.println("country inserted");
-
-        // insert saved search
-        System.out.println("Insert savedSearch");
-        cutCrudResource.insert("savedSearch","1.0.0","{'data':{'name':'test','entity':'country','parameters':[{'name':'iso'}],'query':{'field':'iso2code','op':'=','rvalue':'${iso}'}}}".
-                               replaceAll("'","\""));
-        System.out.println("savedSearch inserted");
-
-        // Run saved search
-        String result = cutCrudResource.runSavedSearch("country","1.0.0","test",null,null,null,null,null,"{'iso':'CA'}".replaceAll("'","\"")).getEntity().toString();
-        assertTrue(result.indexOf("\"matchCount\":1")!=-1);
-        System.out.println("result:" + result);
-
-    }
-
-    @Test
-    public void testListSavedSearch() throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, URISyntaxException, JSONException {
-        Assert.assertNotNull("CrudResource was not injected by the container", cutCrudResource);
-
-        // Saved search metadata
-        System.out.println("Insert saved search md");
-        String metadata = readFile("lb-saved-search.json");
-        EntityMetadata em = RestConfiguration.getFactory().getJSONParser().parseEntityMetadata(JsonUtils.json(metadata));
-        RestConfiguration.getFactory().getMetadata().createNewMetadata(em);
-        System.out.println("saved search md inserted");
-
-        // insert saved search
-        System.out.println("Insert savedSearch");
-        cutCrudResource.insert("savedSearch","1.0.0","{'data':{'name':'test','entity':'country','parameters':[{'name':'iso'}],'query':{'field':'iso2code','op':'=','rvalue':'${iso}'}}}".
-                               replaceAll("'","\""));
-        System.out.println("savedSearch inserted");
-
-        // get saved search
-        String result = cutCrudResource.getSearchesForEntity("country",null,null).getEntity().toString();
-        assertTrue(result.indexOf("\"matchCount\":1")!=-1);
-        System.out.println("result:" + result);
-
-    }
-
-    @Test
-    @RunAsClient
-    public void testDiagnosticsCheckAsClient(@ArquillianResource URL url) throws Exception {
-        ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
-                .path("diagnostics")
-                .build()
-                .toString());
-        request.accept(MediaType.APPLICATION_JSON);
-        ClientResponse<String> response = request.get(String.class);
-        ObjectNode jsonNode = (ObjectNode) new ObjectMapper().readTree(response.getEntity());
-
-        System.out.println("DiagnosticCheckMessage: " + jsonNode.elements().next().get("message").asText());
-        assertTrue(jsonNode.elements().next().get("healthy").asBoolean());
-    }
-
-    @Test
-    @RunAsClient
-    public void testHealthCheckAsClient(@ArquillianResource URL url) throws Exception {
-        ClientRequest request = new ClientRequest(UriBuilder.fromUri(url.toURI())
-                .path("diagnostics")
-                .build()
-                .toString());
-        request.accept(MediaType.APPLICATION_JSON);
-        ClientResponse<String> response = request.get(String.class);
-        ObjectNode jsonNode = (ObjectNode) new ObjectMapper().readTree(response.getEntity());
-
-        System.out.println("HealthCheckMessage: " + jsonNode.elements().next().get("message").asText());
-        assertTrue(jsonNode.elements().next().get("healthy").asBoolean());
-    }
+    LOGGER.debug("HealthCheckMessage: " + jsonNode.elements().next().get("message").asText());
+    assertTrue(jsonNode.elements().next().get("healthy").asBoolean());
+  }
 
 }
